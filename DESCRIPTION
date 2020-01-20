@@ -1,0 +1,26 @@
+Package: epitopes
+Type: Package
+Title: Processing and Feature Extraction for Epitope Data
+Version: 0.1.0.9000
+Date: 2020-01-20
+Author: person(given = "Felipe", family = "Campelo",
+                    email = "f.campelo@aston.ac.uk",
+                    role = c("aut", "cre"))
+Maintainer: Felipe Campelo <f.campelo@aston.ac.uk>
+Description: Routines for processing epitope data exported from IEDB
+    (https://iedb.org/), retrieving corresponding protein data from Genbank 
+    (https://www.ncbi.nlm.nih.gov/genbank/) and calculating features for 
+    training epitope classification tools.
+License: GPL-2
+Depends: R (>= 3.6.0)
+Imports: assertthat (>= 0.2.1),
+         XML (>= 3.98),
+         dplyr (>= 0.8.3),
+         reutils (>= 0.2.3),
+         utils
+Suggests: pkgdown, knitr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
+VignetteBuilder: knitr
+URL: https://github.com/fcampelo/epitopes
