@@ -17,6 +17,7 @@ Imports: assertthat (>= 0.2.1),
          XML (>= 3.98),
          dplyr (>= 0.8.3),
          reutils (>= 0.2.3),
+         forcats (>= 0.4.0),
          utils
 Suggests: pkgdown, knitr
 Encoding: UTF-8
