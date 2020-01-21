@@ -3,3 +3,5 @@
 export(assemble_windowed_dataframe)
 export(get_linear_bcell_epitopes)
 export(retrieve_protein_data)
+importFrom(dplyr,"%>%")
+importFrom(rlang,.data)

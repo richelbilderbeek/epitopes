@@ -29,7 +29,6 @@
 #' . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . . . . APQGPGAPX\cr
 #' . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
 #'
-
 #'
 #' @param epitopes data frame of epitope data (returned by [get_linear_bcell_epitopes()].
 #' @param proteins data frame of epitope data (returned by [retrieve_protein_data()].
@@ -41,6 +40,8 @@
 #' @param step_size positive integer, step size to use (see `Details`)
 #' @param min_prot_len shortest protein length to be considered
 #' @param max_prot_len longest protein length to be considered
+#' @param ncores positive integer, number of cores to use. If `NULL` defaults
+#'        to all available cores minus one.
 #'
 #' @return A data frame containing the extracted windows is returned invisibly.
 #' Each row of the resulting data frame will have the epitope ID, protein ID,
@@ -50,17 +51,20 @@
 #' \email{f.campelo@@aston.ac.uk})
 #'
 #' @importFrom dplyr "%>%"
+#' @importFrom rlang .data
 #'
 #' @export
 #'
 
 assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
-                                        min_epit = 5,
-                                        max_epit = 30,
-                                        window_size = NULL,
-                                        step_size   = NULL,
+                                        min_epit     = 5,
+                                        max_epit     = 20,
+                                        only_exact   = FALSE,
+                                        window_size  = NULL,
+                                        step_size    = NULL,
                                         min_prot_len = 1,
-                                        max_prot_len = Inf){
+                                        max_prot_len = Inf,
+                                        ncores       = NULL){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -70,14 +74,18 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                           assertthat::is.count(max_prot_len),
                           is.null(window_size) | assertthat::is.count(window_size),
                           is.null(step_size) | assertthat::is.count(step_size),
+                          is.logical(only_exact), length(only_exact) == 1,
+                          is.null(ncores) | assertthat::is.count(ncores),
                           is.data.frame(epitopes),
                           is.data.frame(proteins),
                           is.character(save_file),
                           min_epit <= max_epit,
                           min_prot_len <= max_prot_len)
 
+  available.cores <- parallel::detectCores()
   if(is.null(window_size)) window_size <- max(3, (2 * min_epit) - 1)
   if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
+  if(is.null(ncores) || ncores >= available.cores) ncores <- available.cores - 1
 
   # Check save file extension and create error file name
   if(!identical(substr(save_file, nchar(save_file) - 3,
@@ -94,21 +102,21 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
   # Join epitopes and proteins dataframes, preliminary feature transformation
   df <- epitopes %>%
     dplyr::left_join(proteins, by = "molecule_id") %>%
-    dplyr::transmute(epitope_id    = as.character(epitope_id),
-                     epitope_seq   = as.character(seq),
-                     epitope_start = as.numeric(start_pos),
-                     epitope_stop  = as.numeric(end_pos),
-                     epitope_len   = as.numeric(epit_len),
-                     epitope_def   = as.character(epit_struc_def),
-                     protein_id    = as.character(molecule_id),
-                     protein_seq   = as.character(TSeq_sequence),
-                     protein_len   = nchar(protein_seq),
-                     protein_taxid = as.character(TSeq_taxid),
-                     host_id       = as.character(host_id),
-                     org_id        = as.character(sourceOrg_id),
-                     org_name      = as.character(TSeq_orgname),
-                     file_id       = as.character(file_id),
-                     Class         = as.character(qual_measure))
+    dplyr::transmute(epitope_id    = as.character(.data$epitope_id),
+                     epitope_seq   = as.character(.data$seq),
+                     epitope_start = as.numeric(.data$start_pos),
+                     epitope_stop  = as.numeric(.data$end_pos),
+                     epitope_len   = as.numeric(.data$epit_len),
+                     epitope_def   = as.character(.data$epit_struc_def),
+                     protein_id    = as.character(.data$molecule_id),
+                     protein_seq   = as.character(.data$TSeq_sequence),
+                     protein_len   = nchar(.data$protein_seq),
+                     protein_taxid = as.character(.data$TSeq_taxid),
+                     host_id       = as.character(.data$host_id),
+                     org_id        = as.character(.data$sourceOrg_id),
+                     org_name      = as.character(.data$TSeq_orgname),
+                     file_id       = as.character(.data$file_id),
+                     Class         = as.character(.data$qual_measure))
 
 
   # Record/remove entries without protein and/or epitope data,
@@ -117,73 +125,52 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                                    is.na(df$epitope_start) |
                                    is.na(df$epitope_stop))]
   df <- df %>%
-    dplyr::filter(!is.na(df$protein_seq),
-                  !is.na(df$epitope_start),
-                  !is.na(df$epitope_stop),
-                  epitope_len >= min_epit,
-                  epitope_len <= max_epit,
-                  protein_len >= min_prot_len,
-                  protein_len <= max_prot_len) %>%
-    dplyr::mutate(Class = forcats::fct_recode(Class,
+    dplyr::filter(!is.na(.data$protein_seq),
+                  !is.na(.data$epitope_start),
+                  !is.na(.data$epitope_stop),
+                  .data$epitope_len >= min_epit,
+                  .data$epitope_len <= max_epit,
+                  .data$protein_len >= min_prot_len,
+                  .data$protein_len <= max_prot_len) %>%
+    dplyr::mutate(Class = forcats::fct_recode(.data$Class,
                                               Positive = "Positive-Low",
                                               Positive = "Positive-High",
                                               Positive = "Positive-Intermediate"))
 
+  # If needed, keep only "Exact Epitopes"
+  if(only_exact) df <- df[df$epitope_struc_def == "Exact Epitope", ]
+
   # Record/remove entries where the epitope is not where it should be
   epit_def_not_found <- is.na(df$epitope_def)
-  epit_not_in_place  <- mapply(FUN = function(ep, pr, i1, i2){ep != substr(pr, i1, i2)},
-                               ep  = df$epitope_seq,
-                               pr  = df$protein_seq,
-                               i1  = df$epitope_start,
-                               i2  = df$epitope_stop)
+  epit_misplaced <- mapply(function(ep, pr, i1, i2){ep != substr(pr, i1, i2)},
+                           ep  = df$epitope_seq,
+                           pr  = df$protein_seq,
+                           i1  = df$epitope_start,
+                           i2  = df$epitope_stop)
   errlist <- c(errlist,
-               df$epitope_id[which(epit_not_in_place)],
+               df$epitope_id[which(epit_misplaced)],
                df$epitope_id[which(epit_def_not_found)])
 
-  df <- df[!epit_not_in_place & !epit_def_not_found, ]
+  df <- df[!epit_misplaced & !epit_def_not_found, ]
 
 
   # ========================================================================== #
   # Generate dataframe by sliding windows
-
-  # Function to extract windows from a given row of df
-  extract_windows <- function(x, window_size, step_size){
-    # Initialise dataframe
-    wdf <- data.frame(window_seq = rep(NA_character_, x$epitope_len + 2),
-                      Class      = x$Class,
-                      epitope_id = x$epitope_id,
-                      protein_id = x$protein_id,
-                      stringsAsFactors = FALSE)
-
-    # Initial position for window
-    i1   <- max(1, x$epitope_start - floor(window_size / 2))
-    i2   <- min(x$protein_len, i1 + window_size - 1)
-    stop <- FALSE
-    j <- 1
-    while(!stop){
-      wdf$window_seq[j] <- substr(x$protein_seq, i1, i2)
-      i1 <- i1 + step_size
-      i2 <- i2 + step_size
-      j  <- j + 1
-      if(i2 > min(x$protein_len,  x$epitope_stop + ceiling(window_size / 2))) {
-        stop <- TRUE
-      }
-    }
-    return(wdf[!is.na(wdf$window_seq), ])
-  }
+  # extract_windows() is an internal function defined in "extract_windows.R"
 
   windows_df <- do.call(rbind,
-                        lapply(seq_along(df$epitope_id),
-                               function(i, df, w, s){
-                                 extract_windows(x = df[i, ], w, s)
-                               },
-                               df = df,
-                               w = window_size,
-                               s = step_size))
+                        parallel::mclapply(seq_along(df$epitope_id),
+                                           function(i, df, w, s){
+                                             extract_windows(df[i, ], w, s)},
+                                           df = df,
+                                           w  = window_size,
+                                           s  = step_size,
+                                           mc.cores = ncores))
 
-  # Add file save lines here
+  # Save resulting dataframe and error IDs to file
+  saveRDS(df, file = save_file)
+  saveRDS(errlist,   file = errfile)
 
 
   invisible(windows_df)
-
 }

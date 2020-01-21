@@ -4,7 +4,39 @@
 \alias{assemble_windowed_dataframe}
 \title{Assemble a sliding window representation of epitope data}
 \usage{
-assemble_windowed_dataframe()
+assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 5,
+  max_epit = 20, only_exact = FALSE, window_size = NULL,
+  step_size = NULL, min_prot_len = 1, max_prot_len = Inf,
+  ncores = NULL)
+}
+\arguments{
+\item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
+
+\item{proteins}{data frame of epitope data (returned by [retrieve_protein_data()].}
+
+\item{save_file}{file name for saving the resulting data frame.}
+
+\item{min_epit}{positive integer, smallest epitope to be considered}
+
+\item{max_epit}{positive integer, largest epitope to be considered}
+
+\item{only_exact}{logical, should only "Exact epitopes" be considered?}
+
+\item{window_size}{positive integer, size of window to use (see `Details`)}
+
+\item{step_size}{positive integer, step size to use (see `Details`)}
+
+\item{min_prot_len}{shortest protein length to be considered}
+
+\item{max_prot_len}{longest protein length to be considered}
+
+\item{ncores}{positive integer, number of cores to use. If `NULL` defaults
+to all available cores minus one.}
+}
+\value{
+A data frame containing the extracted windows is returned invisibly.
+Each row of the resulting data frame will have the epitope ID, protein ID,
+windowed sequence, and the class associated with the epitope ID.
 }
 \description{
 This function is used to turn epitope and protein data into a dataframe where
@@ -12,6 +44,11 @@ each row corresponds to a fixed-length window that slides over the epitope
 data (and its surrounding aminoacid residues in the protein).
 }
 \details{
+Window size and step size can be either set by the user or determined
+implicitly by the routine. In the latter case the window is set as
+`max(3, (2 * min_epit) - 1)`, and the step size as
+`min(2, floor(min_epit / 2))`.
+
 The initial position of the window is determined as the first position where
 the majority of the AAs covered by the window belong to the target region.
 Similarly, the last position of the window is determined as the last one
@@ -31,9 +68,6 @@ in a distinct row of the resulting dataframe):
 . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . . . . . . . PGAPQGPGA\cr
 . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . . . . APQGPGAPX\cr
 . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
-
-Each resulting row of the data frame will have the epitope ID, protein ID,
-windowed sequence, and
 }
 \author{
 Felipe Campelo (\email{fcampelo@ufmg.br},

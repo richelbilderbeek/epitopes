@@ -1,8 +1,8 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.1.0.9000
-Date: 2020-01-20
+Version: 0.1.0.9005
+Date: 2020-01-21
 Author: person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
                     role = c("aut", "cre"))
@@ -18,7 +18,9 @@ Imports: assertthat (>= 0.2.1),
          dplyr (>= 0.8.3),
          reutils (>= 0.2.3),
          forcats (>= 0.4.0),
-         utils
+         utils,
+         parallel,
+         rlang
 Suggests: pkgdown, knitr
 Encoding: UTF-8
 LazyData: true
