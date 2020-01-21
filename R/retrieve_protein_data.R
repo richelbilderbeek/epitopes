@@ -100,4 +100,6 @@ retrieve_protein_data <- function(uids, save_file){
   saveRDS(prot_data, file = save_file)
   saveRDS(errlist,   file = errfile)
   if (file.exists(tmpfile)) file.remove(tmpfile)
+
+  invisible(prot_data)
 }

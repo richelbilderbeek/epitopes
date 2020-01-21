@@ -181,4 +181,6 @@ get_linear_bcell_epitopes <- function(data_folder = "./", save_file = NULL){
 
   saveRDS(object = df,      file = save_file)
   saveRDS(object = errlist, file = errfile)
+
+  invisible(df)
 }
