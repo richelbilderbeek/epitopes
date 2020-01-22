@@ -47,8 +47,6 @@
 #' @param step_size positive integer, step size to use (see `Details`)
 #' @param min_prot_len shortest protein length to be considered
 #' @param max_prot_len longest protein length to be considered
-#' @param ncores positive integer, number of cores to use. If `NULL` defaults
-#'        to all available cores minus one.
 #'
 #' @return A data frame containing the extracted windows is returned invisibly.
 #' Each row of the resulting data frame will have the epitope ID, protein ID,
@@ -99,8 +97,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                                         window_exp   = NULL,
                                         step_size    = NULL,
                                         min_prot_len = 1,
-                                        max_prot_len = Inf,
-                                        ncores       = NULL){
+                                        max_prot_len = Inf){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -119,11 +116,9 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                           min_epit <= max_epit,
                           min_prot_len <= max_prot_len)
 
-  available.cores <- parallel::detectCores()
   if(is.null(window_size)) window_size <- max(3, (2 * min_epit) - 1)
   if(is.null(window_exp))  window_exp  <- min_epit - 1
   if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
-  if(is.null(ncores) || ncores >= available.cores) ncores <- available.cores - 1
 
   # Check save file extension and create error file name
   if(!identical(substr(save_file, nchar(save_file) - 3,
