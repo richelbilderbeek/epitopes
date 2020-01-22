@@ -109,7 +109,6 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                           is.null(step_size) | assertthat::is.count(step_size),
                           is.null(window_exp) | assertthat::is.count(window_exp + 1),
                           is.logical(only_exact), length(only_exact) == 1,
-                          is.null(ncores) | assertthat::is.count(ncores),
                           is.data.frame(epitopes),
                           is.data.frame(proteins),
                           is.character(save_file),
@@ -195,19 +194,19 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
   # ========================================================================== #
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
+  cat("\nExtracting windows:")
+  windows_df <- pbapply::pblapply(X = purrr::pmap(as.list(df), list),
+                                  FUN = extract_windows,
+                                  window_size = 9,
+                                  step_size   = 2,
+                                  window_exp  = 3)
 
-  windows_df <- lapply(X = purrr::pmap(as.list(df), list),
-                       FUN = extract_windows,
-                       window_size = 9,
-                       step_size   = 2,
-                       window_exp  = 3)
-
-  windows_df <- do.call(rbind, windows_df)
-
+  cat("\nAssembling dataframe:")
+  windows_df <- data.frame(data.table::rbindlist(windows_df))
 
   # Save resulting dataframe and error IDs to file
-  saveRDS(df,      file = save_file)
-  saveRDS(errlist, file = errfile)
+  saveRDS(windows_df, file = save_file)
+  saveRDS(errlist,    file = errfile)
 
   invisible(windows_df)
 }

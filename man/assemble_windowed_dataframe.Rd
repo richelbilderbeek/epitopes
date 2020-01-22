@@ -7,7 +7,7 @@
 assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 5,
   max_epit = 20, only_exact = FALSE, window_size = NULL,
   window_exp = NULL, step_size = NULL, min_prot_len = 1,
-  max_prot_len = Inf, ncores = NULL)
+  max_prot_len = Inf)
 }
 \arguments{
 \item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
@@ -32,9 +32,6 @@ on either side of the window (see `Details`)}
 \item{min_prot_len}{shortest protein length to be considered}
 
 \item{max_prot_len}{longest protein length to be considered}
-
-\item{ncores}{positive integer, number of cores to use. If `NULL` defaults
-to all available cores minus one.}
 }
 \value{
 A data frame containing the extracted windows is returned invisibly.
