@@ -4,22 +4,27 @@
 #' each row corresponds to a fixed-length window that slides over the epitope
 #' data (and its surrounding aminoacid residues in the protein).
 #'
-#' Window size and step size can be either set by the user or determined
-#' implicitly by the routine. In the latter case the window is set as
-#' `max(3, (2 * min_epit) - 1)`, and the step size as
-#' `min(2, floor(min_epit / 2))`.
+#' Window size, window expansion value and step size can be set either by the
+#' user or automatically. In the latter case the window is set as
+#' `max(3, (2 * min_epit) - 1)`, the step size as
+#' `min(2, floor(min_epit / 2))`, and the window expansion value as
+#' `min_epit - 1`.
 #'
-#' The initial position of the window is determined as the first position where
+#' The initial position of the window is set as the first position where
 #' the majority of the AAs covered by the window belong to the target region.
 #' Similarly, the last position of the window is determined as the last one
 #' where the majority of the AAs covered by the window still belong to the
 #' target region.
 #'
+#' The window expansion value indicates how many AA extra positions are captured
+#' from each side of the window. If set to zero the resulting dataframe will not
+#' contain the `window_exp` column.
+#'
 #' As an example, assume an epitope "QGPGAPQGPGAP" contained within a given
-#' protein, a window size of 9 and a step size of 2. Let "X" represent any AA
-#' not belonging to the target region, and | be a start and end positions covered
-#' by the window. This routine would then generate the following windows (each
-#' in a distinct row of the resulting dataframe):
+#' protein, `window_size = 9`, `window_exp = 0` and `step_size = 2`.
+#' Let "X" represent any AA not belonging to the target region, and | be a start
+#' and end positions covered by the window. This routine would then generate the
+#' following windows (each in a distinct row of the resulting dataframe):
 #'
 #' ...XXXXXQGPGAPQGPGAPXXXXX...\cr
 #' . . . | . . . . . . . . . . . . | . . . . . . . . . . . . . . . . . . . XXXXQGPGA\cr
@@ -37,6 +42,8 @@
 #' @param max_epit positive integer, largest epitope to be considered
 #' @param only_exact logical, should only "Exact epitopes" be considered?
 #' @param window_size positive integer, size of window to use (see `Details`)
+#' @param window_exp non-negative integer, how many extra AAs to capture
+#'                   on either side of the window (see `Details`)
 #' @param step_size positive integer, step size to use (see `Details`)
 #' @param min_prot_len shortest protein length to be considered
 #' @param max_prot_len longest protein length to be considered
@@ -55,12 +62,40 @@
 #'
 #' @export
 #'
+#' @examples
+#' epitopes <- data.frame(epitope_id = c("1234", "4321"),
+#'               molecule_id = c("P.001", "A.002"),
+#'               start_pos = c(14, 39),
+#'               end_pos = c(18, 50),
+#'               seq = c("LKLAT", "QGPGAPQGPGAP"),
+#'               epit_struc_def = c("Exact Epitope",
+#'                 "Epitope containing region/antigenic site"),
+#'               qual_measure = factor(c("Negative", "Positive"),
+#'                 levels = c("Negative", "Positive", "Positive-Low",
+#'                   "Positive-High", "Positive-Intermediate")),
+#'               epit_len = c(5, 12),
+#'               host_id = c(NA,NA),
+#'               sourceOrg_id = c(NA,NA),
+#'               file_id = c(NA,NA),
+#'               stringsAsFactors = FALSE)
+#'
+#' proteins <- data.frame(molecule_id = c("P.001", "A.002"),
+#'               TSeq_sequence = c("TYGACPKYVKQNTLKLATGMRNVPEKQT",
+#'                 "LPKEEKKDDPPKDPKKDDPPKEAQNKLNQPVVADENVDQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQ"),
+#'               TSeq_taxid = c(NA,NA),
+#'               TSeq_orgname = c(NA,NA),
+#'               stringsAsFactors = FALSE)
+#'
+#'
+#' x <- assemble_windowed_dataframe(epitopes, proteins,
+#'      save_file = "~/Downloads/xyz.rds")
 
 assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                                         min_epit     = 5,
                                         max_epit     = 20,
                                         only_exact   = FALSE,
                                         window_size  = NULL,
+                                        window_exp   = NULL,
                                         step_size    = NULL,
                                         min_prot_len = 1,
                                         max_prot_len = Inf,
@@ -74,6 +109,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                           assertthat::is.count(max_prot_len),
                           is.null(window_size) | assertthat::is.count(window_size),
                           is.null(step_size) | assertthat::is.count(step_size),
+                          is.null(window_exp) | assertthat::is.count(window_exp + 1),
                           is.logical(only_exact), length(only_exact) == 1,
                           is.null(ncores) | assertthat::is.count(ncores),
                           is.data.frame(epitopes),
@@ -84,6 +120,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
 
   available.cores <- parallel::detectCores()
   if(is.null(window_size)) window_size <- max(3, (2 * min_epit) - 1)
+  if(is.null(window_exp))  window_exp  <- min_epit - 1
   if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
   if(is.null(ncores) || ncores >= available.cores) ncores <- available.cores - 1
 
@@ -116,7 +153,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                      org_id        = as.character(.data$sourceOrg_id),
                      org_name      = as.character(.data$TSeq_orgname),
                      file_id       = as.character(.data$file_id),
-                     Class         = as.character(.data$qual_measure))
+                     Class         = .data$qual_measure)
 
 
   # Record/remove entries without protein and/or epitope data,
@@ -147,30 +184,34 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                            pr  = df$protein_seq,
                            i1  = df$epitope_start,
                            i2  = df$epitope_stop)
-  errlist <- c(errlist,
-               df$epitope_id[which(epit_misplaced)],
-               df$epitope_id[which(epit_def_not_found)])
 
-  df <- df[!epit_misplaced & !epit_def_not_found, ]
+  errlist <- c(errlist, df$epitope_id[which(epit_def_not_found)])
+  if (length(epit_misplaced) > 0) {
+    errlist <- c(errlist, df$epitope_id[which(epit_misplaced)])
+    df <- df[!epit_misplaced & !epit_def_not_found, ]
+  } else {
+    df <- df[!epit_def_not_found, ]
+  }
+
+
 
 
   # ========================================================================== #
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
 
-  windows_df <- do.call(rbind,
-                        parallel::mclapply(seq_along(df$epitope_id),
-                                           function(i, df, w, s){
-                                             extract_windows(df[i, ], w, s)},
-                                           df = df,
-                                           w  = window_size,
-                                           s  = step_size,
-                                           mc.cores = ncores))
+  windows_df <- lapply(X = purrr::pmap(as.list(df), list),
+                       FUN = extract_windows,
+                       window_size = 9,
+                       step_size   = 2,
+                       window_exp  = 3)
+
+  windows_df <- do.call(rbind, windows_df)
+
 
   # Save resulting dataframe and error IDs to file
-  saveRDS(df, file = save_file)
-  saveRDS(errlist,   file = errfile)
-
+  saveRDS(df,      file = save_file)
+  saveRDS(errlist, file = errfile)
 
   invisible(windows_df)
 }

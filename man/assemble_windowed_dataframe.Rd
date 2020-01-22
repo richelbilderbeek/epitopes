@@ -6,8 +6,8 @@
 \usage{
 assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 5,
   max_epit = 20, only_exact = FALSE, window_size = NULL,
-  step_size = NULL, min_prot_len = 1, max_prot_len = Inf,
-  ncores = NULL)
+  window_exp = NULL, step_size = NULL, min_prot_len = 1,
+  max_prot_len = Inf, ncores = NULL)
 }
 \arguments{
 \item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
@@ -23,6 +23,9 @@ assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 5,
 \item{only_exact}{logical, should only "Exact epitopes" be considered?}
 
 \item{window_size}{positive integer, size of window to use (see `Details`)}
+
+\item{window_exp}{non-negative integer, how many extra AAs to capture
+on either side of the window (see `Details`)}
 
 \item{step_size}{positive integer, step size to use (see `Details`)}
 
@@ -44,22 +47,27 @@ each row corresponds to a fixed-length window that slides over the epitope
 data (and its surrounding aminoacid residues in the protein).
 }
 \details{
-Window size and step size can be either set by the user or determined
-implicitly by the routine. In the latter case the window is set as
-`max(3, (2 * min_epit) - 1)`, and the step size as
-`min(2, floor(min_epit / 2))`.
+Window size, window expansion value and step size can be set either by the
+user or automatically. In the latter case the window is set as
+`max(3, (2 * min_epit) - 1)`, the step size as
+`min(2, floor(min_epit / 2))`, and the window expansion value as
+`min_epit - 1`.
 
-The initial position of the window is determined as the first position where
+The initial position of the window is set as the first position where
 the majority of the AAs covered by the window belong to the target region.
 Similarly, the last position of the window is determined as the last one
 where the majority of the AAs covered by the window still belong to the
 target region.
 
+The window expansion value indicates how many AA extra positions are captured
+from each side of the window. If set to zero the resulting dataframe will not
+contain the `window_exp` column.
+
 As an example, assume an epitope "QGPGAPQGPGAP" contained within a given
-protein, a window size of 9 and a step size of 2. Let "X" represent any AA
-not belonging to the target region, and | be a start and end positions covered
-by the window. This routine would then generate the following windows (each
-in a distinct row of the resulting dataframe):
+protein, `window_size = 9`, `window_exp = 0` and `step_size = 2`.
+Let "X" represent any AA not belonging to the target region, and | be a start
+and end positions covered by the window. This routine would then generate the
+following windows (each in a distinct row of the resulting dataframe):
 
 ...XXXXXQGPGAPQGPGAPXXXXX...\cr
 . . . | . . . . . . . . . . . . | . . . . . . . . . . . . . . . . . . . XXXXQGPGA\cr
@@ -68,6 +76,34 @@ in a distinct row of the resulting dataframe):
 . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . . . . . . . PGAPQGPGA\cr
 . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . . . . APQGPGAPX\cr
 . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
+}
+\examples{
+epitopes <- data.frame(epitope_id = c("1234", "4321"),
+              molecule_id = c("P.001", "A.002"),
+              start_pos = c(14, 39),
+              end_pos = c(18, 50),
+              seq = c("LKLAT", "QGPGAPQGPGAP"),
+              epit_struc_def = c("Exact Epitope",
+                "Epitope containing region/antigenic site"),
+              qual_measure = factor(c("Negative", "Positive"),
+                levels = c("Negative", "Positive", "Positive-Low",
+                  "Positive-High", "Positive-Intermediate")),
+              epit_len = c(5, 12),
+              host_id = c(NA,NA),
+              sourceOrg_id = c(NA,NA),
+              file_id = c(NA,NA),
+              stringsAsFactors = FALSE)
+
+proteins <- data.frame(molecule_id = c("0704243A", "P06914.1"),
+              TSeq_sequence = c("TYGACPKYVKQNTLKLATGMRNVPEKQT",
+                "LPKEEKKDDPPKDPKKDDPPKEAQNKLNQPVVADENVDQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQ"),
+              TSeq_taxid = c(NA,NA),
+              TSeq_orgname = c(NA,NA),
+              stringsAsFactors = FALSE)
+
+
+x <- assemble_windowed_dataframe(epitopes, proteins,
+     save_file = "~/Downloads/xyz.rds")
 }
 \author{
 Felipe Campelo (\email{fcampelo@ufmg.br},
