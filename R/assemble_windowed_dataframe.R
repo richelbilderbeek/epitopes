@@ -63,6 +63,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' epitopes <- data.frame(epitope_id = c("1234", "4321"),
 #'               molecule_id = c("P.001", "A.002"),
 #'               start_pos = c(14, 39),
@@ -86,9 +87,9 @@
 #'               TSeq_orgname = c(NA,NA),
 #'               stringsAsFactors = FALSE)
 #'
-#'
 #' x <- assemble_windowed_dataframe(epitopes, proteins,
-#'      save_file = "~/Downloads/xyz.rds")
+#'      save_file = "./xyz.rds")
+#' }
 
 assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                                         min_epit     = 5,

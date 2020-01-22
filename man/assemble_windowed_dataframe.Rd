@@ -78,6 +78,7 @@ following windows (each in a distinct row of the resulting dataframe):
 . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
 }
 \examples{
+\dontrun{
 epitopes <- data.frame(epitope_id = c("1234", "4321"),
               molecule_id = c("P.001", "A.002"),
               start_pos = c(14, 39),
@@ -94,16 +95,16 @@ epitopes <- data.frame(epitope_id = c("1234", "4321"),
               file_id = c(NA,NA),
               stringsAsFactors = FALSE)
 
-proteins <- data.frame(molecule_id = c("0704243A", "P06914.1"),
+proteins <- data.frame(molecule_id = c("P.001", "A.002"),
               TSeq_sequence = c("TYGACPKYVKQNTLKLATGMRNVPEKQT",
                 "LPKEEKKDDPPKDPKKDDPPKEAQNKLNQPVVADENVDQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQ"),
               TSeq_taxid = c(NA,NA),
               TSeq_orgname = c(NA,NA),
               stringsAsFactors = FALSE)
 
-
 x <- assemble_windowed_dataframe(epitopes, proteins,
-     save_file = "~/Downloads/xyz.rds")
+     save_file = "./xyz.rds")
+}
 }
 \author{
 Felipe Campelo (\email{fcampelo@ufmg.br},
