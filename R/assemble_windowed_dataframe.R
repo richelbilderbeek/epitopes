@@ -50,7 +50,8 @@
 #'
 #' @return A data frame containing the extracted windows is returned invisibly.
 #' Each row of the resulting data frame will have the epitope ID, protein ID,
-#' windowed sequence, and the class associated with the epitope ID.
+#' windowed sequence, the class associated with the epitope ID, and other
+#' variables that may be useful for stratification or classification.
 #'
 #' @author Felipe Campelo (\email{fcampelo@@ufmg.br},
 #' \email{f.campelo@@aston.ac.uk})
@@ -90,13 +91,13 @@
 #' }
 
 assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
-                                        min_epit     = 5,
+                                        min_epit     = 8,
                                         max_epit     = 20,
-                                        only_exact   = FALSE,
+                                        only_exact   = TRUE,
                                         window_size  = NULL,
                                         window_exp   = NULL,
                                         step_size    = NULL,
-                                        min_prot_len = 1,
+                                        min_prot_len = min_epit,
                                         max_prot_len = Inf){
 
   # ========================================================================== #

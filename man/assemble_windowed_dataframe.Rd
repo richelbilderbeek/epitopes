@@ -4,9 +4,9 @@
 \alias{assemble_windowed_dataframe}
 \title{Assemble a sliding window representation of epitope data}
 \usage{
-assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 5,
-  max_epit = 20, only_exact = FALSE, window_size = NULL,
-  window_exp = NULL, step_size = NULL, min_prot_len = 1,
+assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 8,
+  max_epit = 20, only_exact = TRUE, window_size = NULL,
+  window_exp = NULL, step_size = NULL, min_prot_len = min_epit,
   max_prot_len = Inf)
 }
 \arguments{
@@ -36,7 +36,8 @@ on either side of the window (see `Details`)}
 \value{
 A data frame containing the extracted windows is returned invisibly.
 Each row of the resulting data frame will have the epitope ID, protein ID,
-windowed sequence, and the class associated with the epitope ID.
+windowed sequence, the class associated with the epitope ID, and other
+variables that may be useful for stratification or classification.
 }
 \description{
 This function is used to turn epitope and protein data into a dataframe where
