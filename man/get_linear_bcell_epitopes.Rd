@@ -4,13 +4,13 @@
 \alias{get_linear_bcell_epitopes}
 \title{Extract linear B Cell epitopes from XML files retrieved from IEDB.}
 \usage{
-get_linear_bcell_epitopes(data_folder = "./", save_file = NULL)
+get_linear_bcell_epitopes(data_folder = "./", save_folder = NULL)
 }
 \arguments{
 \item{data_folder}{path (either relative or absolute) to the directory
 containing the XML files}
 
-\item{save_file}{file name for saving the resulting data frame.}
+\item{save_folder}{path to folder for saving the results.}
 }
 \value{
 A data frame containing the extracted epitopes is returned invisibly.

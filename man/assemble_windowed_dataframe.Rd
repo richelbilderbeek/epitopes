@@ -4,17 +4,17 @@
 \alias{assemble_windowed_dataframe}
 \title{Assemble a sliding window representation of epitope data}
 \usage{
-assemble_windowed_dataframe(epitopes, proteins, save_file, min_epit = 8,
-  max_epit = 20, only_exact = TRUE, window_size = NULL,
-  window_exp = NULL, step_size = NULL, min_prot_len = min_epit,
-  max_prot_len = Inf)
+assemble_windowed_dataframe(epitopes, proteins, save_folder = NULL,
+  min_epit = 8, max_epit = 20, only_exact = TRUE,
+  window_size = NULL, window_exp = NULL, step_size = NULL,
+  min_prot_len = min_epit, max_prot_len = Inf)
 }
 \arguments{
 \item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
 
 \item{proteins}{data frame of epitope data (returned by [retrieve_protein_data()].}
 
-\item{save_file}{file name for saving the resulting data frame.}
+\item{save_folder}{path to folder for saving the results.}
 
 \item{min_epit}{positive integer, smallest epitope to be considered}
 
@@ -34,10 +34,15 @@ on either side of the window (see `Details`)}
 \item{max_prot_len}{longest protein length to be considered}
 }
 \value{
-A data frame containing the extracted windows is returned invisibly.
+A list object containing:
+* A data frame containing the extracted windows is returned invisibly.
 Each row of the resulting data frame will have the epitope ID, protein ID,
 windowed sequence, the class associated with the epitope ID, and other
 variables that may be useful for stratification or classification.
+
+* A list of epitope IDs that were removed from the final dataframe due
+to data inconsistencies (missing protein data, wrong location in protein,
+etc.)
 }
 \description{
 This function is used to turn epitope and protein data into a dataframe where
@@ -80,28 +85,27 @@ following windows (each in a distinct row of the resulting dataframe):
 epitopes <- data.frame(epitope_id = c("1234", "4321"),
               molecule_id = c("P.001", "A.002"),
               start_pos = c(14, 39),
-              end_pos = c(18, 50),
-              seq = c("LKLAT", "QGPGAPQGPGAP"),
+              end_pos = c(23, 50),
+              seq = c("LKLATLKLAT", "QGPGAPQGPGAP"),
               epit_struc_def = c("Exact Epitope",
                 "Epitope containing region/antigenic site"),
               qual_measure = factor(c("Negative", "Positive"),
                 levels = c("Negative", "Positive", "Positive-Low",
                   "Positive-High", "Positive-Intermediate")),
-              epit_len = c(5, 12),
+              epit_len = c(10, 12),
               host_id = c(NA,NA),
               sourceOrg_id = c(NA,NA),
               file_id = c(NA,NA),
               stringsAsFactors = FALSE)
 
 proteins <- data.frame(molecule_id = c("P.001", "A.002"),
-              TSeq_sequence = c("TYGACPKYVKQNTLKLATGMRNVPEKQT",
+              TSeq_sequence = c("TYGACPKYVKQNTLKLATLKLATGMRNVPEKQT",
                 "LPKEEKKDDPPKDPKKDDPPKEAQNKLNQPVVADENVDQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQ"),
               TSeq_taxid = c(NA,NA),
               TSeq_orgname = c(NA,NA),
               stringsAsFactors = FALSE)
 
-x <- assemble_windowed_dataframe(epitopes, proteins,
-     save_file = "./xyz.rds")
+x <- assemble_windowed_dataframe(epitopes, proteins)
 }
 }
 \author{

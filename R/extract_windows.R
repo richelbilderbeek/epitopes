@@ -11,6 +11,7 @@ extract_windows <- function(x, window_size, step_size, window_exp){
                     taxid      = x$protein_taxid,
                     host_id    = x$host_id,
                     org_id     = x$org_id,
+                    file_id    = x$file_id,
                     stringsAsFactors = FALSE)
 
   if (window_exp <= 0) wdf$window_exp <- NULL

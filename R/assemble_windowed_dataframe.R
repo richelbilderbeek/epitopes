@@ -37,7 +37,7 @@
 #'
 #' @param epitopes data frame of epitope data (returned by [get_linear_bcell_epitopes()].
 #' @param proteins data frame of epitope data (returned by [retrieve_protein_data()].
-#' @param save_file file name for saving the resulting data frame.
+#' @param save_folder path to folder for saving the results.
 #' @param min_epit positive integer, smallest epitope to be considered
 #' @param max_epit positive integer, largest epitope to be considered
 #' @param only_exact logical, should only "Exact epitopes" be considered?
@@ -48,10 +48,15 @@
 #' @param min_prot_len shortest protein length to be considered
 #' @param max_prot_len longest protein length to be considered
 #'
-#' @return A data frame containing the extracted windows is returned invisibly.
+#' @return A list object containing:
+#' * A data frame containing the extracted windows is returned invisibly.
 #' Each row of the resulting data frame will have the epitope ID, protein ID,
 #' windowed sequence, the class associated with the epitope ID, and other
 #' variables that may be useful for stratification or classification.
+#'
+#' * A list of epitope IDs that were removed from the final dataframe due
+#' to data inconsistencies (missing protein data, wrong location in protein,
+#' etc.)
 #'
 #' @author Felipe Campelo (\email{fcampelo@@ufmg.br},
 #' \email{f.campelo@@aston.ac.uk})
@@ -66,31 +71,31 @@
 #' epitopes <- data.frame(epitope_id = c("1234", "4321"),
 #'               molecule_id = c("P.001", "A.002"),
 #'               start_pos = c(14, 39),
-#'               end_pos = c(18, 50),
-#'               seq = c("LKLAT", "QGPGAPQGPGAP"),
+#'               end_pos = c(23, 50),
+#'               seq = c("LKLATLKLAT", "QGPGAPQGPGAP"),
 #'               epit_struc_def = c("Exact Epitope",
 #'                 "Epitope containing region/antigenic site"),
 #'               qual_measure = factor(c("Negative", "Positive"),
 #'                 levels = c("Negative", "Positive", "Positive-Low",
 #'                   "Positive-High", "Positive-Intermediate")),
-#'               epit_len = c(5, 12),
+#'               epit_len = c(10, 12),
 #'               host_id = c(NA,NA),
 #'               sourceOrg_id = c(NA,NA),
 #'               file_id = c(NA,NA),
 #'               stringsAsFactors = FALSE)
 #'
 #' proteins <- data.frame(molecule_id = c("P.001", "A.002"),
-#'               TSeq_sequence = c("TYGACPKYVKQNTLKLATGMRNVPEKQT",
+#'               TSeq_sequence = c("TYGACPKYVKQNTLKLATLKLATGMRNVPEKQT",
 #'                 "LPKEEKKDDPPKDPKKDDPPKEAQNKLNQPVVADENVDQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQGPGAPQ"),
 #'               TSeq_taxid = c(NA,NA),
 #'               TSeq_orgname = c(NA,NA),
 #'               stringsAsFactors = FALSE)
 #'
-#' x <- assemble_windowed_dataframe(epitopes, proteins,
-#'      save_file = "./xyz.rds")
+#' x <- assemble_windowed_dataframe(epitopes, proteins)
 #' }
 
-assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
+assemble_windowed_dataframe <- function(epitopes, proteins,
+                                        save_folder  = NULL,
                                         min_epit     = 8,
                                         max_epit     = 20,
                                         only_exact   = TRUE,
@@ -112,7 +117,8 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                           is.logical(only_exact), length(only_exact) == 1,
                           is.data.frame(epitopes),
                           is.data.frame(proteins),
-                          is.character(save_file),
+                          is.null(save_folder) | (is.character(save_folder)),
+                          is.null(save_folder) | length(save_folder) == 1,
                           min_epit <= max_epit,
                           min_prot_len <= max_prot_len)
 
@@ -120,14 +126,12 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
   if(is.null(window_exp))  window_exp  <- min_epit - 1
   if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
 
-  # Check save file extension and create error file name
-  if(!identical(substr(save_file, nchar(save_file) - 3,
-                       nchar(save_file)), ".rds")) {
-    save_file <- paste0(save_file, ".rds")
+  # Check save folder and create file names
+  if(!is.null(save_folder)) {
+    if(!dir.exists(save_folder)) dir.create(save_folder)
+    df_file <- normalizePath(paste0(save_folder, "/df_windowed.rds"))
+    errfile <- normalizePath(paste0(save_folder, "/df_errors.rds"))
   }
-  mydir   <- normalizePath(dirname(save_file))
-  errfile <- paste0(mydir, "/df_errors.rds")
-
 
   # ========================================================================== #
   # Initial preprocessing
@@ -171,7 +175,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
                                               Positive = "Positive-Intermediate"))
 
   # If needed, keep only "Exact Epitopes"
-  if(only_exact) df <- df[df$epitope_struc_def == "Exact Epitope", ]
+  if(only_exact) df <- df[df$epitope_def == "Exact Epitope", ]
 
   # Record/remove entries where the epitope is not where it should be
   epit_def_not_found <- is.na(df$epitope_def)
@@ -195,19 +199,22 @@ assemble_windowed_dataframe <- function(epitopes, proteins, save_file,
   # ========================================================================== #
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
-  cat("\nExtracting windows:")
+  cat("\nExtracting windows:\n")
   windows_df <- pbapply::pblapply(X = purrr::pmap(as.list(df), list),
                                   FUN = extract_windows,
-                                  window_size = 9,
-                                  step_size   = 2,
-                                  window_exp  = 3)
+                                  window_size = window_size,
+                                  step_size   = step_size,
+                                  window_exp  = window_exp)
 
-  cat("\nAssembling dataframe:")
+  cat("\nAssembling dataframe...")
   windows_df <- data.frame(data.table::rbindlist(windows_df))
 
   # Save resulting dataframe and error IDs to file
-  saveRDS(windows_df, file = save_file)
-  saveRDS(errlist,    file = errfile)
+  if(!is.null(save_folder)) {
+    saveRDS(windows_df, file = df_file)
+    saveRDS(errlist,    file = errfile)
+  }
 
-  invisible(windows_df)
+  invisible(list(windows_df = windows_df,
+                 errlist    = errlist))
 }
