@@ -20,8 +20,8 @@
 #' @export
 #'
 
-get_linear_bcell_epitopes <- function(data_folder = "./",
-                                      save_folder = NULL){
+get_LBCE <- function(data_folder = "./",
+                     save_folder = NULL){
 
 
   # ========================================================================== #
@@ -41,21 +41,23 @@ get_linear_bcell_epitopes <- function(data_folder = "./",
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
-    df_file <- normalizePath(paste0(save_folder, "/epitopes.rds"))
-    # errfile <- normalizePath(paste0(save_folder, "/xml_load_errors.rds"))
+    df_file <- paste0(normalizePath(save_folder), "/epitopes.rds")
+    #errfile <- paste0(normalizePath(save_folder), "/xml_load_errors.rds")
   }
 
   # ==================================================
   cat("Processing files:\n")
   df <- pbapply::pblapply(filelist, process_xml_file)
 
+  #errlist <- filelist[which(sapply(df, function(x) length(x$Epitope) == 0))]
+
   cat("\nProcessing resulting list:\n")
-  df           <- pbapply::pblapply(df, data.table::rbindlist)
-  df           <- data.frame(data.table::rbindlist(df))
+  df <- pbapply::pblapply(df, data.table::rbindlist)
+  df <- data.frame(data.table::rbindlist(df))
 
   if(!is.null(save_folder)){
     saveRDS(object = df,      file = df_file)
-    # saveRDS(object = errlist, file = errfile)
+    #saveRDS(object = errlist, file = errfile)
   }
 
   invisible(df)

@@ -129,8 +129,8 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
-    df_file <- normalizePath(paste0(save_folder, "/df_windowed.rds"))
-    errfile <- normalizePath(paste0(save_folder, "/df_errors.rds"))
+    df_file <- paste0(normalizePath(save_folder), "/df_windowed.rds")
+    errfile <- paste0(normalizePath(save_folder), "/df_errors.rds")
   }
 
   # ========================================================================== #
@@ -153,7 +153,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                      org_id        = as.character(.data$sourceOrg_id),
                      org_name      = as.character(.data$TSeq_orgname),
                      file_id       = as.character(.data$file_id),
-                     Class         = .data$qual_measure)
+                     Class         = as.character(.data$qual_measure))
 
 
   # Record/remove entries without protein and/or epitope data,
@@ -168,11 +168,9 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                   .data$epitope_len >= min_epit,
                   .data$epitope_len <= max_epit,
                   .data$protein_len >= min_prot_len,
-                  .data$protein_len <= max_prot_len) %>%
-    dplyr::mutate(Class = forcats::fct_recode(.data$Class,
-                                              Positive = "Positive-Low",
-                                              Positive = "Positive-High",
-                                              Positive = "Positive-Intermediate"))
+                  .data$protein_len <= max_prot_len)
+
+  df$Class[grep("Positive", df$Class)] <- "Positive"
 
   # If needed, keep only "Exact Epitopes"
   if(only_exact) df <- df[df$epitope_def == "Exact Epitope", ]

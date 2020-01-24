@@ -19,6 +19,5 @@ process_xml_file <- function(filename){
                     FUN = process_individual_epitope,
                     file_id = nullcheck(list_data$Reference$ReferenceId))
 
-  outlist <- outlist[!sapply(outlist, is.null)]
   return(outlist)
 }
