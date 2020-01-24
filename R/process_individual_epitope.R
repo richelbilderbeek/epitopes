@@ -43,8 +43,8 @@ process_individual_epitope <- function(ep, file_id){
     end_pos   <- endpos
   }
 
-  if(!exists(start_pos)) start_pos <- NA
-  if(!exists(end_pos))   end_pos   <- NA
+  if(!exists("start_pos")) start_pos <- NA
+  if(!exists("end_pos"))   end_pos   <- NA
 
   return(data.frame(file_id        = file_id,
                     host_id        = host_id,
