@@ -204,7 +204,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                                   step_size   = step_size,
                                   window_exp  = window_exp)
 
-  cat("\nAssembling dataframe...")
+  cat("\nAssembling windowed dataframe...")
   windows_df <- data.frame(data.table::rbindlist(windows_df))
 
   # Save resulting dataframe and error IDs to file

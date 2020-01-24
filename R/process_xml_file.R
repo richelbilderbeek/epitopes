@@ -6,7 +6,9 @@ process_xml_file <- function(filename){
   errk <- FALSE
 
   # Load XML file as a list
-  tryCatch({list_data <- XML::xmlToList(XML::xmlParse(filename))},
+  tryCatch({
+    invisible(utils::capture.output(
+      list_data <- XML::xmlToList(XML::xmlParse(filename))))},
            error   = function(c) {errk <<- TRUE},
            warning = function(c) {errk <<- TRUE},
            finally = NULL)

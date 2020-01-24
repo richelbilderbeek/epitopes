@@ -32,6 +32,7 @@ get_proteins <- function(uids, save_folder = NULL){
 
   # Retrieving proteins using individual requests rather than (more efficient)
   # batch requests, to catch and treat efetch() or parsing errors more easily.
+  cat("\nRetrieving proteins:\n")
   df      <- pbapply::pblapply(uids, retrieve_single_protein)
   errlist <- uids[sapply(df, is.null)]
   df      <- data.frame(data.table::rbindlist(df,
