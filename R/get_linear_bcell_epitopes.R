@@ -35,9 +35,7 @@ get_linear_bcell_epitopes <- function(data_folder = "./",
 
   # =======================================
   # Get file list and initialise variables
-  start_time  <- Sys.time()
-  filelist    <- dir(data_folder, pattern = ".xml",
-                     full.names = TRUE)
+  filelist    <- dir(data_folder, pattern = ".xml", full.names = TRUE)
   filelist    <- gsub("//", "/", filelist, fixed = TRUE)
 
   # Check save folder and create file names
@@ -48,12 +46,12 @@ get_linear_bcell_epitopes <- function(data_folder = "./",
   }
 
   # ==================================================
+  cat("Processing files:\n")
   df <- pbapply::pblapply(filelist, process_xml_file)
-  df <- df[sapply(df, nrow) > 0]
-  df <- data.frame(data.table::rbindlist(df))
 
-  df$start_pos <- as.numeric(df$start_pos)
-  df$end_pos   <- as.numeric(df$end_pos)
+  cat("\nProcessing resulting list:\n")
+  df           <- pbapply::pblapply(df, data.table::rbindlist)
+  df           <- data.frame(data.table::rbindlist(df))
 
   if(!is.null(save_folder)){
     saveRDS(object = df,      file = df_file)

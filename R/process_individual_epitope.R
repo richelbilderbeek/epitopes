@@ -43,7 +43,7 @@ process_individual_epitope <- function(ep, file_id){
     end_pos   <- endpos
   }
 
-  return(data.frame(file_id = file_id,
+  return(data.frame(file_id        = file_id,
                     host_id        = host_id,
                     sourceOrg_id   = sourceOrg_id,
                     epitope_id     = epitope_id,
@@ -54,5 +54,6 @@ process_individual_epitope <- function(ep, file_id){
                     seq            = seq,
                     evid_code      = evid_code,
                     epit_struc_def = epit_struc_def,
-                    qual_measure   = qual_measure))
+                    qual_measure   = qual_measure,
+                    stringsAsFactors = FALSE))
 }

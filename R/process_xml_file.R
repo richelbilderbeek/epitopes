@@ -20,5 +20,5 @@ process_xml_file <- function(filename){
                     file_id = nullcheck(list_data$Reference$ReferenceId))
 
   outlist <- outlist[!sapply(outlist, is.null)]
-  return(data.frame(data.table::rbindlist(outlist)))
+  return(outlist)
 }
