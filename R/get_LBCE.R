@@ -19,6 +19,11 @@
 #'
 #' @export
 #'
+#'
+#' @examples
+#' my.dir   <- system.file("extdata", package="ChocoLattes")
+#' epitopes <- get_LBCE(my.dir)
+#'
 
 get_LBCE <- function(data_folder = "./",
                      save_folder = NULL){

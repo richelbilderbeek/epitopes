@@ -24,6 +24,11 @@ the _XML Database Export_ field in IEDB's
 [Database Export](https://www.iedb.org/database_export_v3.php) and extracted
 it in a given folder, which is passed as an argument to the function.
 }
+\examples{
+my.dir   <- system.file("extdata", package="ChocoLattes")
+epitopes <- get_LBCE(my.dir)
+
+}
 \author{
 Felipe Campelo (\email{fcampelo@ufmg.br},
 \email{f.campelo@aston.ac.uk})
