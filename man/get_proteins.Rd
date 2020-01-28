@@ -4,10 +4,13 @@
 \alias{get_proteins}
 \title{Retrieve protein sequences and data from GenBank}
 \usage{
-get_proteins(uids, save_folder = NULL)
+get_proteins(uids, ncpus = 1, save_folder = NULL)
 }
 \arguments{
 \item{uids}{A list of potein IDs provided a character vector.}
+
+\item{ncpus}{positive integer, number of cores to use (multi-core
+capabilities not yet available for Windows systems.)}
 
 \item{save_folder}{path to folder for saving the results.}
 }

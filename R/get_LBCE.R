@@ -10,6 +10,8 @@
 #'
 #' @param data_folder path (either relative or absolute) to the directory
 #'        containing the XML files
+#' @param ncpus positive integer, number of cores to use (multi-core
+#'        capabilities not yet available for Windows systems.)
 #' @param save_folder path to folder for saving the results.
 #'
 #' @return A data frame containing the extracted epitopes is returned invisibly.
@@ -22,10 +24,11 @@
 #'
 #' @examples
 #' my.dir   <- system.file("extdata", package="ChocoLattes")
-#' epitopes <- get_LBCE(my.dir)
+#' epitopes <- get_LBCE(my.dir, ncpus = 2)
 #'
 
 get_LBCE <- function(data_folder = "./",
+                     ncpus = 1,
                      save_folder = NULL){
 
 
@@ -34,8 +37,25 @@ get_LBCE <- function(data_folder = "./",
   assertthat::assert_that(is.character(data_folder),
                           length(data_folder) == 1,
                           dir.exists(data_folder),
+                          assertthat::is.count(ncpus),
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1)
+
+
+  # Set up parallel processing
+  if ((.Platform$OS.type == "windows") & (ncpus > 1)){
+    cat("\nAttention: multicore not currently available for Windows.\n
+        Forcing ncpus = 1.")
+    ncpus <- 1
+  } else {
+    available.cores <- parallel::detectCores()
+    if (ncpus >= available.cores){
+      cat("\nAttention: ncpus too large, we only have ", available.cores,
+          " cores.\nUsing ", available.cores - 1,
+          " cores for run_experiment().")
+      ncpus <- available.cores - 1
+    }
+  }
 
 
   # =======================================
@@ -52,7 +72,13 @@ get_LBCE <- function(data_folder = "./",
 
   # ==================================================
   cat("Processing files:\n")
-  df <- pbapply::pblapply(filelist, process_xml_file)
+
+  if (ncpus == 1){
+    df <- pbapply::pblapply(X = filelist, FUN = process_xml_file)
+  } else {
+    df <- pbmcapply::pbmclapply(X = filelist, FUN = process_xml_file,
+                                mc.cores = ncpus, mc.preschedule = FALSE)
+  }
 
   #errlist <- filelist[which(sapply(df, function(x) length(x$Epitope) == 0))]
 

@@ -4,11 +4,14 @@
 \alias{get_LBCE}
 \title{Extract linear B Cell epitopes from XML files retrieved from IEDB.}
 \usage{
-get_LBCE(data_folder = "./", save_folder = NULL)
+get_LBCE(data_folder = "./", ncpus = 1, save_folder = NULL)
 }
 \arguments{
 \item{data_folder}{path (either relative or absolute) to the directory
 containing the XML files}
+
+\item{ncpus}{positive integer, number of cores to use (multi-core
+capabilities not yet available for Windows systems.)}
 
 \item{save_folder}{path to folder for saving the results.}
 }
@@ -26,7 +29,7 @@ it in a given folder, which is passed as an argument to the function.
 }
 \examples{
 my.dir   <- system.file("extdata", package="ChocoLattes")
-epitopes <- get_LBCE(my.dir)
+epitopes <- get_LBCE(my.dir, ncpus = 2)
 
 }
 \author{

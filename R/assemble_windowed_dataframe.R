@@ -47,6 +47,8 @@
 #' @param step_size positive integer, step size to use (see `Details`)
 #' @param min_prot_len shortest protein length to be considered
 #' @param max_prot_len longest protein length to be considered
+#' @param ncpus positive integer, number of cores to use (multi-core
+#'        capabilities not yet available for Windows systems.)
 #'
 #' @return A list object containing:
 #' * A data frame containing the extracted windows is returned invisibly.
@@ -67,14 +69,12 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' epitopes <- data.frame(epitope_id = c("1234", "4321"),
 #'               molecule_id = c("P.001", "A.002"),
 #'               start_pos = c(14, 39),
 #'               end_pos = c(23, 50),
 #'               seq = c("LKLATLKLAT", "QGPGAPQGPGAP"),
-#'               epit_struc_def = c("Exact Epitope",
-#'                 "Epitope containing region/antigenic site"),
+#'               epit_struc_def = rep("Exact Epitope", 2),
 #'               qual_measure = factor(c("Negative", "Positive"),
 #'                 levels = c("Negative", "Positive", "Positive-Low",
 #'                   "Positive-High", "Positive-Intermediate")),
@@ -91,8 +91,9 @@
 #'               TSeq_orgname = c(NA,NA),
 #'               stringsAsFactors = FALSE)
 #'
-#' x <- assemble_windowed_dataframe(epitopes, proteins)
-#' }
+#' x <- assemble_windowed_dataframe(epitopes, proteins, ncpus = 1)
+#' x$windows_df[, 1:4]
+#'
 
 assemble_windowed_dataframe <- function(epitopes, proteins,
                                         save_folder  = NULL,
@@ -100,10 +101,11 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                                         max_epit     = 20,
                                         only_exact   = TRUE,
                                         window_size  = NULL,
-                                        window_exp   = NULL,
+                                        window_exp   = 0,
                                         step_size    = NULL,
                                         min_prot_len = min_epit,
-                                        max_prot_len = Inf){
+                                        max_prot_len = Inf,
+                                        ncpus        = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -120,11 +122,27 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1,
                           min_epit <= max_epit,
-                          min_prot_len <= max_prot_len)
+                          min_prot_len <= max_prot_len,
+                          assertthat::is.count(ncpus))
 
   if(is.null(window_size)) window_size <- max(3, (2 * min_epit) - 1)
   if(is.null(window_exp))  window_exp  <- min_epit - 1
   if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
+
+  # Set up parallel processing
+  if ((.Platform$OS.type == "windows") & (ncpus > 1)){
+    cat("\nAttention: multicore not currently available for Windows.\n
+        Forcing ncpus = 1.")
+    ncpus <- 1
+  } else {
+    available.cores <- parallel::detectCores()
+    if (ncpus >= available.cores){
+      cat("\nAttention: ncpus too large, we only have ", available.cores,
+          " cores.\nUsing ", available.cores - 1,
+          " cores for run_experiment().")
+      ncpus <- available.cores - 1
+    }
+  }
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
@@ -198,11 +216,21 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
   cat("\nExtracting windows:\n")
-  windows_df <- pbapply::pblapply(X = purrr::pmap(as.list(df), list),
-                                  FUN = extract_windows,
-                                  window_size = window_size,
-                                  step_size   = step_size,
-                                  window_exp  = window_exp)
+  if (ncpus == 1){
+    windows_df <- pbapply::pblapply(X = purrr::pmap(as.list(df), list),
+                                    FUN = extract_windows,
+                                    window_size = window_size,
+                                    step_size   = step_size,
+                                    window_exp  = window_exp)
+  } else {
+    windows_df <- pbmcapply::pbmclapply(X = purrr::pmap(as.list(df), list),
+                                        FUN = extract_windows,
+                                        window_size = window_size,
+                                        step_size   = step_size,
+                                        window_exp  = window_exp,
+                                        mc.cores       = ncpus,
+                                        mc.preschedule = FALSE)
+  }
 
   cat("\nAssembling windowed dataframe...")
   windows_df <- data.frame(data.table::rbindlist(windows_df))

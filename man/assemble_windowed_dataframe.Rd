@@ -6,8 +6,8 @@
 \usage{
 assemble_windowed_dataframe(epitopes, proteins, save_folder = NULL,
   min_epit = 8, max_epit = 20, only_exact = TRUE,
-  window_size = NULL, window_exp = NULL, step_size = NULL,
-  min_prot_len = min_epit, max_prot_len = Inf)
+  window_size = NULL, window_exp = 0, step_size = NULL,
+  min_prot_len = min_epit, max_prot_len = Inf, ncpus = 1)
 }
 \arguments{
 \item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
@@ -32,6 +32,9 @@ on either side of the window (see `Details`)}
 \item{min_prot_len}{shortest protein length to be considered}
 
 \item{max_prot_len}{longest protein length to be considered}
+
+\item{ncpus}{positive integer, number of cores to use (multi-core
+capabilities not yet available for Windows systems.)}
 }
 \value{
 A list object containing:
@@ -81,14 +84,12 @@ following windows (each in a distinct row of the resulting dataframe):
 . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
 }
 \examples{
-\dontrun{
 epitopes <- data.frame(epitope_id = c("1234", "4321"),
               molecule_id = c("P.001", "A.002"),
               start_pos = c(14, 39),
               end_pos = c(23, 50),
               seq = c("LKLATLKLAT", "QGPGAPQGPGAP"),
-              epit_struc_def = c("Exact Epitope",
-                "Epitope containing region/antigenic site"),
+              epit_struc_def = rep("Exact Epitope", 2),
               qual_measure = factor(c("Negative", "Positive"),
                 levels = c("Negative", "Positive", "Positive-Low",
                   "Positive-High", "Positive-Intermediate")),
@@ -105,8 +106,9 @@ proteins <- data.frame(molecule_id = c("P.001", "A.002"),
               TSeq_orgname = c(NA,NA),
               stringsAsFactors = FALSE)
 
-x <- assemble_windowed_dataframe(epitopes, proteins)
-}
+x <- assemble_windowed_dataframe(epitopes, proteins, ncpus = 1)
+x$windows_df[, 1:4]
+
 }
 \author{
 Felipe Campelo (\email{fcampelo@ufmg.br},
