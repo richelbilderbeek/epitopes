@@ -1,4 +1,4 @@
-retrieve_single_protein <- function(uid){
+retrieve_single_protein <- function(uid, wait = 0){
 
   # Try retrieving from GenBank
   tmpfile <- tempfile("tmp_", tmpdir = ".", fileext = ".xml")
@@ -21,6 +21,7 @@ retrieve_single_protein <- function(uid){
   if (errk) return(NULL)
 
   prot_row$molecule_id <- uid
+  if (wait > 0) Sys.sleep(wait * (1 + runif(1)))
 
   return(prot_row)
 }

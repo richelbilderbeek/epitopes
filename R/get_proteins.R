@@ -55,9 +55,10 @@ get_proteins <- function(uids,
   # batch requests, to catch and treat efetch() or parsing errors more easily.
   cat("\nRetrieving proteins:\n")
   if(ncpus == 1) {
-    df <- pbapply::pblapply(X = uids, FUN = retrieve_single_protein)
+    df <- pbapply::pblapply(X = uids, FUN = retrieve_single_protein, wait = 0.1)
   } else {
     df <- pbmcapply::pbmclapply(X = uids, FUN = retrieve_single_protein,
+                                wait = 0.1,
                                 mc.cores = ncpus, mc.preschedule = FALSE)
   }
 
