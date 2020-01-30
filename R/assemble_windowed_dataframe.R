@@ -60,8 +60,7 @@
 #' to data inconsistencies (missing protein data, wrong location in protein,
 #' etc.)
 #'
-#' @author Felipe Campelo (\email{fcampelo@@ufmg.br},
-#' \email{f.campelo@@aston.ac.uk})
+#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @importFrom dplyr "%>%"
 #' @importFrom rlang .data

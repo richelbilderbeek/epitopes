@@ -33,6 +33,5 @@ epitopes <- get_LBCE(my.dir, ncpus = 2)
 
 }
 \author{
-Felipe Campelo (\email{fcampelo@ufmg.br},
-\email{f.campelo@aston.ac.uk})
+Felipe Campelo (\email{f.campelo@aston.ac.uk})
 }

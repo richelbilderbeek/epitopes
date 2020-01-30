@@ -8,7 +8,6 @@
 #'        containing the XML files
 #' @param save_folder path to folder for saving the results.
 #'
-#' @export
 #'
 get_linear_bcell_epitopes <- function(data_folder = "./",
                                       save_folder = NULL){
@@ -59,7 +58,6 @@ get_linear_bcell_epitopes <- function(data_folder = "./",
 #' @param uids A list of potein IDs provided a character vector.
 #' @param save_folder path to folder for saving the results.
 #'
-#' @export
 #'
 
 retrieve_protein_data <- function(uids, save_folder = NULL){

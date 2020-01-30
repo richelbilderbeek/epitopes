@@ -111,6 +111,5 @@ x$windows_df[, 1:4]
 
 }
 \author{
-Felipe Campelo (\email{fcampelo@ufmg.br},
-\email{f.campelo@aston.ac.uk})
+Felipe Campelo (\email{f.campelo@aston.ac.uk})
 }

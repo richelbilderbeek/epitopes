@@ -16,8 +16,7 @@
 #'
 #' @return A data frame containing the extracted epitopes is returned invisibly.
 #'
-#' @author Felipe Campelo (\email{fcampelo@@ufmg.br},
-#' \email{f.campelo@@aston.ac.uk})
+#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @export
 #'

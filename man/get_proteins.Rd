@@ -4,13 +4,10 @@
 \alias{get_proteins}
 \title{Retrieve protein sequences and data from GenBank}
 \usage{
-get_proteins(uids, ncpus = 1, save_folder = NULL)
+get_proteins(uids, save_folder = NULL)
 }
 \arguments{
 \item{uids}{A list of potein IDs provided a character vector.}
-
-\item{ncpus}{positive integer, number of cores to use (multi-core
-capabilities not yet available for Windows systems.)}
 
 \item{save_folder}{path to folder for saving the results.}
 }
@@ -22,6 +19,5 @@ This function is used to retrieve data from
 [GenBank](https://www.ncbi.nlm.nih.gov/genbank/) for given protein IDs.
 }
 \author{
-Felipe Campelo (\email{fcampelo@ufmg.br},
-\email{f.campelo@aston.ac.uk})
+Felipe Campelo (\email{f.campelo@aston.ac.uk})
 }
