@@ -5,7 +5,7 @@
 \title{Calculate simple features based on composition and physico-chemical
 properties of a protein sequence}
 \usage{
-calc_peptide_features(seqs, .funs = c(mean, sd), ncores = 1,
+calc_peptide_features(seqs, .funs = c(mean, sd), ncpus = 1,
   save_folder = NULL)
 }
 \arguments{
@@ -14,10 +14,10 @@ calc_peptide_features(seqs, .funs = c(mean, sd), ncores = 1,
 \item{.funs}{a vector of functions used to aggregate some of the AA-based
 features into sequence-wide features (see `Value`).}
 
-\item{save_folder}{path to folder for saving the results.}
-
 \item{ncpus}{positive integer, number of cores to use (multi-core
 capabilities not yet available for Windows systems.)}
+
+\item{save_folder}{path to folder for saving the results.}
 }
 \value{
 A data frame containing the extracted features is returned invisibly.

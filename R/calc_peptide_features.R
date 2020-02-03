@@ -114,7 +114,7 @@
 #'
 
 calc_peptide_features <- function(seqs, .funs = c(mean, sd),
-                                  ncores = 1, save_folder = NULL){
+                                  ncpus = 1, save_folder = NULL){
 # TO DO
 
 

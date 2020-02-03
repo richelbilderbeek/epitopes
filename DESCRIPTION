@@ -1,8 +1,8 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.1.2
-Date: 2020-01-30
+Version: 0.1.3
+Date: 2020-02-03
 Author: person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
                     role = c("aut", "cre"))
