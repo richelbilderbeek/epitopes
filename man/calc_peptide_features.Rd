@@ -5,8 +5,7 @@
 \title{Calculate simple features based on composition and physico-chemical
 properties of a protein sequence}
 \usage{
-calc_peptide_features(seqs, .funs = c(mean, sd), ncpus = 1,
-  save_folder = NULL)
+calc_peptide_features(seqs, .funs = c(mean, sd), ncpus = 1, save_folder = NULL)
 }
 \arguments{
 \item{seqs}{A character vector of potein sequences.}

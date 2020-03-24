@@ -4,10 +4,20 @@
 \alias{assemble_windowed_dataframe}
 \title{Assemble a sliding window representation of epitope data}
 \usage{
-assemble_windowed_dataframe(epitopes, proteins, save_folder = NULL,
-  min_epit = 8, max_epit = 20, only_exact = TRUE,
-  window_size = NULL, window_exp = 0, step_size = NULL,
-  min_prot_len = min_epit, max_prot_len = Inf, ncpus = 1)
+assemble_windowed_dataframe(
+  epitopes,
+  proteins,
+  save_folder = NULL,
+  min_epit = 8,
+  max_epit = 20,
+  only_exact = TRUE,
+  window_size = NULL,
+  window_exp = 0,
+  step_size = NULL,
+  min_prot_len = min_epit,
+  max_prot_len = Inf,
+  ncpus = 1
+)
 }
 \arguments{
 \item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}

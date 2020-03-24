@@ -1,6 +1,6 @@
-#' Extract linear B Cell epitopes from XML files retrieved from IEDB.
+#' Extract linear T Cell epitopes from XML files retrieved from IEDB.
 #'
-#' This function is used to extract information for **linear B-cell epitopes**
+#' This function is used to extract information for **linear T-cell epitopes**
 #' from the XML files exported using the functionality provided by
 #' [IEDB](https://www.iedb.org/).
 #' It assumes that the user has downloaded the _Complete Database Export_ from
@@ -23,10 +23,10 @@
 #'
 #' @examples
 #' my.dir   <- system.file("extdata", package="epitopes")
-#' epitopes <- get_LBCE(my.dir, ncpus = 2)
+#' epitopes <- get_LTCE(my.dir, ncpus = 2)
 #'
 
-get_LBCE <- function(data_folder = "./",
+get_LTCE <- function(data_folder = "./",
                      ncpus = 1,
                      save_folder = NULL){
 
@@ -72,9 +72,8 @@ get_LBCE <- function(data_folder = "./",
   # ==================================================
   cat("Processing files:\n")
 
-  df <- pbmcapply::pbmclapply(X = filelist, FUN = process_xml_file, type = "B",
+  df <- pbmcapply::pbmclapply(X = filelist, FUN = process_xml_file, type = "T",
                               mc.cores = ncpus, mc.preschedule = FALSE)
-
 
   #errlist <- filelist[which(sapply(df, function(x) length(x$Epitope) == 0))]
 

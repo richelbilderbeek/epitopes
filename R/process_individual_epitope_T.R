@@ -1,12 +1,12 @@
-process_individual_epitope <- function(ep, file_id){
+process_individual_epitope_T <- function(ep, file_id){
 
   not_valid <- FALSE
-  # If it is not a linear B-Cell epitope, then ignore
+  # If it is not a linear T-Cell epitope, then ignore
   # -->>> ASSUMPTION: All assays of same type
-  # -->>> ASSUMPTION: All linear B-Cell epitopes appear as
+  # -->>> ASSUMPTION: All linear T-Cell epitopes appear as
   # -->>> "FragmentOfANaturalSequenceMolecule" and contain a
   # -->>> field named "LinearSequence"
-  not_valid <- not_valid | is.null(ep$Assays$BCell)
+  not_valid <- not_valid | is.null(ep$Assays$TCell)
   not_valid <- not_valid | is.null(ep$EpitopeStructure$FragmentOfANaturalSequenceMolecule$LinearSequence)
 
   if(not_valid) return(NULL)
@@ -14,14 +14,14 @@ process_individual_epitope <- function(ep, file_id){
   # ============= ONLY LINEAR B-CELL EPITOPES CROSS THIS LINE ============= #
 
   # Extract relevant fields.
-  host_id        <- nullcheck(ep$Assays$BCell$Immunization$HostOrganism$OrganismId)
+  host_id        <- nullcheck(ep$Assays$TCell$Immunization$HostOrganism$OrganismId)
   sourceOrg_id   <- nullcheck(ep$EpitopeStructure$FragmentOfANaturalSequenceMolecule$SourceOrganismId)
   epitope_id     <- nullcheck(ep$EpitopeId)
   molecule_id    <- nullcheck(ep$EpitopeStructure$FragmentOfANaturalSequenceMolecule$SourceMolecule$GenBankId)
   seq            <- nullcheck(ep$EpitopeStructure$FragmentOfANaturalSequenceMolecule$LinearSequence)
   evid_code      <- nullcheck(ep$EpitopeEvidenceCode)
   epit_struc_def <- nullcheck(ep$EpitopeStructureDefines)
-  qual_measure   <- nullcheck(ep$Assays$BCell$AssayInformation$QualitativeMeasurement)
+  qual_measure   <- nullcheck(ep$Assays$TCell$AssayInformation$QualitativeMeasurement)
 
 
   # Extract start and end positions, checking against sequence length

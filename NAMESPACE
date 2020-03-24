@@ -3,6 +3,7 @@
 export(assemble_windowed_dataframe)
 export(calc_peptide_features)
 export(get_LBCE)
+export(get_LTCE)
 export(get_proteins)
 importFrom(dplyr,"%>%")
 importFrom(rlang,.data)
