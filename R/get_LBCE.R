@@ -22,7 +22,7 @@
 #'
 #'
 #' @examples
-#' my.dir   <- system.file("extdata", package="epitopes")
+#' my.dir   <- system.file("extdata/xml_examples", package="epitopes")
 #' epitopes <- get_LBCE(my.dir, ncpus = 2)
 #'
 

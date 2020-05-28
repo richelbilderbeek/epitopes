@@ -1,0 +1,21 @@
+Name,One_letter_code,Three_letter_code,Number_of_carbon_atoms_in_aa,Number_of_hydrogen_atoms_in_aa,Number_of_nitrogen_atoms_in_aa,Number_of_oxygen_atoms_in_aa,Number_of_sulphur_atoms_in_aa,Residue_mass,Number_of_atoms,CT_group,Amino_acid_molecular_weight
+  Alanine       ,A,  ALA ,3,7,1,2,0,71.08,13,0,89.09
+  Cysteine      ,C,  CYS ,3,7,1,2,1,103.14,14,1,121.16
+  Aspartic Acid ,D,  ASP ,4,7,1,4,0,115.09,16,6,133.1
+  Glutamic Acid ,E,  GLU ,5,9,1,4,0,129.12,19,6,147.13
+  Phenylalanine ,F,  PHE ,9,11,1,2,0,147.18,23,2,165.19
+  Glycine       ,G,  GLY ,2,5,1,2,0,57.05,10,0,75.07
+  Histidine     ,H,  HIS ,6,9,3,2,0,137.14,20,4,155.16
+  Isoleucine    ,I,  ILE ,6,13,1,2,0,113.16,22,2,131.17
+  Lysine        ,K,  LYS ,6,14,2,2,0,128.17,24,5,146.19
+  Leucine       ,L,  LEU ,6,13,1,2,0,113.16,22,2,131.17
+  Methionine    ,M,  MET ,5,11,1,2,1,131.19,20,3,149.21
+  Asparagine    ,N,  ASN ,4,8,2,3,0,114.1,17,4,132.12
+  Proline       ,P,  PRO ,5,9,1,2,0,97.12,17,2,115.13
+  Glutamine     ,Q,  GLN ,5,10,2,3,0,128.13,20,4,146.15
+  Arginine      ,R,  ARG ,6,14,4,2,0,156.19,26,5,174.2
+  Serine        ,S,  SER ,3,7,1,3,0,87.08,14,3,105.09
+  Threonine     ,T,  THR ,4,9,1,3,0,101.11,17,3,119.12
+  Valine        ,V,  VAL ,5,11,1,2,0,99.13,19,0,117.15
+  Tryptophan    ,W,  TRP ,11,12,2,2,0,186.21,27,4,204.22
+  Tyrosine      ,Y,  TYR ,9,11,1,3,0,163.18,24,3,181.19

@@ -28,7 +28,7 @@ the _XML Database Export_ field in IEDB's
 it in a given folder, which is passed as an argument to the function.
 }
 \examples{
-my.dir   <- system.file("extdata", package="epitopes")
+my.dir   <- system.file("extdata/xml_examples", package="epitopes")
 epitopes <- get_LBCE(my.dir, ncpus = 2)
 
 }
