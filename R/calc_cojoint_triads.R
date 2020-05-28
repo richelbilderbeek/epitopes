@@ -68,7 +68,7 @@ calc_cojoint_triads <- function(input, ncores = parallel::detectCores() - 1){
 
 
   # Binds the rows of all conjoint triad tables
-  triad_full <- do.call(what = bind_rows, args = triad_list)
+  triad_full <- do.call(what = dplyr::bind_rows, args = triad_list)
   triad_full[is.na(triad_full)] <- 0
   # Changes the names of all columns
   names(triad_full) <- paste0("perc_of_", names(triad_full))

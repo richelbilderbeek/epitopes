@@ -1,11 +1,17 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.1.4
-Date: 2020-03-24
-Author: person(given = "Felipe", family = "Campelo",
+Version: 0.1.5
+Date: 2020-05-28
+Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
-                    role = c("aut", "cre"))
+                    role = c("aut", "cre")),
+          person(given = "Jodie", family = "Ashford",
+                    email = "ashfojsm@aston.ac.uk",
+                    role = c("ctb")),
+          person(given = "Francisco", family = "Lobo",
+                    email = "franciscolobo@gmail.com",
+                    role = c("ctb")))
 Maintainer: Felipe Campelo <f.campelo@aston.ac.uk>
 Description: Routines for processing epitope data exported from IEDB
     (https://iedb.org/), retrieving corresponding protein data from Genbank 
