@@ -1,28 +1,9 @@
-#' Calculate simple features based on composition and physico-chemical
-#' properties of a protein sequence
+#' Calculate a set of mean AA descriptors
 #'
-#' This function relies on package `Peptides` to calculate several simple
-#' features. It currently
-#'
-#' @param seqs A character vector of potein sequences.
-#' @param .funs a vector of functions used to aggregate some of the AA-based
-#' features into sequence-wide features (see `Value`).
-#' @param ncpus positive integer, number of cores to use (multi-core
-#'        capabilities not yet available for Windows systems.)
-#' @param save_folder path to folder for saving the results.
-#'
-#' @return A data frame containing the extracted features is returned invisibly.
-#' This function currently calculates the following features for each sequence
-#' provided in `seqs`:
-#'
-#'   \itemize{
-#'      \item\code{AA composition}, based on function `Peptides::aaComp()`.
-#'      Calculates the percent of amino acids by class (Tiny, Small, Aliphatic,
-#'      Aromatic, Non-polar, Polar, Charged, Basic and Acidic) in the sequence.
-#'      \item\code{AA descriptors}, based on function
-#'      `Peptides::aaDescriptors()`. For each sequence the following properties
-#'      are calculated for each AA, and then aggregated using the functions
-#'      passed in `.funs`.
+#' This function is used to calculate 66 aminoacid descriptors based on
+#' function `Peptides::aaDescriptors`. These descriptors apply to each
+#' individual aminoacid in a peptide, and are summarised for the peptide using a
+#' simple mean. The features returned are provided in the `Details`
 #'
 #'   \itemize{
 #'      \item\code{crucianiProperties}
@@ -100,22 +81,67 @@
 #'      \itemize{
 #'          \item MSWHIM1 - MSWHIM3
 #'      }
-#'   }
 #' }
 #'
-#' See the documentation for `Peptides::aaDescriptors()` and
-#' `Peptides::aaData()` for further information and references.
+#' See the documentation for [Peptides::aaDescriptors()] and
+#' [Peptides::aaData()] for further information and references.
 #'
-#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
+#' @param input either a vector of peptides or a data frame with a variable
+#' called "window_seq" containing the peptides.
+#' @param ncores number of cores to use when calculating the features.
 #'
-#' @importFrom stats sd
+#' @return Data frame containing the calculated AA percentages. If `input` is
+#' a`data.frame` the original input is returned with the AA percentages
+#' appended as columns.
 #'
+#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk});
+#'         Jodie Ashford (\email{ashfojsm@@aston.ac.uk})
+#'
+#' @importFrom data.table rbindlist
+#' @importFrom parallel mclapply
 #' @export
 #'
+calc_aa_descriptors <- function(input, ncores = parallel::detectCores() - 1){
+  # ========================================================================== #
+  # Sanity checks and initial definitions
+  assertthat::assert_that(assertthat::is.count(ncores))
 
-calc_peptide_features <- function(seqs, .funs = c(mean, sd),
-                                  ncpus = 1, save_folder = NULL){
-# TO DO
+  if(is.data.frame(input)){
+    assertthat::assert_that("window_seq" %in% names(input),
+                            is.character(input$window_seq))
+    pepvec <- input$window_seq
+  } else {
+    assertthat::assert_that(is.vector(input),
+                            is.character(input))
+    pepvec <- input
+    input  <- data.frame(window_seq = pepvec)
+  }
 
+  aa_codes <- get_aa_codes()
+  isvalid <- sapply(pepvec,
+                    function(x){
+                      all(strsplit(x, split = "")[[1]] %in% aa_codes)
+                    })
 
+  if(any(!isvalid)){
+    stop("Unrecognised aminoacid code in entry(ies): ",
+         paste(which(!isvalid), collapse = ", "))
+  }
+  # ========================================================================== #
+
+  # Prepare feature names
+  col_names <- colnames(Peptides::aaDescriptors("K"))
+
+  # Calculate features for all windows
+  X <- rbindlist(mclapply(pepvec,
+                          function(x){
+                            x <- strsplit(x, split = "")[[1]]
+                            indfeat <- t(rowMeans(sapply(x,Peptides::aaDescriptors)))
+                            colnames(indfeat) <- col_names
+                            return(as.data.frame(indfeat))
+                          },
+                          mc.preschedule = TRUE,
+                          mc.cores = ncores))
+
+  return(cbind(input, X))
 }

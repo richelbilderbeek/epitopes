@@ -20,6 +20,10 @@ Processing and Feature Extraction of epitope data from the Immune Epitope Databa
 2. Run routine `get_LBCE()` to extract the linear B-cell epitopes.
 3. Run `get_proteins()` to retrieve protein information from [GenBank](https://www.ncbi.nlm.nih.gov/genbank/)
 4. Run `assemble_windowed_dataframe()` to assemble a tidy dataframe based on a sliding window representation.
-5. Run `calc_peptide_features()` to calculate summary features for each window, based on the properties available in the [Peptides](https://cran.r-project.org/package=Peptides) package
+5. Run `calc_features()` to calculate a variety of statistical and 
+physiochemical features for each window.
 
 
+***
+
+Please report any bugs or suggestions directly in the repository [Issues](https://github.com/fcampelo/epitopes/issues) page.

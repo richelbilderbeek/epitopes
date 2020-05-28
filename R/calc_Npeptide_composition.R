@@ -72,6 +72,7 @@ calc_Npeptide_composition <- function(input, N = 2){
 
   # change column names
   names(Npeptides_full) <- paste0("perc_of_", names(Npeptides_full))
+  Npeptides_full <- Npeptides_full[, order(names(Npeptides_full))]
 
   return(cbind(input, Npeptides_full))
 }
