@@ -10,7 +10,7 @@ Processing and Feature Extraction of epitope data from the Immune Epitope Databa
 ## Current version:
 - Consolidation of linear B-cell epitopes from the full IEDB database
 - Extraction of observations for feature calculation using a sliding window representation.
-- Calculation of summary peptide-based features (using package [Peptides](https://cran.r-project.org/package=Peptides)).
+- Calculation of summary peptide-based features.
 
 ## Upcoming:
 - Calculation of more features: cojoint triads and dipeptide frequencies (code tested, to be released to the package in late May/2020).
