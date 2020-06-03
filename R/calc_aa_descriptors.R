@@ -101,7 +101,7 @@
 #' @importFrom parallel mclapply
 #' @export
 #'
-calc_aa_descriptors <- function(input, ncores = parallel::detectCores() - 1){
+calc_aa_descriptors <- function(input, ncores = 1){
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(assertthat::is.count(ncores))

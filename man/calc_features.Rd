@@ -4,7 +4,7 @@
 \alias{calc_features}
 \title{Calculate statistical and physicochemical features for peptides}
 \usage{
-calc_features(input, max.N = 2, ncores = parallel::detectCores() - 1)
+calc_features(input, max.N = 2, ncores = 1)
 }
 \arguments{
 \item{input}{either a vector of peptides or a data frame with a variable

@@ -4,7 +4,7 @@
 \alias{calc_aa_descriptors}
 \title{Calculate a set of mean AA descriptors}
 \usage{
-calc_aa_descriptors(input, ncores = parallel::detectCores() - 1)
+calc_aa_descriptors(input, ncores = 1)
 }
 \arguments{
 \item{input}{either a vector of peptides or a data frame with a variable

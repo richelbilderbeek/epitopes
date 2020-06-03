@@ -4,7 +4,7 @@
 \alias{calc_cojoint_triads}
 \title{Calculate cojoint triads}
 \usage{
-calc_cojoint_triads(input, ncores = parallel::detectCores() - 1)
+calc_cojoint_triads(input, ncores = 1)
 }
 \arguments{
 \item{input}{either a vector of peptides or a data frame with a variable

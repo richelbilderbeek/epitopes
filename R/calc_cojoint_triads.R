@@ -17,7 +17,7 @@
 #' @importFrom parallel mclapply
 #' @export
 #'
-calc_cojoint_triads <- function(input, ncores = parallel::detectCores() - 1){
+calc_cojoint_triads <- function(input, ncores = 1){
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(assertthat::is.count(ncores))

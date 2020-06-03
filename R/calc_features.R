@@ -28,7 +28,7 @@
 #'
 calc_features <- function(input,
                           max.N = 2,
-                          ncores = parallel::detectCores() - 1){
+                          ncores = 1){
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(assertthat::is.count(ncores),
