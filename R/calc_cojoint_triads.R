@@ -45,7 +45,9 @@ calc_cojoint_triads <- function(input, ncores = 1){
   }
   # ========================================================================== #
 
-  aa_prop <- readRDS("./inst/extdata/amino_acid_propensity.rds")
+  aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
+                                 package = "epitopes"))
+
   # creates a list of conjoint triads for each sequence
   triad_list <- mclapply(pepvec,
                          function(x){

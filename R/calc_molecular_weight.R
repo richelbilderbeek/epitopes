@@ -43,7 +43,8 @@ calc_molecular_weight <- function(input){
 
   # ========================================================================== #
 
-  aa_prop <- readRDS("./inst/extdata/amino_acid_propensity.rds")
+  aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
+                                 package = "epitopes"))
 
   total_mw <- sapply(pepvec,
                      FUN = function(x){

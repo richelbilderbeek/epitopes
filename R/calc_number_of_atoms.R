@@ -43,7 +43,9 @@ calc_number_of_atoms <- function(input){
   }
   # ========================================================================== #
 
-  aa_prop <- readRDS("./inst/extdata/amino_acid_propensity.rds")
+
+  aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
+                                 package = "epitopes"))
 
   elements = c('Number_of_carbon_atoms_in_aa',
                'Number_of_hydrogen_atoms_in_aa',
