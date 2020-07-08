@@ -5,16 +5,16 @@ extract_windows <- function(x, window_size, step_size, window_exp){
   # Initialise dataframe
   wdf <- data.frame(window_seq = rep(NA_character_, x$epitope_len + 2),
                     window_exp = rep(NA_character_, x$epitope_len + 2),
+                    protein_id = x$protein_id,
+                    epitope_id = x$epitope_id,
                     center_pos = rep(NA_integer_, x$epitope_len + 2),
                     start_pos  = rep(NA_integer_, x$epitope_len + 2),
                     stop_pos   = rep(NA_integer_, x$epitope_len + 2),
-                    Class      = x$Class,
-                    epitope_id = x$epitope_id,
-                    protein_id = x$protein_id,
                     taxid      = x$protein_taxid,
                     host_id    = x$host_id,
                     org_id     = x$org_id,
                     file_id    = x$file_id,
+                    Class      = x$Class,
                     Type       = nullcheck(x$Type),
                     stringsAsFactors = FALSE)
 
