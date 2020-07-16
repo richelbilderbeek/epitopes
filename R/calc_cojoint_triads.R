@@ -66,14 +66,13 @@ calc_cojoint_triads <- function(input, ncores = 1){
 
                            # Return frequencies of eah triad
                            table(ct_list) / length(ct_list)
-                         })
+                         },
+                         mc.cores = ncores)
 
 
   # Binds the rows of all conjoint triad tables
   triad_full <- do.call(what = dplyr::bind_rows, args = triad_list)
   triad_full[is.na(triad_full)] <- 0
-  # Changes the names of all columns
-  names(triad_full) <- paste0("perc_of_", names(triad_full))
 
   # Generate any columns that may be missing
   myarg   <- expand.grid(0:6, 0:6, 0:6)
@@ -82,9 +81,12 @@ calc_cojoint_triads <- function(input, ncores = 1){
   toadd   <- toadd[!(toadd %in% names(triad_full))]
   newcols <- as.data.frame(matrix(0, nrow = nrow(input), length(toadd)))
 
-  names(newcols) <- paste0("perc_of_", toadd)
   triad_full <- cbind(triad_full, newcols)
   triad_full <- triad_full[, order(names(triad_full))]
+
+  # Changes the names of all columns
+  names(triad_full) <- paste0("perc_of_", names(triad_full))
+
 
   return(cbind(input, triad_full))
 }

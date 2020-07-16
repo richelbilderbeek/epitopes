@@ -52,8 +52,11 @@ calc_features <- function(input,
                     })
 
   if(any(!isvalid)){
-    stop("Unrecognised aminoacid code in entry(ies): ",
+    cat("Unrecognised aminoacid code in entry(ies): ",
          paste(which(!isvalid), collapse = ", "))
+    cat("\n(Probably due to degenerate aminoacid codes)")
+    cat("\nRemoving these entries before proceeding...")
+    input <- input[-which(!isvalid), ]
   }
   # ========================================================================== #
 
