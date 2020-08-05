@@ -28,4 +28,4 @@ Meta
 
 *.rds
 
-results/
+#results/
