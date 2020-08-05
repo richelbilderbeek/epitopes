@@ -20,9 +20,9 @@ assemble_windowed_dataframe(
 )
 }
 \arguments{
-\item{epitopes}{data frame of epitope data (returned by [get_linear_bcell_epitopes()].}
+\item{epitopes}{data frame of epitope data (returned by [get_LBCE()] or [get_LTCE()].}
 
-\item{proteins}{data frame of epitope data (returned by [retrieve_protein_data()].}
+\item{proteins}{data frame of protein data (returned by [retrieve_protein_data()].}
 
 \item{save_folder}{path to folder for saving the results.}
 

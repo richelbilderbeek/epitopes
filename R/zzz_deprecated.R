@@ -36,10 +36,15 @@ get_linear_bcell_epitopes <- function(data_folder = "./",
 
   # ==================================================
   cat("Processing files:\n")
-  df <- pbapply::pblapply(filelist, process_xml_file)
+  df <- pbmcapply::pbmclapply(X        = filelist,
+                              FUN      = process_xml_file,
+                              mc.cores = 1)
+
 
   cat("\nProcessing resulting list:\n")
-  df           <- pbapply::pblapply(df, data.table::rbindlist)
+  df <- pbmcapply::pbmclapply(X        = df,
+                              FUN      = data.table::rbindlist,
+                              mc.cores = 1)
   df           <- data.frame(data.table::rbindlist(df))
 
   if(!is.null(save_folder)){
@@ -79,7 +84,10 @@ retrieve_protein_data <- function(uids, save_folder = NULL){
 
   # Retrieving proteins using individual requests rather than (more efficient)
   # batch requests, to catch and treat efetch() or parsing errors more easily.
-  df      <- pbapply::pblapply(uids, retrieve_single_protein)
+  df <- pbmcapply::pbmclapply(X       = uids,
+                              FUN      = retrieve_single_protein,
+                              mc.cores = 1)
+
   errlist <- uids[sapply(df, is.null)]
   df      <- data.frame(data.table::rbindlist(df,
                                               use.names = TRUE,

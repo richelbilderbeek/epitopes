@@ -1,8 +1,8 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.1.6
-Date: 2020-07-16
+Version: 0.1.7
+Date: 2020-08-05
 Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
                     role = c("aut", "cre")),
@@ -25,7 +25,6 @@ Imports: assertthat (>= 0.2.1),
          reutils (>= 0.2.3),
          purrr (>= 0.3.3),
          rlang (>= 0.4.2),
-         pbapply (>= 1.4.0),
          pbmcapply (>= 1.5.0),
          data.table (>= 1.12.8),
          Peptides (>= 2.4.1),

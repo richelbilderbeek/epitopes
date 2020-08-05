@@ -35,8 +35,8 @@
 #' . . . . . . . . . . . . . . . . . . | . . . . . . . . . . . . | . . . . QGPGAPXXX\cr
 #'
 #'
-#' @param epitopes data frame of epitope data (returned by [get_linear_bcell_epitopes()].
-#' @param proteins data frame of epitope data (returned by [retrieve_protein_data()].
+#' @param epitopes data frame of epitope data (returned by [get_LBCE()] or [get_LTCE()].
+#' @param proteins data frame of protein data (returned by [retrieve_protein_data()].
 #' @param save_folder path to folder for saving the results.
 #' @param min_epit positive integer, smallest epitope to be considered
 #' @param max_epit positive integer, largest epitope to be considered
@@ -215,21 +215,13 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
   cat("\nExtracting windows:\n")
-  if (ncpus == 1){
-    windows_df <- pbapply::pblapply(X = purrr::pmap(as.list(df), list),
-                                    FUN = extract_windows,
-                                    window_size = window_size,
-                                    step_size   = step_size,
-                                    window_exp  = window_exp)
-  } else {
-    windows_df <- pbmcapply::pbmclapply(X = purrr::pmap(as.list(df), list),
-                                        FUN = extract_windows,
-                                        window_size = window_size,
-                                        step_size   = step_size,
-                                        window_exp  = window_exp,
-                                        mc.cores       = ncpus,
-                                        mc.preschedule = FALSE)
-  }
+  windows_df <- pbmcapply::pbmclapply(X = purrr::pmap(as.list(df), list),
+                                      FUN = extract_windows,
+                                      window_size = window_size,
+                                      step_size   = step_size,
+                                      window_exp  = window_exp,
+                                      mc.cores       = ncpus,
+                                      mc.preschedule = FALSE)
 
   cat("\nAssembling windowed dataframe...")
   windows_df <- data.frame(data.table::rbindlist(windows_df))

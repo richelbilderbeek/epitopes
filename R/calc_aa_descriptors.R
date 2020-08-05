@@ -3,7 +3,7 @@
 #' This function is used to calculate 66 aminoacid descriptors based on
 #' function `Peptides::aaDescriptors`. These descriptors apply to each
 #' individual aminoacid in a peptide, and are summarised for the peptide using a
-#' simple mean. The features returned are provided in the `Details`
+#' simple mean. The features returned are provided in the `Details`.
 #'
 #'   \itemize{
 #'      \item\code{crucianiProperties}
