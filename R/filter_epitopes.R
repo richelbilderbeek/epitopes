@@ -55,7 +55,9 @@ filter_epitopes <- function(epitopes,
   if(!is.null(removeID)) idx3 <- (epitopes$sourceOrg_id %in% removeID)
 
   epitopes <- epitopes[which(idx1 & idx2 & !idx3) , ]
-  epitopes <- epitopes[order(epitopes$protein_id, epitopes$epitope_id), ]
+  epitopes <- epitopes[order(epitopes$protein_id,
+                             epitopes$epitope_id,
+                             epitopes$center_pos), ]
   return(epitopes)
 
 }
