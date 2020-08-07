@@ -4,10 +4,12 @@
 \alias{get_taxonomy}
 \title{Retrieve taxonomic classification tables from NCBI.}
 \usage{
-get_taxonomy(UIDs)
+get_taxonomy(UIDs, save_file = NULL)
 }
 \arguments{
 \item{UIDs}{vector of organism IDs to retrieve taxonomical information}
+
+\item{save_file}{filename (including path) to save the resulting list.}
 }
 \value{
 A list containing the information for each element of UIDs.

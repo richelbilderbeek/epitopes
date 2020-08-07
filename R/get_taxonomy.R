@@ -4,6 +4,7 @@
 #' IDs, from the NCBI Taxonomy data base.
 #'
 #' @param UIDs vector of organism IDs to retrieve taxonomical information
+#' @param save_file filename (including path) to save the resulting list.
 #'
 #' @return A list containing the information for each element of UIDs.
 #'
@@ -18,7 +19,15 @@
 #' tax <- get_taxonomy(UIDs)
 #'
 
-get_taxonomy <- function(UIDs) {
+get_taxonomy <- function(UIDs, save_file = NULL) {
+
+  # ========================================================================== #
+  # Sanity checks and initial definitions
+  ok_classes <- c("NULL", "numeric", "integer", "character")
+  assertthat::assert_that(class(UIDs) %in% ok_classes,
+                          is.null(save_file) || is.character(save_file),
+                          is.null(save_file) || length(save_file) == 1)
+
   cat("\n")
   out <- vector(mode = "list", length = length(UIDs))
   for (i in seq_along(UIDs)){
@@ -54,6 +63,8 @@ get_taxonomy <- function(UIDs) {
     Sys.sleep(0.34)
 
   }
+
+  if(!is.null(save_file)) saveRDS(out, save_file)
 
   return(out)
 }

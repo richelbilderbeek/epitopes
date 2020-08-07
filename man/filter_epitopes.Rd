@@ -4,19 +4,34 @@
 \alias{filter_epitopes}
 \title{Filter epitopes by taxonomy and host}
 \usage{
-filter_epitopes(epitopes, taxID = NULL, hostID = NULL, removeID = NULL)
+filter_epitopes(
+  epitopes,
+  taxID = NULL,
+  hostID = NULL,
+  removeID = NULL,
+  tax_load_file = NULL,
+  tax_save_file = NULL
+)
 }
 \arguments{
-\item{epitopes}{data frame of epitope data (returned by [get_LBCE()] or [get_LTCE()].}
+\item{epitopes}{data frame of epitope data (returned by [get_LBCE()] or
+[get_LTCE()].}
 
-\item{taxID}{taxon IDs that we want to filter the epitopes by}
+\item{taxID}{taxon IDs that we want to filter the epitopes by.}
 
-\item{hostID}{host IDs that we want to filter the epitopes by}
+\item{hostID}{host IDs that we want to filter the epitopes by.}
 
-\item{removeID}{organism IDs to be removed from the data frame}
+\item{removeID}{organism IDs to be removed from the data frame.}
+
+\item{tax_load_file}{optional taxonomy file (RDS file generated either by this
+function or by [get_taxonomy()]).}
+
+\item{tax_save_file}{optional file name for saving the taxonomy. Ignored
+if `tax_file` is not `NULL`. Must be either `NULL` or a .RDS filename.}
 }
 \value{
-A data frame filtered by the criteria in taxID or hostID
+Epitope dataframe filtered by the criteria in `taxID`, `hostID` and
+        `removeID`.
 }
 \description{
 Filters an epitope dataframe (returned by [get_LBCE()] or [get_LTCE()]) by
