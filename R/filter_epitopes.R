@@ -55,9 +55,21 @@ filter_epitopes <- function(epitopes,
   if(!is.null(removeID)) idx3 <- (epitopes$sourceOrg_id %in% removeID)
 
   epitopes <- epitopes[which(idx1 & idx2 & !idx3) , ]
-  epitopes <- epitopes[order(epitopes$protein_id,
-                             epitopes$epitope_id,
-                             epitopes$center_pos), ]
+
+
+  if ("molecule_id" %in% names(epitopes)){
+    epitopes <- epitopes[order(epitopes$molecule_id,
+                               epitopes$epitope_id,
+                               epitopes$start_pos), ]
+  } else if ("protein_id" %in% names(epitopes)) {
+    epitopes <- epitopes[order(epitopes$protein_id,
+                               epitopes$epitope_id,
+                               epitopes$start_pos), ]
+  } else {
+    epitopes <- epitopes[order(epitopes$epitope_id,
+                               epitopes$start_pos), ]
+  }
+
   return(epitopes)
 
 }

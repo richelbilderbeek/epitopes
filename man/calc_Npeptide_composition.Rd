@@ -4,13 +4,15 @@
 \alias{calc_Npeptide_composition}
 \title{Calculate frequencies of N-peptides}
 \usage{
-calc_Npeptide_composition(input, N = 2)
+calc_Npeptide_composition(input, N = 2, ncores = 1)
 }
 \arguments{
 \item{input}{either a vector of peptides or a data frame with a variable
 called "window_seq" containing the peptides.}
 
 \item{N}{the length of the subsequences to consider.}
+
+\item{ncores}{number of cores to use when calculating the features.}
 }
 \value{
 Data frame containing the calculated AA percentages. If `input` is

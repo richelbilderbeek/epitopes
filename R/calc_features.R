@@ -61,6 +61,7 @@ calc_features <- function(input,
   # ========================================================================== #
 
   # Calculate features
+  cat("\nCalculating features:")
   df <- input %>%
     calc_aa_composition() %>%
     calc_aa_descriptors(ncores = ncores) %>%
@@ -71,8 +72,10 @@ calc_features <- function(input,
 
   # Add Npeptide percentages
   for (i in 1:max.N){
-    df <- calc_Npeptide_composition(df, N = i)
+    df <- calc_Npeptide_composition(df, N = i, ncores = ncores)
   }
 
-  return(df)
+  return(df[order(df$protein_id,
+                  df$epitope_id,
+                  df$start_pos), ])
 }

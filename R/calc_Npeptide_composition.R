@@ -6,6 +6,7 @@
 #' @param input either a vector of peptides or a data frame with a variable
 #' called "window_seq" containing the peptides.
 #' @param N the length of the subsequences to consider.
+#' @param ncores number of cores to use when calculating the features.
 #'
 #' @return Data frame containing the calculated AA percentages. If `input` is
 #' a`data.frame` the original input is returned with the AA percentages
@@ -16,11 +17,12 @@
 #'
 #' @export
 #'
-calc_Npeptide_composition <- function(input, N = 2){
+calc_Npeptide_composition <- function(input, N = 2, ncores = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
-  assertthat::assert_that(assertthat::is.count(N))
+  assertthat::assert_that(assertthat::is.count(N),
+                          assertthat::is.count(ncores))
 
   if(is.data.frame(input)){
     assertthat::assert_that("window_seq" %in% names(input),
@@ -47,15 +49,17 @@ calc_Npeptide_composition <- function(input, N = 2){
   # ========================================================================== #
 
   # Creates a list of tables contaning the dipeptide percentages for each window sequence in df
-  Npeptides <- lapply(X = pepvec,
-                      FUN = function(x) {
-                        start <- 1:(nchar(x) - N + 1)
-                        stop  <- start + N - 1
-                        table(substring(x, start, stop)) / nchar(x)
-                      })
+  cat("\n Calculating ", N, "-peptide composition:")
+  Npeptides <- pbmcapply::pbmclapply(X = pepvec,
+                                     FUN = function(x) {
+                                       start <- 1:(nchar(x) - N + 1)
+                                       stop  <- start + N - 1
+                                       as.data.frame(t(as.matrix(table(substring(x, start, stop)) / nchar(x))))
+                                     },
+                                     mc.cores = ncores)
 
   # binds the rows of all dipeptide sequence tables
-  Npeptides_full <- do.call(what = dplyr::bind_rows, args = Npeptides)
+  Npeptides_full <- data.table::rbindlist(Npeptides, use.names = TRUE, fill = TRUE)
   Npeptides_full[is.na(Npeptides_full)] <- 0
 
   # Generate any columns that may be missing
@@ -72,7 +76,7 @@ calc_Npeptide_composition <- function(input, N = 2){
 
   # change column names
   names(Npeptides_full) <- paste0("perc_of_", names(Npeptides_full))
-  Npeptides_full <- Npeptides_full[, order(names(Npeptides_full))]
+  Npeptides_full <- as.data.frame(Npeptides_full)[, order(names(Npeptides_full))]
 
   return(cbind(input, Npeptides_full))
 }

@@ -49,29 +49,30 @@ calc_cojoint_triads <- function(input, ncores = 1){
                                  package = "epitopes"))
 
   # creates a list of conjoint triads for each sequence
-  triad_list <- mclapply(pepvec,
-                         function(x){
-                           # Calculate CT representation
-                           xpl <- strsplit(x, split = "")[[1]]
-                           idx <- sapply(xpl,
-                                         function(y) {
-                                           which(aa_prop$One_letter_code == y)
-                                         })
-                           ct_rep <- paste(aa_prop$CT_group[idx], collapse = "")
+  cat("\n Calculating Cojoint Triads:")
+  triad_list <- pbmcapply::pbmclapply(pepvec,
+                                      function(x){
+                                        # Calculate CT representation
+                                        xpl <- strsplit(x, split = "")[[1]]
+                                        idx <- sapply(xpl,
+                                                      function(y) {
+                                                        which(aa_prop$One_letter_code == y)
+                                                      })
+                                        ct_rep <- paste(aa_prop$CT_group[idx], collapse = "")
 
-                           # Extract triads
-                           ct_list <- substring(ct_rep,
-                                                first = 1:(nchar(ct_rep) - 2),
-                                                last  = 3:nchar(ct_rep))
+                                        # Extract triads
+                                        ct_list <- substring(ct_rep,
+                                                             first = 1:(nchar(ct_rep) - 2),
+                                                             last  = 3:nchar(ct_rep))
 
-                           # Return frequencies of eah triad
-                           table(ct_list) / length(ct_list)
-                         },
-                         mc.cores = ncores)
+                                        # Return frequencies of each triad
+                                        as.data.frame(t(as.matrix(table(ct_list) / length(ct_list))))
+                                      },
+                                      mc.cores = ncores)
 
 
   # Binds the rows of all conjoint triad tables
-  triad_full <- do.call(what = dplyr::bind_rows, args = triad_list)
+  triad_full <- data.table::rbindlist(triad_list, use.names = TRUE, fill = TRUE)
   triad_full[is.na(triad_full)] <- 0
 
   # Generate any columns that may be missing
@@ -82,7 +83,7 @@ calc_cojoint_triads <- function(input, ncores = 1){
   newcols <- as.data.frame(matrix(0, nrow = nrow(input), length(toadd)))
 
   triad_full <- cbind(triad_full, newcols)
-  triad_full <- triad_full[, order(names(triad_full))]
+  triad_full <- as.data.frame(triad_full)[ , order(names(triad_full))]
 
   # Changes the names of all columns
   names(triad_full) <- paste0("perc_of_", names(triad_full))
