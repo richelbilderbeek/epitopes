@@ -50,6 +50,8 @@ filter_epitopes <- function(epitopes,
                                function(x){
                                  if (any(taxID %in% x$Taxonomy$UID)) return(x$UID)}))
 
+  idx1 <- idx2 <- rep(TRUE, nrow(epitopes))
+  idx3 <- !idx1
   if(!is.null(taxID))    idx1 <- (epitopes$sourceOrg_id %in% target_list)
   if(!is.null(hostID))   idx2 <- (epitopes$host_id %in% hostID)
   if(!is.null(removeID)) idx3 <- (epitopes$sourceOrg_id %in% removeID)
