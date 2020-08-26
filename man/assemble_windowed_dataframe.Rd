@@ -13,7 +13,7 @@ assemble_windowed_dataframe(
   only_exact = TRUE,
   window_size = NULL,
   window_exp = 0,
-  step_size = NULL,
+  step_size = 1,
   min_prot_len = min_epit,
   max_prot_len = Inf,
   ncpus = 1

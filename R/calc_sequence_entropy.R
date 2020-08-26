@@ -44,7 +44,7 @@ calc_sequence_entropy <- function(input){
   # ========================================================================== #
 
   # Entropy = -SUM(p(e)log2[p(e)])
-  # Creates a table of aa counts for each sequence
+  cat("\nCalculating sequence entropy...")
   entropy <- sapply(pepvec,
                     function(x){
                       # table the frequency of each aa in a window sequence

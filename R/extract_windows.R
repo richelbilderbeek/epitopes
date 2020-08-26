@@ -38,7 +38,7 @@ extract_windows <- function(x, window_size, step_size, window_exp){
     i1e <- i1e + step_size
     i2e <- min(x$protein_len, i2e + step_size)
     j   <- j + 1
-    if(i2 > min(x$protein_len,  x$epitope_stop + ceiling(window_size / 2))) {
+    if(i2 > min(x$protein_len,  x$epitope_stop + ceiling(window_size / 2) - 1)) {
       stop <- TRUE
     }
   }

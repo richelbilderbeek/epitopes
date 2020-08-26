@@ -134,15 +134,15 @@ calc_aa_descriptors <- function(input, ncores = 1){
 
   # Calculate features for all windows
   cat("\n Calculating AA descriptors:")
-  X <- rbindlist(pbmcapply::pbmclapply(pepvec,
-                                       function(x){
-                                         x <- strsplit(x, split = "")[[1]]
-                                         indfeat <- t(rowMeans(sapply(x,Peptides::aaDescriptors)))
-                                         colnames(indfeat) <- col_names
-                                         return(as.data.frame(indfeat))
-                                       },
-                                       mc.preschedule = TRUE,
-                                       mc.cores = ncores))
+  X <- data.table::rbindlist(pbmcapply::pbmclapply(pepvec,
+                                                   function(x){
+                                                     x <- strsplit(x, split = "")[[1]]
+                                                     indfeat <- t(rowMeans(sapply(x,Peptides::aaDescriptors)))
+                                                     colnames(indfeat) <- col_names
+                                                     return(as.data.frame(indfeat))
+                                                   },
+                                                   mc.preschedule = TRUE,
+                                                   mc.cores = ncores))
 
   return(cbind(input, X))
 }

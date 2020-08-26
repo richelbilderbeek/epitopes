@@ -55,6 +55,7 @@ calc_number_of_atoms <- function(input){
 
   # adds the total number of atoms of each element for each sequence to the
   # data frame
+  cat("\nCalculating atomic composition...")
   for(element in elements){
     atom_counts <- sapply(X = pepvec,
                           FUN = function(x){

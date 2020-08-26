@@ -43,9 +43,13 @@ calc_aa_composition <- function(input){
   # ========================================================================== #
 
   # Compute the aa composition of each sequence
-  tmp <- as.matrix(do.call(cbind, Peptides::aaComp(pepvec)))
+  cat("\nCalculating AA composition...")
+  suppressMessages({
+    tmp <- as.matrix(dplyr::bind_cols(lapply(Peptides::aaComp(pepvec),
+                                             as.data.frame)))
+  })
   # remove all counts leaving just % behind and transpose matrix
-  tmp <- t(tmp[, which(colnames(tmp) == "Mole%")]) / 100
+  tmp <- t(tmp[, grep("Mole%", colnames(tmp))]) / 100
   colnames(tmp) <- paste0("perc_", colnames(tmp))
   rownames(tmp) <- NULL
 

@@ -101,7 +101,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                                         only_exact   = TRUE,
                                         window_size  = NULL,
                                         window_exp   = 0,
-                                        step_size    = NULL,
+                                        step_size    = 1,
                                         min_prot_len = min_epit,
                                         max_prot_len = Inf,
                                         ncpus        = 1){
@@ -114,7 +114,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                           assertthat::is.count(max_prot_len),
                           is.null(window_size) | assertthat::is.count(window_size),
                           is.null(step_size) | assertthat::is.count(step_size),
-                          is.null(window_exp) | assertthat::is.count(window_exp + 1),
+                          assertthat::is.count(window_exp + 1),
                           is.logical(only_exact), length(only_exact) == 1,
                           is.data.frame(epitopes),
                           is.data.frame(proteins),
@@ -125,8 +125,7 @@ assemble_windowed_dataframe <- function(epitopes, proteins,
                           assertthat::is.count(ncpus))
 
   if(is.null(window_size)) window_size <- max(3, (2 * min_epit) - 1)
-  if(is.null(window_exp))  window_exp  <- min_epit - 1
-  if(is.null(step_size))   step_size   <- min(2, floor(min_epit / 2))
+  if(is.null(step_size))   step_size   <- 1
 
   # Set up parallel processing
   if ((.Platform$OS.type == "windows") & (ncpus > 1)){
