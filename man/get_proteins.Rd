@@ -7,16 +7,21 @@
 get_proteins(uids, save_folder = NULL)
 }
 \arguments{
-\item{uids}{A list of potein IDs provided a character vector.}
+\item{uids}{A list of protein IDs provided a character vector.}
 
 \item{save_folder}{path to folder for saving the results.}
 }
 \value{
-A data frame containing the extracted proteins is returned invisibly.
+A list containing the extracted proteins and a vector containing any
+IDs that were not successfully retrieved.
 }
 \description{
 This function is used to retrieve data from
-[GenBank](https://www.ncbi.nlm.nih.gov/genbank/) for given protein IDs.
+[Genbank's protein database](https://www.ncbi.nlm.nih.gov/genbank/) for
+given protein IDs. If an ID is not available from Genbank the function will
+try to retrieve it from [uniprot](https://www.uniprot.org/), based on a
+query to the address: `https://www.uniprot.org/uniprot/<uid>.fasta`
+(replacing <uid> by the given ID).
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})

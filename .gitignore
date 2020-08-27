@@ -29,3 +29,5 @@ Meta
 *.rds
 
 #results/
+results/.DS_Store
+results/.DS_Store

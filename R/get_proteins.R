@@ -1,12 +1,17 @@
 #' Retrieve protein sequences and data from GenBank
 #'
 #' This function is used to retrieve data from
-#' [GenBank](https://www.ncbi.nlm.nih.gov/genbank/) for given protein IDs.
+#' [Genbank's protein database](https://www.ncbi.nlm.nih.gov/genbank/) for
+#' given protein IDs. If an ID is not available from Genbank the function will
+#' try to retrieve it from [uniprot](https://www.uniprot.org/), based on a
+#' query to the address: `https://www.uniprot.org/uniprot/<uid>.fasta`
+#' (replacing <uid> by the given ID).
 #'
-#' @param uids A list of potein IDs provided a character vector.
+#' @param uids A list of protein IDs provided a character vector.
 #' @param save_folder path to folder for saving the results.
 #'
-#' @return A data frame containing the extracted proteins is returned invisibly.
+#' @return A list containing the extracted proteins and a vector containing any
+#' IDs that were not successfully retrieved.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -33,9 +38,9 @@ get_proteins <- function(uids, save_folder = NULL){
   # Retrieving proteins using individual requests rather than (more efficient)
   # batch requests, to catch and treat efetch() or parsing errors more easily.
   cat("\nRetrieving proteins:\n")
-  df <- pbmcapply::pbmclapply(X       = uids,
+  df <- pbmcapply::pbmclapply(X        = uids,
                               FUN      = retrieve_single_protein,
-                              wait = 0.1,
+                              wait     = 0.1,
                               mc.cores = 1)
 
   errlist <- uids[sapply(df, is.null)]
