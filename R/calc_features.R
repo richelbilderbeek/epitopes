@@ -76,6 +76,5 @@ calc_features <- function(input,
   }
 
   return(df[order(df$protein_id,
-                  df$epitope_id,
-                  df$start_pos), ])
+                  df$center_pos), ])
 }
