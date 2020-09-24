@@ -49,6 +49,12 @@ filter_epitopes <- function(epitopes,
   target_list <- unlist(lapply(tax,
                                function(x){
                                  if (any(taxID %in% x$Taxonomy$UID)) return(x$UID)}))
+  target_list <- unique(c(target_list, taxID))
+
+  rem_list <- unlist(lapply(tax,
+                            function(x){
+                              if (any(removeID %in% x$Taxonomy$UID)) return(x$UID)}))
+  rem_list <- unique(c(rem_list, removeID))
 
   idx1 <- idx2 <- rep(TRUE, nrow(epitopes))
   idx3 <- !idx1

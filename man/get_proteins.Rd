@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_proteins.R
 \name{get_proteins}
 \alias{get_proteins}
-\title{Retrieve protein sequences and data from GenBank}
+\title{Retrieve protein sequences and data from GenBank and Uniprot}
 \usage{
 get_proteins(uids, save_folder = NULL)
 }
@@ -12,8 +12,8 @@ get_proteins(uids, save_folder = NULL)
 \item{save_folder}{path to folder for saving the results.}
 }
 \value{
-A list containing the extracted proteins and a vector containing any
-IDs that were not successfully retrieved.
+A list object containing a data frame with the extracted proteins
+plus a vector of IDs that were not successfully retrieved.
 }
 \description{
 This function is used to retrieve data from
@@ -22,6 +22,12 @@ given protein IDs. If an ID is not available from Genbank the function will
 try to retrieve it from [uniprot](https://www.uniprot.org/), based on a
 query to the address: `https://www.uniprot.org/uniprot/<uid>.fasta`
 (replacing <uid> by the given ID).
+}
+\details{
+Queries are processed one by one (rather than in batch) to enable treatment
+of individual inconsistencies (e.g., wrong UIDs, queries that return a
+different identifier, etc.). This makes this routine substantially slower,
+but considerably more robust to errors.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})

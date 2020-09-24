@@ -4,7 +4,7 @@
 \alias{get_LBCE}
 \title{Extract linear B Cell epitopes from XML files retrieved from IEDB.}
 \usage{
-get_LBCE(data_folder = "./", ncpus = 1, save_folder = NULL)
+get_LBCE(data_folder, ncpus = 1, save_folder = NULL)
 }
 \arguments{
 \item{data_folder}{path (either relative or absolute) to the directory

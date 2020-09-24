@@ -20,13 +20,12 @@
 #'
 #' @export
 #'
-#'
 #' @examples
 #' my.dir   <- system.file("extdata/xml_examples", package="epitopes")
 #' epitopes <- get_LBCE(my.dir, ncpus = 2)
 #'
 
-get_LBCE <- function(data_folder = "./",
+get_LBCE <- function(data_folder,
                      ncpus = 1,
                      save_folder = NULL){
 

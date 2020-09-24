@@ -1,8 +1,8 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.1.16
-Date: 2020-08-31
+Version: 0.2
+Date: 2020-09-17
 Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
                     role = c("aut", "cre")),
@@ -13,10 +13,9 @@ Author: c(person(given = "Felipe", family = "Campelo",
                     email = "franciscolobo@gmail.com",
                     role = c("ctb")))
 Maintainer: Felipe Campelo <f.campelo@aston.ac.uk>
-Description: Routines for processing epitope data exported from IEDB
-    (https://iedb.org/), retrieving corresponding protein data from Genbank 
-    (https://www.ncbi.nlm.nih.gov/genbank/) and calculating features for 
-    training epitope classification tools.
+Description: Routines for retrieval and preprocessing of epitope data from 
+             IEDB (https://iedb.org/), as well as feature calculation and 
+             assessment of classification performance .
 License: GPL-2
 Depends: R (>= 3.6.0)
 Imports: assertthat (>= 0.2.1),

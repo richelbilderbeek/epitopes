@@ -19,7 +19,9 @@ retrieve_single_protein <- function(uid, wait = 0){
 
 
   # If error try on uniprot:
-  if (errk){
+  if (!errk) {
+    prot_row$source_DB <- "Genbank"
+  } else {
     errk <- FALSE
     tryCatch({
       myurl <- paste0("https://www.uniprot.org/uniprot/", uid, ".fasta")
@@ -32,6 +34,7 @@ retrieve_single_protein <- function(uid, wait = 0){
                              TSeq_defline  = NA,
                              TSeq_length   = nchar(x),
                              TSeq_sequence = x,
+                             source_DB = "Uniprot",
                              stringsAsFactors = FALSE)},
       warning = function(c) {errk <<- TRUE},
       error   = function(c) {errk <<- TRUE},
