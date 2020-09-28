@@ -10,8 +10,8 @@
 #' @param removeID organism IDs to be removed from the data frame.
 #' @param tax_load_file optional taxonomy file (RDS file generated either by this
 #'        function or by [get_taxonomy()]).
-#' @param tax_save_file optional file name for saving the taxonomy. Ignored
-#'        if `tax_file` is not `NULL`. Must be either `NULL` or a .RDS filename.
+#' @param tax_save_folder optional folder saving the taxonomy. Ignored
+#'        if `tax_load_file` is not `NULL`.
 #'
 #' @return Epitope dataframe filtered by the criteria in `taxID`, `hostID` and
 #'         `removeID`.
@@ -26,7 +26,7 @@ filter_epitopes <- function(epitopes,
                             hostID   = NULL,
                             removeID = NULL,
                             tax_load_file = NULL,
-                            tax_save_file = NULL) {
+                            tax_save_folder = NULL) {
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -36,12 +36,12 @@ filter_epitopes <- function(epitopes,
                           class(hostID)   %in% ok_classes,
                           class(removeID) %in% ok_classes,
                           is.null(tax_load_file) || file.exists(tax_load_file),
-                          is.null(tax_save_file) || is.character(tax_save_file),
-                          is.null(tax_save_file) || length(tax_save_file) == 1)
+                          is.null(tax_save_folder) | (is.character(tax_save_folder)),
+                          is.null(tax_save_folder) | length(tax_save_folder) == 1)
 
   if (is.null(tax_load_file)){
     UIDs <- unique(epitopes$sourceOrg_id)
-    tax  <- get_taxonomy(UIDs, save_file = tax_save_file)
+    tax  <- get_taxonomy(UIDs, save_folder = tax_save_folder)
   } else {
     tax <- readRDS(tax_load_file)
   }

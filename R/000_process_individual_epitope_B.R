@@ -6,6 +6,8 @@ process_individual_epitope_B <- function(idx, list_data){
   # "FragmentOfANaturalSequenceMolecule" and contain a field named
   # "LinearSequence"
   Assays <- ep[which(names(ep) == "Assays")]
+  if (length(Assays) == 0) return(NULL)
+
   BCell  <- sapply(Assays, function(x){"BCell" %in% names(x)})
   Assays <- Assays[which(BCell)]
   not_B  <- !any(BCell)
@@ -36,9 +38,14 @@ process_individual_epitope_B <- function(idx, list_data){
   out$start_pos <- as.numeric(out$start_pos)
   out$end_pos   <- as.numeric(out$end_pos)
 
-  if (!is.na(out$epit_seq) && (out$end_pos - out$start_pos + 1 != nchar(out$epit_seq))){
-    out$start_pos <- NA
-    out$end_pos   <- NA
+  c1 <- !is.na(out$epit_seq)
+  c2 <- !is.na(out$end_pos - out$start_pos)
+  if(c1 && c2){
+    # If the epitope length does not agree with its declared positions:
+    if(out$end_pos - out$start_pos + 1 != nchar(out$epit_seq)){
+      out$start_pos <- NA
+      out$end_pos   <- NA
+    }
   }
 
   # Get information from Assays

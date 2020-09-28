@@ -10,7 +10,7 @@ filter_epitopes(
   hostID = NULL,
   removeID = NULL,
   tax_load_file = NULL,
-  tax_save_file = NULL
+  tax_save_folder = NULL
 )
 }
 \arguments{
@@ -26,8 +26,8 @@ filter_epitopes(
 \item{tax_load_file}{optional taxonomy file (RDS file generated either by this
 function or by [get_taxonomy()]).}
 
-\item{tax_save_file}{optional file name for saving the taxonomy. Ignored
-if `tax_file` is not `NULL`. Must be either `NULL` or a .RDS filename.}
+\item{tax_save_folder}{optional folder saving the taxonomy. Ignored
+if `tax_load_file` is not `NULL`.}
 }
 \value{
 Epitope dataframe filtered by the criteria in `taxID`, `hostID` and

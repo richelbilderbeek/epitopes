@@ -19,11 +19,11 @@ process_xml_file <- function(filename, type = "B"){
 
   # ============= ONLY VALID LIST_DATA OBJECTS CROSS THIS LINE ============= #
   list_data$filename <- basename(filename)
-  if (type == "B")
+  if (type == "B") {
     outlist <- lapply(seq_along(list_data$Reference$Epitopes),
                       FUN  = process_individual_epitope_B,
                       list_data = list_data)
-  else if (type == "T"){
+  } else if (type == "T"){
     stop("T-cell epitope extraction still under development.")
     #outlist <- lapply(list_data$Reference$Epitopes,
     #                  FUN = process_individual_epitope_T,

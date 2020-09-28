@@ -89,7 +89,7 @@ get_proteins <- function(uids, save_folder = NULL){
         tryCatch({
           myurl <- paste0("https://www.uniprot.org/uniprot/",
                           uids[idx], ".fasta")
-          x     <- read.csv(myurl, header = FALSE)
+          x     <- utils::read.csv(myurl, header = FALSE)
         },
         warning = function(c) {errk <<- TRUE},
         error   = function(c) {errk <<- TRUE},

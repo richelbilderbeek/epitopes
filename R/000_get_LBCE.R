@@ -95,5 +95,7 @@ get_LBCE <- function(data_folder,
     saveRDS(object = errlist, file = errfile)
   }
 
+  parallel::stopCluster(cl)
+
   invisible(df)
 }

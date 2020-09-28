@@ -1,7 +1,7 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.2.1
+Version: 0.2.2
 Date: 2020-09-28
 Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
@@ -28,7 +28,8 @@ Imports: assertthat (>= 0.2.1),
          data.table (>= 1.12.8),
          Peptides (>= 2.4.1),
          microseq (>= 2.1.2),
-         utils
+         utils,
+         pbmcapply
 Suggests: pkgdown, knitr
 Encoding: UTF-8
 LazyData: true
