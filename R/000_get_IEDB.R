@@ -29,6 +29,7 @@ get_IEDB <- function(url = "https://www.iedb.org/downloader.php?file_name=doc/ie
 
   # Download the file into save_folder and unzip it.
   if(!dir.exists(save_folder)) dir.create(save_folder)
+
   utils::download.file(url, paste0(save_folder, "/iedb.zip"))
   utils::unzip(paste0(save_folder, "/iedb.zip"), exdir = save_folder)
 
