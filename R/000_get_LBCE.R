@@ -15,7 +15,7 @@
 #'        capabilities not yet available for Windows systems.)
 #' @param save_folder path to folder for saving the output.
 #'
-#' @return A data frame containing the extracted epitopes is returned invisibly.
+#' @return A data.table containing the epitope data is returned invisibly.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -29,7 +29,6 @@
 get_LBCE <- function(data_folder,
                      ncpus = 1,
                      save_folder = NULL){
-
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -50,16 +49,10 @@ get_LBCE <- function(data_folder,
   }
 
   if (.Platform$OS.type == "windows"){
-    cl <- parallel::makeCluster(ncpus,
-                                setup_strategy = "sequential",
-                                setup_timeout = 1)
+    cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
   } else {
-    cl <- parallel::makeCluster(ncpus, type = "FORK",
-                                setup_strategy = "sequential",
-                                setup_timeout = 1)
-
+    cl <- NULL
   }
-
 
   # =======================================
   # Get file list and initialise variables
@@ -76,12 +69,29 @@ get_LBCE <- function(data_folder,
   }
 
   # ==================================================
-  cat("Processing files:\n")
+  t <- Sys.time()
+  cat("Processing", length(filelist), "files using", ncpus, "cores",
+      "\nStarted at", as.character(t),
+      "\nThis may take a while...\n(For reference, processing",
+      "the full IEDB export takes about 2 hours\nusing ncpus = 7 in a",
+      "3.6GHz Intel Core i7 with 16Gb RAM)")
 
-  df <- pbapply::pblapply(X    = filelist,
-                          FUN  = process_xml_file,
-                          type = "B",
-                          cl   = cl)
+  if(!is.null(cl)){
+    df <- parallel::parLapplyLB(cl   = cl,
+                                X    = filelist,
+                                fun  = process_xml_file,
+                                type = "B")
+  } else {
+    df <- parallel::mclapply(X    = filelist,
+                             FUN  = process_xml_file,
+                             type = "B",
+                             mc.cores = ncpus,
+                             mc.preschedule = FALSE)
+  }
+
+  td <- Sys.time() - t
+  cat("\nEnded at", as.character(Sys.time()),
+      "\nElapsed time:", signif(as.numeric(td), 3), attr(td, "units"))
 
   erridx  <- which(sapply(df, function(x) is.character(x) && x == "Error"))
   errlist <- basename(filelist[erridx])
@@ -95,7 +105,7 @@ get_LBCE <- function(data_folder,
     saveRDS(object = errlist, file = errfile)
   }
 
-  parallel::stopCluster(cl)
+  if(!is.null(cl)) parallel::stopCluster(cl)
 
   invisible(df)
 }

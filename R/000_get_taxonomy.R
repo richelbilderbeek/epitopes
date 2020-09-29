@@ -80,7 +80,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
     errlist <- which(sapply(reslist, function(x) {is.null(x$UID)}))
   }
 
-  reslist <- reslist[-errlist]
+  if(length(errlist) > 0) reslist <- reslist[-errlist]
   errlist <- uids[errlist]
 
   # Save results to file

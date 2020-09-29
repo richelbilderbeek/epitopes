@@ -62,14 +62,13 @@ process_individual_epitope_B <- function(idx, list_data){
   }
 
   out$n_assays    <- length(Assays)
-  out$host_id     <- paste(unique(host_id), collapse = ",")
-  out$bcell_id    <- paste(unique(bcell_id), collapse = ",")
-  out$assay_type  <- paste(unique(assay_type), collapse = ",")
-  out$n_positive  <- length(grep("Positive", class, ignore.case = TRUE))
-  out$n_negative  <- out$n_assays - out$n_positive
-  out$Class       <- ifelse(out$n_positive >= out$n_assays/2,
-                            "Positive",
-                            "Negative")
+  out$host_id     <- paste(host_id, collapse = ",")
+  out$bcell_id    <- paste(bcell_id, collapse = ",")
+  out$assay_type  <- paste(assay_type, collapse = ",")
+  out$n_Positive  <- length(grep("Positive", class,ignore.case = TRUE))
+  out$n_Negative  <- out$n_assays - out$n_Positive
+  class           <- as.numeric(grepl("Positive", class,ignore.case = TRUE))
+  out$assay_class <- paste(-1 + 2 * class, collapse = ",")
 
   return(out)
 }

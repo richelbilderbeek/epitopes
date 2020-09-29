@@ -124,7 +124,7 @@ get_proteins <- function(uids, save_folder = NULL){
     }
   }
 
-  reslist <- reslist[-errlist]
+  if(length(errlist) > 0) reslist <- reslist[-errlist]
   errlist <- uids[errlist]
 
   df <- data.table::rbindlist(reslist,
@@ -138,8 +138,7 @@ get_proteins <- function(uids, save_folder = NULL){
     saveRDS(object = errlist, file = errfile)
   }
 
-  invisible(list(proteins = df,
-                 errlist  = errlist))
+  invisible(df)
 }
 
 
