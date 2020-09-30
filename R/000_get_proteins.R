@@ -27,6 +27,7 @@ get_proteins <- function(uids, save_folder = NULL){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
+  t0 <- Sys.time()
   assertthat::assert_that(is.character(uids),
                           length(uids) >= 1,
                           is.null(save_folder) | (is.character(save_folder)),
@@ -39,6 +40,7 @@ get_proteins <- function(uids, save_folder = NULL){
     df_file <- paste0(normalizePath(save_folder), "/00_proteins_", ymd, ".rds")
     errfile <- paste0(normalizePath(save_folder),
                       "/00_prots_not_retrieved_", ymd, ".rds")
+    tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 
   errlist <- seq_along(uids)
@@ -46,13 +48,16 @@ get_proteins <- function(uids, save_folder = NULL){
   nerr    <- Inf
 
   # First try retrieving from NCBI/protein
+  cat("Trying to retrieve", length(reslist), "proteins",
+      "\nStarted at", as.character(t0),
+      "\nThis may take a while...")
   while(length(errlist) < nerr && length(errlist) > 0){
     nerr <- length(errlist)
-    cat("\n Trying to retrieve", length(errlist), "entries from NCBI (db = protein)\n")
+    cat("\nTrying to retrieve", length(errlist),
+        "entries from NCBI (db = protein)")
     cc <- 0
     for (idx in errlist){
-      if (!(cc %% 25) && cc != 0) cat("", cc,"\n")
-      cat(".")
+      # Try fetching data
       tryCatch({
         x <- reutils::efetch(uid = uids[idx],
                              db      = "protein",
@@ -70,9 +75,25 @@ get_proteins <- function(uids, save_folder = NULL){
         reslist[[idx]]$UID <- uids[idx]
         reslist[[idx]]$DB  <- "NCBI protein"
       }
+      # Print progress bar
+      mypb(i = cc, max_i = length(errlist), t0 = t0, npos = 30)
       cc <- cc + 1
+
+      # save tmp results (if needed)
+      if(!is.null(save_folder) && !(cc %% 100)){
+        saveRDS(object = list(reslist = reslist, errlist = errlist,
+                              idx = idx, uids = uids),
+                file = tmpf)
+      }
     }
     errlist <- which(sapply(reslist, function(x) {is.null(x$UID)}))
+  }
+
+  # save tmp results (if needed)
+  if(!is.null(save_folder)){
+    saveRDS(object = list(reslist = reslist, errlist = errlist,
+                          idx = idx, uids = uids),
+            file = tmpf)
   }
 
   if (length(errlist) > 0){
@@ -80,16 +101,15 @@ get_proteins <- function(uids, save_folder = NULL){
     nerr <- Inf
     while(length(errlist) < nerr && length(errlist) > 0){
       nerr <- length(errlist)
-      cat("\n Trying to retrieve", length(errlist), "entries from Uniprot\n")
+      cat("\nTrying to retrieve", length(errlist), "entries from Uniprot")
       cc <- 0
       for (idx in errlist){
-        if (!(cc %% 25) && cc != 0) cat("", cc,"\n")
-        cat(".")
+        # Try fetching data
         errk <- FALSE
         tryCatch({
           myurl <- paste0("https://www.uniprot.org/uniprot/",
                           uids[idx], ".fasta")
-          x     <- utils::read.csv(myurl, header = FALSE)
+          x     <- utils::read.csv(myurl, header = FALSE, sep = ";")
         },
         warning = function(c) {errk <<- TRUE},
         error   = function(c) {errk <<- TRUE},
@@ -98,7 +118,7 @@ get_proteins <- function(uids, save_folder = NULL){
         if(!errk){
           seq   <- paste0(x[-1, 1], collapse = "")
           #>db|UniqueIdentifier|EntryName ProteinName OS=OrganismName OX=OrganismIdentifier [GN=GeneName ]PE=ProteinExistence SV=SequenceVersion
-          mystr <- strsplit(x[1,], "|", fixed = TRUE)[[1]][3]
+          mystr <- strsplit(paste(x[1, ], collapse = ";"), "|", fixed = TRUE)[[1]][3]
           reslist[[idx]]$TSeq_seqtype  <- "protein"
           reslist[[idx]]$TSeq_accver   <- NA
           reslist[[idx]]$TSeq_taxid    <- strsplit(strsplit(mystr, " OX=")[[1]][2],
@@ -111,13 +131,23 @@ get_proteins <- function(uids, save_folder = NULL){
 
           reslist[[idx]]$UID <- uids[idx]
 
-          dbstr <- strsplit(x[1,], "|", fixed = TRUE)[[1]][1]
+          dbstr <- strsplit(paste(x[1, ], collapse = ";"), "|", fixed = TRUE)[[1]][1]
           reslist[[idx]]$DB  <- ifelse(dbstr == ">tr",
                                        yes = "UniProtKB/TrEMBL",
                                        no = ifelse(dbstr == ">sp",
                                                    yes = "UniProtKB/Swiss-Prot",
                                                    no  = "Uniprot/other"))
 
+        }
+        # Print progress bar
+        mypb(i = cc, max_i = length(errlist), t0 = t0, npos = 30)
+        cc <- cc + 1
+
+        # save tmp results (if needed)
+        if(!is.null(save_folder) && !(cc %% 100)){
+          saveRDS(object = list(reslist = reslist, errlist = errlist,
+                                idx = idx, uids = uids),
+                  file = tmpf)
         }
       }
       errlist <- which(sapply(reslist, function(x) {is.null(x$UID)}))
@@ -136,12 +166,8 @@ get_proteins <- function(uids, save_folder = NULL){
   if(!is.null(save_folder)){
     saveRDS(object = df,      file = df_file)
     saveRDS(object = errlist, file = errfile)
+    if(file.exists(tmpf)) file.remove(tmpf)
   }
 
   invisible(df)
 }
-
-
-
-
-

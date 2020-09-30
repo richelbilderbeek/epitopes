@@ -16,7 +16,7 @@ capabilities not yet available for Windows systems.)}
 \item{save_folder}{path to folder for saving the output.}
 }
 \value{
-A data frame containing the extracted epitopes is returned invisibly.
+A data.table containing the epitope data is returned invisibly.
 }
 \description{
 This function is used to extract information for **linear B-cell epitopes**

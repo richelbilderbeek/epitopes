@@ -23,6 +23,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
+  t0 <- Sys.time()
   ok_classes <- c("NULL", "numeric", "integer", "character")
   assertthat::assert_that(class(uids) %in% ok_classes,
                           length(uids) >= 1,
@@ -36,6 +37,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
     df_file <- paste0(normalizePath(save_folder), "/00_taxonomy_", ymd, ".rds")
     errfile <- paste0(normalizePath(save_folder),
                       "/00_taxonomy_not_retrieved_", ymd, ".rds")
+    tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 
   errlist <- seq_along(uids)
@@ -47,8 +49,6 @@ get_taxonomy <- function(uids, save_folder = NULL){
     cat("\n Trying to retrieve", length(errlist), "entries from NCBI (db = taxonomy)\n")
     cc <- 0
     for (idx in errlist){
-      if (!(cc %% 25) && cc != 0) cat("", cc,"\n")
-      cat(".")
       errk <- FALSE
       tryCatch({
         tt  <- reutils::efetch(as.numeric(uids[idx]),
@@ -72,7 +72,17 @@ get_taxonomy <- function(uids, save_folder = NULL){
       if(!errk){
         reslist[[idx]]$UID <- uids[idx]
       }
+
+      # Print progress bar
+      mypb(i = cc, max_i = length(errlist), t0 = t0, npos = 30)
       cc <- cc + 1
+
+      # save tmp results (if needed)
+      if(!is.null(save_folder) && !(cc %% 10)){
+        saveRDS(object = list(reslist = reslist, errlist = errlist,
+                              idx = idx, uids = uids),
+                file = tmpf)
+      }
 
       # NCBI limits requests to three per second
       Sys.sleep(0.333)
@@ -87,6 +97,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
   if(!is.null(save_folder)){
     saveRDS(object = reslist, file = df_file)
     saveRDS(object = errlist, file = errfile)
+    if(file.exists(tmpf)) file.remove(tmpf)
   }
 
   invisible(reslist)
