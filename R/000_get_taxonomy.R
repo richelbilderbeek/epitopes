@@ -24,6 +24,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
   # ========================================================================== #
   # Sanity checks and initial definitions
   t0 <- Sys.time()
+  sinkfile <- tempfile(fileext = "txt")
   ok_classes <- c("NULL", "numeric", "integer", "character")
   assertthat::assert_that(class(uids) %in% ok_classes,
                           length(uids) >= 1,
@@ -46,28 +47,31 @@ get_taxonomy <- function(uids, save_folder = NULL){
 
   while(length(errlist) < nerr && length(errlist) > 0){
     nerr <- length(errlist)
-    cat("\n Trying to retrieve", length(errlist), "entries from NCBI (db = taxonomy)\n")
+    cat("\nTrying to retrieve", length(errlist), "entries from NCBI (db = taxonomy)")
     cc <- 0
     for (idx in errlist){
       errk <- FALSE
-      tryCatch({
-        tt  <- reutils::efetch(as.numeric(uids[idx]),
-                               db      = "taxonomy",
-                               retmode = "xml")
-        ttp <- XML::xmlTreeParse(tt$content, useInternalNodes = TRUE)
-        reslist[[idx]]$Taxonomy <- data.frame(
-          ScientificName = XML::xpathSApply(ttp,
-                                            "//TaxaSet/Taxon/LineageEx/Taxon/ScientificName",
-                                            XML::xmlValue),
-          Rank = XML::xpathSApply(ttp, "//TaxaSet/Taxon/LineageEx/Taxon/Rank",
-                                  XML::xmlValue),
-          UID  = XML::xpathSApply(ttp, "//TaxaSet/Taxon/LineageEx/Taxon/TaxId",
-                                  XML::xmlValue),
-          stringsAsFactors = FALSE)
-      },
-      warning = function(c) {errk <<- TRUE},
-      error   = function(c) {errk <<- TRUE},
-      finally = NULL)
+      suppressMessages(
+        tryCatch({
+          tt  <- reutils::efetch(as.numeric(uids[idx]),
+                                 db      = "taxonomy",
+                                 retmode = "xml")
+          if(is.null(tt$errors$errmsg)){
+            ttp <- XML::xmlTreeParse(tt$content, useInternalNodes = TRUE)
+            reslist[[idx]]$Taxonomy <- data.frame(
+              ScientificName = XML::xpathSApply(ttp,
+                                                "//TaxaSet/Taxon/LineageEx/Taxon/ScientificName",
+                                                XML::xmlValue),
+              Rank = XML::xpathSApply(ttp, "//TaxaSet/Taxon/LineageEx/Taxon/Rank",
+                                      XML::xmlValue),
+              UID  = XML::xpathSApply(ttp, "//TaxaSet/Taxon/LineageEx/Taxon/TaxId",
+                                      XML::xmlValue),
+              stringsAsFactors = FALSE)
+          }
+        },
+        warning = function(c) {errk <<- TRUE},
+        error   = function(c) {errk <<- TRUE},
+        finally = NULL))
 
       if(!errk){
         reslist[[idx]]$UID <- uids[idx]
@@ -85,7 +89,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
       }
 
       # NCBI limits requests to three per second
-      Sys.sleep(0.333)
+      Sys.sleep(0.3)
     }
     errlist <- which(sapply(reslist, function(x) {is.null(x$UID)}))
   }
