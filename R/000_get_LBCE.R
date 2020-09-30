@@ -40,6 +40,9 @@ get_LBCE <- function(data_folder,
 
 
   # Set up parallel processing
+  op <- options()
+  op$pboptions$char      <- ">"
+  op$pboptions$txt.width <- 30
   available.cores <- parallel::detectCores()
   if (ncpus >= available.cores){
     cat("\nAttention: cores too large, we only have ", available.cores,
@@ -51,7 +54,7 @@ get_LBCE <- function(data_folder,
   if (.Platform$OS.type == "windows"){
     cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
   } else {
-    cl <- NULL
+    cl <- ncpus
   }
 
   # =======================================
@@ -71,26 +74,16 @@ get_LBCE <- function(data_folder,
   # ==================================================
   t <- Sys.time()
   cat("Processing", length(filelist), "files using", ncpus, "cores",
-      "\nStarted at", as.character(t),
-      "\nThis may take a while...\n(For reference, processing",
-      "the full IEDB export takes about 2 hours\nusing ncpus = 7 in a",
-      "3.6GHz Intel Core i7 with 16Gb RAM)")
+      "\nStarted at", as.character(t), "\n")
 
-  if(!is.null(cl)){
-    df <- parallel::parLapplyLB(cl   = cl,
-                                X    = filelist,
-                                fun  = process_xml_file,
-                                type = "B")
-  } else {
-    df <- parallel::mclapply(X    = filelist,
-                             FUN  = process_xml_file,
-                             type = "B",
-                             mc.cores = ncpus,
-                             mc.preschedule = FALSE)
-  }
+  df <- pbapply::pblapply(cl   = cl,
+                          X    = filelist,
+                          FUN  = process_xml_file,
+                          type = "B",
+                          mc.preschedule = FALSE)
 
   td <- Sys.time() - t
-  cat("\nEnded at", as.character(Sys.time()),
+  cat("Ended at", as.character(Sys.time()),
       "\nElapsed time:", signif(as.numeric(td), 3), attr(td, "units"))
 
   erridx  <- which(sapply(df, function(x) is.character(x) && x == "Error"))
@@ -105,7 +98,7 @@ get_LBCE <- function(data_folder,
     saveRDS(object = errlist, file = errfile)
   }
 
-  if(!is.null(cl)) parallel::stopCluster(cl)
+  if("cluster" %in% class(cl)) parallel::stopCluster(cl)
 
   invisible(df)
 }

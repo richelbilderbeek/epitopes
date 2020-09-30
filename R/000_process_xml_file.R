@@ -1,4 +1,4 @@
-process_xml_file <- function(filename, type = "B"){
+process_xml_file <- function(filename, type = "B", ...){
 
   if(!file.exists(filename)) return(NULL)
 

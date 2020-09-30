@@ -142,13 +142,6 @@ get_proteins <- function(uids, save_folder = NULL){
         # Print progress bar
         mypb(i = cc, max_i = length(errlist), t0 = t0, npos = 30)
         cc <- cc + 1
-
-        # save tmp results (if needed)
-        if(!is.null(save_folder) && !(cc %% 100)){
-          saveRDS(object = list(reslist = reslist, errlist = errlist,
-                                idx = idx, uids = uids),
-                  file = tmpf)
-        }
       }
       errlist <- which(sapply(reslist, function(x) {is.null(x$UID)}))
     }
