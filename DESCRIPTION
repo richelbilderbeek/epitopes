@@ -23,13 +23,14 @@ Imports: assertthat (>= 0.2.1),
          dplyr (>= 0.8.3),
          reutils (>= 0.2.3),
          purrr (>= 0.3.3),
-         rlang (>= 0.4.2),
          data.table (>= 1.12.8),
          Peptides (>= 2.4.1),
          microseq (>= 2.1.2),
          pbapply (>= 1.4.0),
+         stringr (>= 1.4.0),
          utils, 
-         pbmcapply
+         pbmcapply,
+         rlang (>= 0.4.2)
 Suggests: pkgdown, knitr
 Encoding: UTF-8
 LazyData: true

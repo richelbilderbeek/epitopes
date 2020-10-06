@@ -5,7 +5,7 @@
 #' This routine prints the names of the feature calculation functions available
 #' in the `epitopes` package, which are used within `calc_features()`.
 #'
-#' @return vector of funtion names.
+#' @return vector of function names.
 #'
 #' @examples
 #' get_feature_functions()

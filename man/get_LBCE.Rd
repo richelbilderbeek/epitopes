@@ -10,8 +10,7 @@ get_LBCE(data_folder, ncpus = 1, save_folder = NULL)
 \item{data_folder}{path (either relative or absolute) to the directory
 containing the XML files}
 
-\item{ncpus}{positive integer, number of cores to use (multi-core
-capabilities not yet available for Windows systems.)}
+\item{ncpus}{positive integer, number of cores to use}
 
 \item{save_folder}{path to folder for saving the output.}
 }

@@ -11,8 +11,7 @@
 #'
 #' @param data_folder path (either relative or absolute) to the directory
 #'        containing the XML files
-#' @param ncpus positive integer, number of cores to use (multi-core
-#'        capabilities not yet available for Windows systems.)
+#' @param ncpus positive integer, number of cores to use
 #' @param save_folder path to folder for saving the output.
 #'
 #' @return A data.table containing the epitope data is returned invisibly.
@@ -40,11 +39,8 @@ get_LBCE <- function(data_folder,
 
 
   # Set up parallel processing
-  op <- options()
-  op$pboptions$char      <- ">"
-  op$pboptions$txt.width <- 30
   available.cores <- parallel::detectCores()
-  if (ncpus >= available.cores){
+  if (ncpus > available.cores){
     cat("\nAttention: cores too large, we only have ", available.cores,
         " cores.\nUsing ", available.cores - 1,
         " cores for get_LBCE().")
@@ -57,10 +53,6 @@ get_LBCE <- function(data_folder,
     cl <- ncpus
   }
 
-  # =======================================
-  # Get file list and initialise variables
-  filelist    <- dir(normalizePath(data_folder), pattern = ".xml",
-                     full.names = TRUE)
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
@@ -70,6 +62,13 @@ get_LBCE <- function(data_folder,
     errfile <- paste0(normalizePath(save_folder),
                       "/00_epit_errlist_", ymd, ".rds")
   }
+
+
+  # Get file list and initialise variables
+  filelist    <- dir(normalizePath(data_folder), pattern = ".xml",
+                     full.names = TRUE)
+
+
 
   # ==================================================
   t <- Sys.time()
@@ -92,6 +91,8 @@ get_LBCE <- function(data_folder,
 
   emptidx <- which(sapply(df, function(x) nrow(x) == 0))
   df      <- data.table::rbindlist(df[-emptidx])
+
+  class(df) <- c(class(df), "LBCE_dt")
 
   if(!is.null(save_folder)){
     saveRDS(object = df,      file = df_file)

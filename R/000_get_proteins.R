@@ -154,6 +154,7 @@ get_proteins <- function(uids, save_folder = NULL){
                               use.names = TRUE,
                               fill      = TRUE)
 
+  class(df) <- c(class(df), "protein_dt")
 
   # Save results to file
   if(!is.null(save_folder)){
