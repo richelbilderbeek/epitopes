@@ -7,5 +7,5 @@
 
 
 .onDetach <- function(...) {
-  if(exists("op.epitopes.original")) options(op.epitopes.original)
+  # if(exists("op.epitopes.original")) options(op.epitopes.original)
 }

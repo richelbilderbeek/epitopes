@@ -161,6 +161,7 @@ prepare_join_df <- function(epitopes, proteins,
   }
 
   class(df) <- c(class(df), "joined_epitope_dt")
+  attr(df, "min_epit") <- min_epit
 
   if(!is.null(save_folder)){
     saveRDS(object = df,    file = df_file)

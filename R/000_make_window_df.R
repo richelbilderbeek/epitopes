@@ -26,8 +26,7 @@
 #'
 #' @export
 #'
-#' @importFrom rlang .data
-#' @importFrom dplyr %>%
+#' @importFrom data.table :=
 
 make_window_df <- function(df,
                            save_folder     = NULL,
@@ -86,24 +85,44 @@ make_window_df <- function(df,
   # ========================================================================== #
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
-  # cat("\nExtracting windows:\n")
-  # windows_df <- pbmcapply::pbmclapply(X = purrr::pmap(as.list(df), list),
-  #                                     FUN = extract_windows,
-  #                                     window_size = window_size,
-  #                                     step_size   = step_size,
-  #                                     window_exp  = window_exp,
-  #                                     mc.cores       = ncpus,
-  #                                     mc.preschedule = FALSE)
-  #
-  # cat("\nAssembling windowed dataframe...")
-  # windows_df <- data.frame(data.table::rbindlist(windows_df))
-  #
-  # # Save resulting dataframe and error IDs to file
-  # if(!is.null(save_folder)) {
-  #   saveRDS(windows_df, file = df_file)
-  #   saveRDS(errlist,    file = errfile)
-  # }
-  #
-  # invisible(list(windows_df = windows_df,
-  #                errlist    = errlist))
+  cat("\nExtracting windows:\n")
+  torm <- c("pubmed_id", "year", "epit_name", "epitope_id", "evid_code",
+            "epit_struc_def", "epit_seq", "n_assays", "bcell_id", "assay_type",
+            "assay_class", "TSeq_seqtype", "TSeq_defline", "DB", "TSeq_sid",
+            "TSeq_length")
+  torm <- torm[torm %in% names(df)]
+  df2  <- df[, (torm) := NULL]
+
+  X <- lapply(purrr::pmap(as.list(df2), list),
+              function(x, t){
+                x$df_type <- t
+                return(x)},
+              t = type)
+
+  wdf <- pbapply::pblapply(cl   = cl,
+                           X    = X,
+                           FUN  = extract_windows,
+                           ws   = window_size,
+                           mc.preschedule = FALSE)
+
+
+
+  cat("\nAssembling windowed dataframe...")
+  wdf <- data.table::rbindlist(wdf)
+  class(wdf) <- c(class(wdf), paste0("windowed_", type, "_dt"))
+
+  nm <- names(wdf)
+  idx <- which(nm != "Class")
+  nm[idx] <- paste0("Info_", nm[idx])
+  names(wdf) <- nm
+  if("Class" %in% names(wdf)){
+    wdf <- data.table::setcolorder(wdf , c(idx, which(names(wdf) == "Class")))
+  }
+
+  # Save resulting dataframe to file
+  if(!is.null(save_folder)) {
+    saveRDS(wdf, file = df_file)
+  }
+
+  invisible(wdf)
 }
