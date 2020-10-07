@@ -90,8 +90,9 @@ make_window_df <- function(df,
             "epit_struc_def", "epit_seq", "n_assays", "bcell_id", "assay_type",
             "assay_class", "TSeq_seqtype", "TSeq_defline", "DB", "TSeq_sid",
             "TSeq_length")
+
   torm <- torm[torm %in% names(df)]
-  df2  <- df[, (torm) := NULL]
+  if(length(torm) > 0) df2  <- df[, (torm) := NULL]
 
   X <- lapply(purrr::pmap(as.list(df2), list),
               function(x, t){
@@ -105,9 +106,6 @@ make_window_df <- function(df,
                            ws   = window_size,
                            mc.preschedule = FALSE)
 
-
-
-  cat("\nAssembling windowed dataframe...")
   wdf <- data.table::rbindlist(wdf)
   class(wdf) <- c(class(wdf), paste0("windowed_", type, "_dt"))
 
@@ -123,6 +121,7 @@ make_window_df <- function(df,
   if(!is.null(save_folder)) {
     saveRDS(wdf, file = df_file)
   }
+  cat("Done!\n")
 
   invisible(wdf)
 }
