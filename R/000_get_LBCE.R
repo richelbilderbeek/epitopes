@@ -101,5 +101,7 @@ get_LBCE <- function(data_folder,
 
   if("cluster" %in% class(cl)) parallel::stopCluster(cl)
 
+  cat("\nDone!\n", nrow(df), "epitopes retrieved.\n",
+      length(errlist), "processing errors.")
   invisible(df)
 }
