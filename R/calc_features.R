@@ -3,11 +3,13 @@
 #' This function is used to calculate several distinct families of features for
 #' a vector of peptides.
 #'
-#' Some of the
-#' features are calculated based on an aminoacid propensity scale, which was
-#' originally obtained from *E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
-#' Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957*. The data was
-#' downloaded from
+#' This function is partially based on functions [Peptides::aaComp()]
+#' and [Peptides::aaDescriptors()] (check documentation for details).
+#'
+#' Some of the features are calculated based on an aminoacid propensity scale,
+#' which was originally obtained from *E.L. Ulrich et al., "BioMagResBank".
+#' Nucleic Acids Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957*. The
+#' data was downloaded from
 #' [http://www.bmrb.wisc.edu/ref_info/aadata.dat](http://www.bmrb.wisc.edu/ref_info/aadata.dat)
 #' on July 1, 2020.
 #'
@@ -86,24 +88,27 @@ calc_features <- function(df,
   cat("\nCalculating features:")
 
   df <- df %>%
-    calc_aa_composition(cl = cl)
-
-
-  df <- input %>%
-    calc_aa_composition() %>%
-    calc_aa_descriptors(ncores = ncores) %>%
-    calc_molecular_weight() %>%
-    calc_number_of_atoms() %>%
-    calc_sequence_entropy() %>%
-    calc_cojoint_triads(ncores = ncores)
+    calc_aa_composition(cl = cl) %>%
+    calc_aa_descriptors(cl = cl) %>%
+    calc_molecular_weight(cl = cl) %>%
+    calc_number_of_atoms(cl = cl) %>%
+    calc_sequence_entropy(cl = cl) %>%
+    calc_conjoint_triads(cl = cl)
 
   # Add Npeptide percentages
   for (i in 1:max.N){
-    df <- calc_Npeptide_composition(df, N = i, ncores = ncores)
+    df <- calc_Npeptide_composition(df, N = i, cl = cl)
   }
+
+  # Sort data.table (The variable names are initialised below just to
+  # prevent NOTEs on CRAN. The data.table ordering uses references to variables
+  # internal to df)
+  Info_sourceOrg_id <- Info_protein_id <- NULL
+  Info_epitope_id   <- Info_center_pos <- NULL
+  df <- df[order(Info_sourceOrg_id, Info_protein_id, Info_epitope_id,
+                 Info_center_pos), ]
 
   if("cluster" %in% class(cl)) parallel::stopCluster(cl)
 
-  return(df[order(df$protein_id,
-                  df$center_pos), ])
+  return(df)
 }

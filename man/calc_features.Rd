@@ -25,11 +25,13 @@ This function is used to calculate several distinct families of features for
 a vector of peptides.
 }
 \details{
-Some of the
-features are calculated based on an aminoacid propensity scale, which was
-originally obtained from \emph{E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
-Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957}. The data was
-downloaded from
+This function is partially based on functions \code{\link[Peptides:aacomp]{Peptides::aaComp()}}
+and \code{\link[Peptides:aaDescriptors]{Peptides::aaDescriptors()}} (check documentation for details).
+
+Some of the features are calculated based on an aminoacid propensity scale,
+which was originally obtained from \emph{E.L. Ulrich et al., "BioMagResBank".
+Nucleic Acids Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957}. The
+data was downloaded from
 \url{http://www.bmrb.wisc.edu/ref_info/aadata.dat}
 on July 1, 2020.
 }

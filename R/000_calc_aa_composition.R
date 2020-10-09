@@ -20,7 +20,6 @@ calc_aa_composition <- function(df, cl){
 
   cat("\nCalculating AA composition\n")
 
-  # Compute the aa composition of each sequence
   AAtypes <- list(Tiny      = c("A", "C", "G", "S", "T"),
                   Small     = c("A", "B", "C", "D", "G", "N", "P", "S", "T", "V"),
                   Aliphatic = c("A", "I", "L", "V"),
