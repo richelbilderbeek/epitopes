@@ -24,9 +24,9 @@ calc_conjoint_triads <- function(df, cl){
   tmp <- pbapply::pblapply(cl  = cl,
                            X   = df$Info_window_seq,
                            FUN = function(x, aa_prop){
-                             idx <- str_locate(paste(aa_prop$One_letter_code,
-                                                     collapse = ""),
-                                               strsplit(x, "")[[1]])[, 1]
+                             idx <- stringr::str_locate(paste(aa_prop$One_letter_code,
+                                                              collapse = ""),
+                                                        strsplit(x, "")[[1]])[, 1]
                              x <- paste(aa_prop$CT_group[idx], collapse = "")
                              ct <- stringr::str_sub(x,
                                                     start = 1:(nchar(x) - 2),

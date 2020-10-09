@@ -37,7 +37,7 @@ calc_aa_composition <- function(df, cl){
                              as.data.frame(
                                lapply(AAtypes,
                                       function(pat, x){
-                                        sum(str_count(x, pat)) / nchar(x)},
+                                        sum(stringr::str_count(x, pat)) / nchar(x)},
                                       x = x))},
                            AAtypes = AAtypes)
 
