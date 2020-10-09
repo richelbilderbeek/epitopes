@@ -52,7 +52,7 @@ make_window_df <- function(df,
   }
 
   type <- "prot"
-  if("joined_epitope_dt" %in% class(df)){
+  if("joined_epit_dt" %in% class(df)){
     type <- "epit"
   } else if(!("protein_dt" %in% class(df))){
     cat("\nNote: Cannot determine if 'df' is an epitope or protein dataframe.",
@@ -68,12 +68,6 @@ make_window_df <- function(df,
     ncpus <- available.cores - 1
   }
 
-  if (.Platform$OS.type == "windows"){
-    cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-  } else {
-    cl <- ncpus
-  }
-
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
@@ -86,7 +80,7 @@ make_window_df <- function(df,
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
   cat("\nExtracting windows:\n")
-  torm <- c("pubmed_id", "year", "epit_name", "epitope_id", "evid_code",
+  torm <- c("pubmed_id", "year", "epit_name", "evid_code",
             "epit_struc_def", "epit_seq", "n_assays", "bcell_id", "assay_type",
             "assay_class", "TSeq_seqtype", "TSeq_defline", "DB", "TSeq_sid",
             "TSeq_length")
@@ -100,11 +94,23 @@ make_window_df <- function(df,
                 return(x)},
               t = type)
 
-  wdf <- pbapply::pblapply(cl   = cl,
-                           X    = X,
-                           FUN  = extract_windows,
-                           ws   = window_size,
-                           mc.preschedule = FALSE)
+  if (ncpus > 1){
+    cl <- ncpus
+    if (.Platform$OS.type == "windows"){
+      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
+    }
+    wdf <- pbapply::pblapply(cl   = cl,
+                             X    = X,
+                             FUN  = extract_windows,
+                             ws   = window_size,
+                             mc.preschedule = FALSE)
+  } else {
+    cl <- 1
+    wdf <- pbapply::pblapply(cl   = cl,
+                             X    = X,
+                             FUN  = extract_windows,
+                             ws   = window_size)
+  }
 
   wdf <- data.table::rbindlist(wdf)
   class(wdf) <- c(class(wdf), paste0("windowed_", type, "_dt"))

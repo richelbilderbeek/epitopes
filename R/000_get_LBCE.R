@@ -47,13 +47,6 @@ get_LBCE <- function(data_folder,
     ncpus <- available.cores - 1
   }
 
-  if (.Platform$OS.type == "windows"){
-    cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-  } else {
-    cl <- ncpus
-  }
-
-
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
@@ -75,11 +68,24 @@ get_LBCE <- function(data_folder,
   cat("Processing", length(filelist), "files using", ncpus, "cores",
       "\nStarted at", as.character(t), "\n")
 
-  df <- pbapply::pblapply(cl   = cl,
-                          X    = filelist,
-                          FUN  = process_xml_file,
-                          type = "B",
-                          mc.preschedule = FALSE)
+  if (ncpus > 1){
+    cl <- ncpus
+    if (.Platform$OS.type == "windows"){
+      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
+    }
+    df <- pbapply::pblapply(cl   = cl,
+                            X    = filelist,
+                            FUN  = process_xml_file,
+                            type = "B",
+                            mc.preschedule = FALSE)
+  } else {
+    cl <- 1
+    df <- pbapply::pblapply(cl   = cl,
+                            X    = filelist,
+                            FUN  = process_xml_file,
+                            type = "B")
+  }
+
 
   td <- Sys.time() - t
   cat("Ended at", as.character(Sys.time()),

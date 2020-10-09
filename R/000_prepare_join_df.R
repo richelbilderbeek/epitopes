@@ -160,7 +160,7 @@ prepare_join_df <- function(epitopes, proteins,
     df$Class <- -1 + 2 * (df$n_Positive >= df$n_Negative)
   }
 
-  class(df) <- c(class(df), "joined_epitope_dt")
+  class(df) <- c("data.table", "data.frame", "joined_epit_dt")
   attr(df, "min_epit") <- min_epit
 
   if(!is.null(save_folder)){
