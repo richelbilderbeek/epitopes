@@ -11,8 +11,8 @@ calc_molecular_weight(input)
 called "window_seq" containing the peptides.}
 }
 \value{
-Data frame containing the calculated molecular weights. If `input` is
-a`data.frame` the original input is returned with the molecular weights
+Data frame containing the calculated molecular weights. If \code{input} is
+a\code{data.frame} the original input is returned with the molecular weights
 appended as columns.
 }
 \description{
@@ -21,5 +21,5 @@ of peptides.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk});
-        Jodie Ashford (\email{ashfojsm@aston.ac.uk})
+Jodie Ashford (\email{ashfojsm@aston.ac.uk})
 }

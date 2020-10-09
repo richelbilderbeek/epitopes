@@ -1,7 +1,7 @@
 #' Calculate a set of mean AA descriptors
 #'
 #' This function is used to calculate 66 aminoacid descriptors based on
-#' function `Peptides::aaDescriptors`. These descriptors apply to each
+#' function [Peptides::aaDescriptors()]. These descriptors apply to each
 #' individual aminoacid in a peptide, and are summarised for the peptide using a
 #' simple mean. The features returned are provided in the `Details`.
 #'
@@ -83,8 +83,8 @@
 #'      }
 #' }
 #'
-#' See the documentation for [Peptides::aaDescriptors()] and
-#' [Peptides::aaData()] for further information and references.
+#' See the documentation for [Peptides::aaDescriptors()] for further information
+#' and references.
 #'
 #' @param input either a vector of peptides or a data frame with a variable
 #' called "window_seq" containing the peptides.

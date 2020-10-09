@@ -1,9 +1,10 @@
 #' Print available feature calculation functions
 #'
-#' Prints the feature calculation functions available in the `epitopes` package
+#' Prints the feature calculation functions available in the **epitopes**
+#' package
 #'
 #' This routine prints the names of the feature calculation functions available
-#' in the `epitopes` package, which are used within `calc_features()`.
+#' in the **epitopes** package, which are used within **calc_features()**.
 #'
 #' @return vector of function names.
 #'

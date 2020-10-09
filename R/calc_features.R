@@ -4,20 +4,20 @@
 #' a vector of peptides.
 #'
 #' To get a list of all routines for calculating the
-#' individual types of features use `get_feature_functions()`. Some of the
-#' features are calculated based on an aminoacide propensity scale, which was
-#' originally obtained from _E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
-#' Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957_. The data was
+#' individual types of features use [get_feature_functions()]. Some of the
+#' features are calculated based on an aminoacid propensity scale, which was
+#' originally obtained from *E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
+#' Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957*. The data was
 #' downloaded from [http://www.bmrb.wisc.edu/ref_info/aadata.dat](http://www.bmrb.wisc.edu/ref_info/aadata.dat)
 #'
 #' @param input either a vector of peptides or a data frame with a variable
 #' called "window_seq" containing the peptides.
 #' @param max.N maximum length of N-peptide frequency features to be calculated.
-#'              See `calc_Npeptide_composition()` for details.
+#'              See [calc_Npeptide_composition()] for details.
 #' @param ncores number of cores to use for calculating some of the features.
 #'
-#' @return Data frame containing the calculated features. If `input` is
-#' a`data.frame` the original input is returned with the features
+#' @return Data frame containing the calculated features. If **input** is
+#' a *data.table* the original input is returned with the features
 #' appended as columns.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk});

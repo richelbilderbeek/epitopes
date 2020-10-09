@@ -1,20 +1,20 @@
 #' Extract linear B Cell epitopes from XML files retrieved from IEDB.
 #'
-#' This function is used to extract information for **linear B-cell epitopes**
+#' This function is used to extract information for *linear B-cell epitopes*
 #' from the XML files exported using the functionality provided by
 #' [IEDB](https://www.iedb.org/).
-#' It assumes that the user has downloaded the _Complete Database Export_ from
-#' the _XML Database Export_ field in IEDB's
+#' It assumes that the user has downloaded the *Complete Database Export* from
+#' the *XML Database Export* field in IEDB's
 #' [Database Export](https://www.iedb.org/database_export_v3.php) and extracted
 #' it in a given folder, which is passed as an argument to the function. This
-#' can be easily done with `get_IEDB()`.
+#' can be easily done with [get_IEDB()].
 #'
 #' @param data_folder path (either relative or absolute) to the directory
 #'        containing the XML files
 #' @param ncpus positive integer, number of cores to use
 #' @param save_folder path to folder for saving the output.
 #'
-#' @return A data.table containing the epitope data is returned invisibly.
+#' @return A *data.table* containing the epitope data is returned invisibly.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'

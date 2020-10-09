@@ -11,13 +11,13 @@ calc_features(input, max.N = 2, ncores = 1)
 called "window_seq" containing the peptides.}
 
 \item{max.N}{maximum length of N-peptide frequency features to be calculated.
-See `calc_Npeptide_composition()` for details.}
+See \code{\link[=calc_Npeptide_composition]{calc_Npeptide_composition()}} for details.}
 
 \item{ncores}{number of cores to use for calculating some of the features.}
 }
 \value{
-Data frame containing the calculated features. If `input` is
-a`data.frame` the original input is returned with the features
+Data frame containing the calculated features. If \strong{input} is
+a \emph{data.table} the original input is returned with the features
 appended as columns.
 }
 \description{
@@ -26,13 +26,13 @@ a vector of peptides.
 }
 \details{
 To get a list of all routines for calculating the
-individual types of features use `get_feature_functions()`. Some of the
-features are calculated based on an aminoacide propensity scale, which was
-originally obtained from _E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
-Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957_. The data was
-downloaded from [http://www.bmrb.wisc.edu/ref_info/aadata.dat](http://www.bmrb.wisc.edu/ref_info/aadata.dat)
+individual types of features use \code{\link[=get_feature_functions]{get_feature_functions()}}. Some of the
+features are calculated based on an aminoacid propensity scale, which was
+originally obtained from \emph{E.L. Ulrich et al., "BioMagResBank". Nucleic Acids
+Research 36, D402-D408 (2008) DOI: 10.1093/nar/gkm957}. The data was
+downloaded from \url{http://www.bmrb.wisc.edu/ref_info/aadata.dat}
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk});
-        Jodie Ashford (\email{ashfojsm@aston.ac.uk})
+Jodie Ashford (\email{ashfojsm@aston.ac.uk})
 }

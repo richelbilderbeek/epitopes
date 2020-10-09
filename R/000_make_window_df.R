@@ -4,22 +4,22 @@
 #' fixed-length window centred on consecutive positions of each sequence.
 #'
 #' The sliding window runs from the first to the last positions of each sequence
-#' in the `df` input (which in turn comes from running `prepare_join_df()`).
+#' in the **df** input (which in turn comes from running [prepare_join_df()]).
 #' If a window extends beyond the limits of the protein it is padded with the
 #' first (or last) letter of the sequence.
 #'
-#' @param df data frame of epitope data (returned by `prepare_join_df()`) or
-#'        protein data (returned by `get_proteins()`).
+#' @param df data frame of epitope data (returned by [prepare_join_df()]) or
+#'        protein data (returned by [get_proteins()]).
 #' @param save_folder path to folder for saving the results.
-#' @param window_size positive integer, size of window to use. If `df` is a
-#'        dataframe of class "joined_epitope_dt" (returned from
-#'        `prepare_join_df()`) then a standard value for this parameter is
-#'        used automatically if `window_size = NULL` (this standard value is
-#'        calculated as (2 x `min_epitope` - 1), based on the value of
-#'        `min_epitope` used in the call to `prepare_join_df()`.
+#' @param window_size positive integer, size of window to use. If **df** is a
+#'        *data.table* of class *joined_epitope_dt* (returned from
+#'        [prepare_join_df()]) then a standard value for this parameter is
+#'        used automatically if **window_size** = _NULL_ (this standard value is
+#'        calculated as $(2 x min_epitope - 1)$, based on the value of
+#'        **min_epitope** used in the call to [prepare_join_df()].
 #' @param ncpus positive integer, number of cores to use
 #'
-#' @return A data.table object containing the sliding window representation of
+#' @return A *data.table* object containing the sliding window representation of
 #' the input data.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})

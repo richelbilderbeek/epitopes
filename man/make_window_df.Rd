@@ -7,22 +7,22 @@
 make_window_df(df, save_folder = NULL, window_size = NULL, ncpus = 1)
 }
 \arguments{
-\item{df}{data frame of epitope data (returned by `prepare_join_df()`) or
-protein data (returned by `get_proteins()`).}
+\item{df}{data frame of epitope data (returned by \code{\link[=prepare_join_df]{prepare_join_df()}}) or
+protein data (returned by \code{\link[=get_proteins]{get_proteins()}}).}
 
 \item{save_folder}{path to folder for saving the results.}
 
-\item{window_size}{positive integer, size of window to use. If `df` is a
-dataframe of class "joined_epitope_dt" (returned from
-`prepare_join_df()`) then a standard value for this parameter is
-used automatically if `window_size = NULL` (this standard value is
-calculated as (2 x `min_epitope` - 1), based on the value of
-`min_epitope` used in the call to `prepare_join_df()`.}
+\item{window_size}{positive integer, size of window to use. If \strong{df} is a
+\emph{data.table} of class \emph{joined_epitope_dt} (returned from
+\code{\link[=prepare_join_df]{prepare_join_df()}}) then a standard value for this parameter is
+used automatically if \strong{window_size} = \emph{NULL} (this standard value is
+calculated as $(2 x min_epitope - 1)$, based on the value of
+\strong{min_epitope} used in the call to \code{\link[=prepare_join_df]{prepare_join_df()}}.}
 
 \item{ncpus}{positive integer, number of cores to use}
 }
 \value{
-A data.table object containing the sliding window representation of
+A \emph{data.table} object containing the sliding window representation of
 the input data.
 }
 \description{
@@ -31,7 +31,7 @@ fixed-length window centred on consecutive positions of each sequence.
 }
 \details{
 The sliding window runs from the first to the last positions of each sequence
-in the `df` input (which in turn comes from running `prepare_join_df()`).
+in the \strong{df} input (which in turn comes from running \code{\link[=prepare_join_df]{prepare_join_df()}}).
 If a window extends beyond the limits of the protein it is padded with the
 first (or last) letter of the sequence.
 }

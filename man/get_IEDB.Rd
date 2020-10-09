@@ -11,18 +11,18 @@ get_IEDB(
 )
 }
 \arguments{
-\item{url}{URL of the .zip file containing the full IEDB
+\item{url}{URL of the \emph{.zip} file containing the full IEDB
 export (XML).}
 
 \item{save_folder}{Path to folder for extracting the results. Defaults to
-"iedb_yyyymmdd", where `yyyymmdd` is replaced by the current date.}
+"iedb_yyyymmdd", where \emph{yyyymmdd} is replaced by the current date.}
 
-\item{remove_zip}{logical flag: should the .ZIP file be deleted after
+\item{remove_zip}{logical flag: should the \emph{.zip} file be deleted after
 extraction?}
 }
 \description{
 This function is used to retrieve the full IEDB database from
-[IEDB](https://www.iedb.org) and extract it to a target folder.
+\href{https://www.iedb.org}{IEDB} and extract it to a target folder.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})

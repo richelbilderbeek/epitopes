@@ -16,10 +16,9 @@ prepare_join_df(
 )
 }
 \arguments{
-\item{epitopes}{data frame of epitope data (returned by `get_LBCE()`).}
+\item{epitopes}{data frame of epitope data (returned by \code{\link[=get_LBCE]{get_LBCE()}}).}
 
-\item{proteins}{data frame of protein data (returned by running, e.g.,
-`get_proteins(unique(epitopes$protein_id))`).}
+\item{proteins}{data frame of protein data (returned by \code{\link[=get_proteins]{get_proteins()}}).}
 
 \item{save_folder}{path to folder for saving the results.}
 
@@ -28,20 +27,20 @@ prepare_join_df(
 \item{max_epit}{positive integer, longest epitope to be considered}
 
 \item{only_exact}{logical, should only sequences labelled as "Exact Epitope"
-in variable `epit_struc_def` be considered?}
+in variable \emph{epit_struc_def} be considered?}
 
 \item{pos.mismatch.rm}{should epitopes with position mismatches be removed?
-Use `all` (default) for removing any position mismatch (i.e., if the
-protein substring between `start_pos` and `end_pos` does not
-correspond to `epit_seq`) or `align` if the routine should attempt to
-fix `start_pos` and `end_pos` by searching for `epit_seq` in the
-protein sequence. Removed entries are listed (if `save_folder` is not
-`NULL`) in the `df_errlist` file.}
+Use "all" (default) for removing any position mismatch (i.e., if the
+protein substring between \emph{start_pos} and \emph{end_pos} does not
+correspond to \emph{epit_seq}) or "align" if the routine should attempt to
+fix \emph{start_pos} and \emph{end_pos} by searching for \emph{epit_seq} in the
+protein sequence. Removed entries are listed (if \strong{save_folder} is
+not \emph{NULL}) in the \emph{df_errlist} file.}
 
 \item{set.positive}{how to decide whether an observation should be of the
-"Positive" class? Use "any" to set a sequence as positive if
-`n_positive > 0`, "mode" to set it if `n_positive >= n_negative`,
-or "all" to set it if `n_negative == 0`. Defaults to "mode".}
+"Positive" (+1) class? Use "any" to set a sequence as positive if
+$n_positive > 0$, "mode" to set it if $n_positive >= n_negative$,
+or "all" to set it if $n_negative == 0$. Defaults to "mode".}
 }
 \value{
 A data.table object containing the merged data frame
@@ -51,16 +50,16 @@ Merges previously extracted epitopes and proteins, and performs some
 sanity checks and filtering.
 }
 \details{
-Entries in the `epitopes` input are removed if they:
+Entries in the \strong{epitopes} input are removed if they:
 \itemize{
-  \item Lack a valid protein ID (i.e., one that has a corresponding entry in
-  `proteins`)
-  \item Lack a valid string in `epit_seq`
-  \item Lack a valid definition in `epit_struc_def`
-  \item Have sequences shorter than `min_epit` or longer than `max_epit`.
-  \item Have a mismatch between the sequence in `epit_seq` and the
-  corresponding sequence between `start_pos` and `end_pos` on the protein
-  sequence (see description of parameter `pos.mismatch.rm`).
+\item Lack a valid protein ID (i.e., one that has a corresponding entry in
+\strong{proteins})
+\item Lack a valid string in \emph{epit_seq}
+\item Lack a valid definition in \emph{epit_struc_def}
+\item Have sequences shorter than \strong{min_epit} or longer than \strong{max_epit}.
+\item Have a mismatch between the sequence in \emph{epit_seq} and the
+corresponding sequence between \emph{start_pos} and \emph{end_pos} on the protein
+sequence (see description of parameter \strong{pos.mismatch.rm}).
 }
 }
 \author{

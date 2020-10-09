@@ -11,8 +11,8 @@ calc_number_of_atoms(input)
 called "window_seq" containing the peptides.}
 }
 \value{
-Data frame containing the calculated numbers of atoms. If `input` is
-a`data.frame` the original input is returned with the numbers of atoms
+Data frame containing the calculated numbers of atoms. If \code{input} is
+a\code{data.frame} the original input is returned with the numbers of atoms
 appended as columns.
 }
 \description{
@@ -21,5 +21,5 @@ of peptides.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk});
-        Jodie Ashford (\email{ashfojsm@aston.ac.uk})
+Jodie Ashford (\email{ashfojsm@aston.ac.uk})
 }

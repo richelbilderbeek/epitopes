@@ -11,8 +11,8 @@ amino_acid_percentages(input)
 called "window_seq" containing the peptides.}
 }
 \value{
-Data frame containing the calculated AA percentages. If `input` is
-a`data.frame` the original input is returned with the AA percentages
+Data frame containing the calculated AA percentages. If \code{input} is
+a\code{data.frame} the original input is returned with the AA percentages
 appended as columns.
 }
 \description{
@@ -21,5 +21,5 @@ peptides.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk});
-        Jodie Ashford (\email{ashfojsm@aston.ac.uk})
+Jodie Ashford (\email{ashfojsm@aston.ac.uk})
 }

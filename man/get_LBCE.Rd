@@ -15,17 +15,17 @@ containing the XML files}
 \item{save_folder}{path to folder for saving the output.}
 }
 \value{
-A data.table containing the epitope data is returned invisibly.
+A \emph{data.table} containing the epitope data is returned invisibly.
 }
 \description{
-This function is used to extract information for **linear B-cell epitopes**
+This function is used to extract information for \emph{linear B-cell epitopes}
 from the XML files exported using the functionality provided by
-[IEDB](https://www.iedb.org/).
-It assumes that the user has downloaded the _Complete Database Export_ from
-the _XML Database Export_ field in IEDB's
-[Database Export](https://www.iedb.org/database_export_v3.php) and extracted
+\href{https://www.iedb.org/}{IEDB}.
+It assumes that the user has downloaded the \emph{Complete Database Export} from
+the \emph{XML Database Export} field in IEDB's
+\href{https://www.iedb.org/database_export_v3.php}{Database Export} and extracted
 it in a given folder, which is passed as an argument to the function. This
-can be easily done with `get_IEDB()`.
+can be easily done with \code{\link[=get_IEDB]{get_IEDB()}}.
 }
 \examples{
 my.dir   <- system.file("extdata/xml_examples", package="epitopes")

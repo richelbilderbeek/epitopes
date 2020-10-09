@@ -1,8 +1,8 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.2.6
-Date: 2020-10-06
+Version: 0.2.8
+Date: 2020-10-09
 Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
                     role = c("aut", "cre")),
@@ -36,3 +36,4 @@ LazyData: true
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 URL: https://github.com/fcampelo/epitopes
+Roxygen: list(markdown = TRUE)
