@@ -2,7 +2,6 @@
 
 export(amino_acid_percentages)
 export(calc_Npeptide_composition)
-export(calc_aa_composition)
 export(calc_aa_descriptors)
 export(calc_cojoint_triads)
 export(calc_features)
