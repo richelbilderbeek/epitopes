@@ -56,8 +56,8 @@ label_proteins <- function(proteins, epitopes,
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
     ymd <- gsub("-", "", Sys.Date())
-    df_file <- paste0(normalizePath(save_folder), "/", ymd, "_df_", type,
-                      "_labelled_prots.rds")
+    df_file <- paste0(normalizePath(save_folder), "/", ymd,
+                      "df_labelled_prots.rds")
   }
 
   # Prepare protein data.table for labeling
@@ -95,16 +95,17 @@ label_proteins <- function(proteins, epitopes,
                                         epit_id = x$epitope_id,
                                         nPos    = x$n_Positive,
                                         nNeg    = x$n_Negative)})
+  cat("Done!\n")
 
   # Aggregate multiply-labelled entries. The variable names are initialised
   # below just to prevent NOTEs on CRAN. The dplyr functions use references to
   # variables internal to df)
   UID <- pos <- nPos <- nNeg <- epit_id <- NULL
   tmp <- data.table::rbindlist(tmp, use.names = TRUE)
-  tmp <- tmp[, .(Info_epit_id = paste(unique(epit_id), collapse = ","),
-                 Info_nPos    = sum(nPos),
-                 Info_nNeg    = sum(nNeg)),
-             by = .(UID, pos)]
+  tmp <- tmp[, list(Info_epit_id = paste(unique(epit_id), collapse = ","),
+                    Info_nPos    = sum(nPos),
+                    Info_nNeg    = sum(nNeg)),
+             by = list(UID, pos)]
 
 
   proteins <- dplyr::left_join(proteins, tmp,
