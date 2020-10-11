@@ -107,7 +107,7 @@ label_proteins <- function(proteins, epitopes,
                     Info_nNeg    = sum(nNeg)),
              by = list(UID, pos)]
 
-
+  # Join epitope labels into proteins dataset
   proteins <- dplyr::left_join(proteins, tmp,
                                by = c("Info_UID" = "UID",
                                       "Info_center_pos" = "pos"))
