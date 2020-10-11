@@ -86,9 +86,9 @@ make_window_df <- function(df,
             "TSeq_length")
 
   torm <- torm[torm %in% names(df)]
-  if(length(torm) > 0) df2  <- df[, (torm) := NULL]
+  if(length(torm) > 0) df  <- df[, (torm) := NULL]
 
-  X <- lapply(purrr::pmap(as.list(df2), list),
+  X <- lapply(purrr::pmap(as.list(df), list),
               function(x, t){
                 x$df_type <- t
                 return(x)},
