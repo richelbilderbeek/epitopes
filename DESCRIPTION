@@ -27,8 +27,7 @@ Imports: assertthat (>= 0.2.1),
          Peptides (>= 2.4.1),
          pbapply (>= 1.4.0),
          stringr (>= 1.4.0),
-         utils, 
-         rlang (>= 0.4.2)
+         utils
 Suggests: pkgdown, knitr
 Encoding: UTF-8
 LazyData: true

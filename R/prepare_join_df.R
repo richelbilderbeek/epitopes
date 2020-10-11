@@ -39,9 +39,6 @@
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @export
-#'
-#' @importFrom rlang .data
-#' @importFrom dplyr %>%
 
 prepare_join_df <- function(epitopes, proteins,
                             save_folder     = NULL,
@@ -87,8 +84,8 @@ prepare_join_df <- function(epitopes, proteins,
   # Initial preprocessing
 
   # Join epitopes and proteins dataframes, preliminary feature transformation
-  df <- epitopes %>%
-    dplyr::left_join(proteins, by = c("protein_id" = "UID"))
+  df <- dplyr::left_join(epitopes, proteins,
+                         by = c("protein_id" = "UID"))
 
   # Filter by missing info:
   noseq  <- is.na(df$epit_seq)
