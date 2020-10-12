@@ -101,13 +101,22 @@ calc_aa_descriptors <- function(df, cl){
 
   cat("\nCalculating AA descriptors:\n")
 
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = function(x){
-                             x <- strsplit(x, split = "")[[1]]
-                             f <- sapply(x, Peptides::aaDescriptors)
-                             f <- data.table::as.data.table(t(rowMeans(f)))
-                           })
+  myf <- function(x){
+    x <- strsplit(x, split = "")[[1]]
+    f <- sapply(x, Peptides::aaDescriptors)
+    f <- data.table::as.data.table(t(rowMeans(f)))
+  }
+  if (ismc(cl)){
+    tmp <- pbapply::pbsapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf,
+                             mc.preschedule = FALSE)
+  } else {
+    tmp <- pbapply::pbsapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf)
+  }
+
   tmp <- data.table::rbindlist(tmp)
 
   # Prepare feature names

@@ -18,13 +18,21 @@ calc_sequence_entropy <- function(df, cl){
 
   # Entropy = -SUM(p(e)log2[p(e)])
   cat("\nCalculating sequence entropy:\n")
-  tmp <- pbapply::pbsapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = function(x){
-                             cnts <- stringr::str_count(x, LETTERS)
-                             cnts <- cnts[cnts > 0] / sum(cnts)
-                             -sum(cnts * log2(cnts))
-                           })
+  myf <- function(x){
+    cnts <- stringr::str_count(x, LETTERS)
+    cnts <- cnts[cnts > 0] / sum(cnts)
+    -sum(cnts * log2(cnts))
+  }
+  if (ismc(cl)){
+    tmp <- pbapply::pbsapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf,
+                             mc.preschedule = FALSE)
+  } else {
+    tmp <- pbapply::pbsapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf)
+  }
 
   return(cbind(df, feat_seq_entropy = as.numeric(tmp)))
 

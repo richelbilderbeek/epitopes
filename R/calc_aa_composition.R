@@ -30,16 +30,25 @@ calc_aa_composition <- function(df, cl){
                   Basic     = c("H", "K", "R"),
                   Acidic    = c("B", "D", "E", "Z"))
 
-
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = function(x, AAtypes){
-                             as.data.frame(
-                               lapply(AAtypes,
-                                      function(pat, x){
-                                        sum(stringr::str_count(x, pat)) / nchar(x)},
-                                      x = x))},
-                           AAtypes = AAtypes)
+  myf <- function(x, AAtypes){
+    as.data.frame(
+      lapply(AAtypes,
+             function(pat, x){
+               sum(stringr::str_count(x, pat)) / nchar(x)},
+             x = x))
+    }
+  if (ismc(cl)){
+    tmp <- pbapply::pblapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf,
+                             AAtypes = AAtypes,
+                             mc.preschedule = FALSE)
+  } else {
+    tmp <- pbapply::pblapply(cl  = cl,
+                             X   = df$Info_window_seq,
+                             FUN = myf,
+                             AAtypes = AAtypes)
+  }
 
   tmp        <- data.table::rbindlist(tmp, use.names = TRUE)
   names(tmp) <- paste0("feat_Perc_", names(tmp))
