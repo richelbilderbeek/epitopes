@@ -43,8 +43,10 @@ label_proteins <- function(proteins, epitopes,
                           any(class(epitopes) %in% epit_classes),
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1,
-                          is.character(set.positive))
+                          is.character(set.positive),
+                          assertthat::is.count(ncpus))
 
+  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
 
   if(all(tolower(set.positive) == "any")) {
     set.positive <- "any"
@@ -68,33 +70,27 @@ label_proteins <- function(proteins, epitopes,
 
   names(proteins)[which(names(proteins) == "Info_window_seq")] <- "Info_AA"
 
-  # Set up parallel processing
-  available.cores <- parallel::detectCores()
-  if (ncpus > available.cores){
-    cat("\nAttention: cores too large, we only have ", available.cores,
-        " cores.\nUsing ", available.cores - 1,
-        " cores for get_LBCE().")
-    ncpus <- max(1, available.cores - 1)
-  }
-
-  cl <- ncpus
-  if (ncpus > 1){
-    if (.Platform$OS.type == "windows"){
-      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-    }
-  }
-
   cat("\nExtracting label positions from 'epitopes'\n")
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = purrr::pmap(as.list(epitopes), list),
-                           FUN = function(x){
-                             st <- as.numeric(x$start_pos)
-                             en <- as.numeric(x$end_pos)
-                             data.frame(UID     = x$protein_id,
-                                        pos     = st:en,
-                                        epit_id = x$epitope_id,
-                                        nPos    = x$n_Positive,
-                                        nNeg    = x$n_Negative)})
+  myf <- function(x){
+    st <- as.numeric(x$start_pos)
+    en <- as.numeric(x$end_pos)
+    data.frame(UID     = x$protein_id,
+               pos     = st:en,
+               epit_id = x$epitope_id,
+               nPos    = x$n_Positive,
+               nNeg    = x$n_Negative)
+  }
+  if (ncpus > 1) {
+    cl <- set_mc(ncpus)
+    tmp <- pbapply::pblapply(cl  = cl,
+                             X   = purrr::pmap(as.list(epitopes), list),
+                             FUN = myf)
+    close_mc(cl)
+  } else {
+    tmp <- pbapply::pblapply(cl  = 1,
+                             X   = purrr::pmap(as.list(epitopes), list),
+                             FUN = myf)
+  }
   cat("Done!\n")
 
   # Aggregate multiply-labelled entries. The variable names are initialised
@@ -120,8 +116,6 @@ label_proteins <- function(proteins, epitopes,
   } else {
     proteins$Class <- -1 + 2 * (proteins$Info_nPos >= proteins$Info_nNeg)
   }
-
-  if("cluster" %in% class(cl)) parallel::stopCluster(cl)
 
   return(proteins)
 

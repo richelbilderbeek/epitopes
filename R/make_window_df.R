@@ -41,6 +41,7 @@ make_window_df <- function(df,
                           is.null(save_folder) | length(save_folder) == 1,
                           assertthat::is.count(ncpus))
 
+  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
 
   if(is.null(window_size)){
     if(!("min_epit" %in% names(attributes(df)))){
@@ -59,15 +60,6 @@ make_window_df <- function(df,
         "\nTrying to treat as 'protein' (default). It may result in errors.")
   }
 
-  # Set up parallel processing
-  available.cores <- parallel::detectCores()
-  if (ncpus > available.cores){
-    cat("\nAttention: cores too large, we only have ", available.cores,
-        " cores.\nUsing ", available.cores - 1,
-        " cores for get_LBCE().")
-    ncpus <- available.cores - 1
-  }
-
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
@@ -80,6 +72,8 @@ make_window_df <- function(df,
   # Generate dataframe by sliding windows
   # extract_windows() is an internal function defined in "extract_windows.R"
   cat("\nExtracting windows:\n")
+
+  # Columns to remove:
   torm <- c("pubmed_id", "year", "epit_name", "evid_code",
             "epit_struc_def", "epit_seq", "n_assays", "bcell_id", "assay_type",
             "assay_class", "TSeq_seqtype", "TSeq_defline", "DB", "TSeq_sid",
@@ -88,6 +82,7 @@ make_window_df <- function(df,
   torm <- torm[torm %in% names(df)]
   if(length(torm) > 0) df  <- df[, (torm) := NULL]
 
+  # Convert df into a list of lists (for lapply)
   X <- lapply(purrr::pmap(as.list(df), list),
               function(x, t){
                 x$df_type <- t
@@ -95,22 +90,20 @@ make_window_df <- function(df,
               t = type)
 
   if (ncpus > 1){
-    cl <- ncpus
-    if (.Platform$OS.type == "windows"){
-      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-    }
+    cl <- set_mc(ncpus)
     wdf <- pbapply::pblapply(cl   = cl,
                              X    = X,
                              FUN  = extract_windows,
                              ws   = window_size,
                              mc.preschedule = FALSE)
+    close_mc(cl)
   } else {
-    cl <- 1
-    wdf <- pbapply::pblapply(cl   = cl,
+    wdf <- pbapply::pblapply(cl   = 1,
                              X    = X,
                              FUN  = extract_windows,
                              ws   = window_size)
   }
+
 
   wdf <- data.table::rbindlist(wdf)
   class(wdf) <- c(class(wdf), paste0("windowed_", type, "_dt"))

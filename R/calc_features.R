@@ -45,22 +45,6 @@ calc_features <- function(df,
     type <- "epit"
   }
 
-  # Set up parallel processing
-  available.cores <- parallel::detectCores()
-  if (ncpus > available.cores){
-    cat("\nAttention: cores too large, we only have ", available.cores,
-        " cores.\nUsing ", available.cores - 1,
-        " cores for get_LBCE().")
-    ncpus <- max(1, available.cores - 1)
-  }
-
-  cl <- ncpus
-  if (ncpus > 1){
-    if (.Platform$OS.type == "windows"){
-      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-    }
-  }
-
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
@@ -88,16 +72,16 @@ calc_features <- function(df,
   cat("\nCalculating features:")
 
   df <- df %>%
-    calc_aa_composition(cl = cl) %>%
-    calc_aa_descriptors(cl = cl) %>%
-    calc_molecular_weight(cl = cl) %>%
-    calc_number_of_atoms(cl = cl) %>%
-    calc_sequence_entropy(cl = cl) %>%
-    calc_conjoint_triads(cl = cl)
+    calc_aa_composition(ncpus = ncpus) %>%
+    calc_aa_descriptors(ncpus = ncpus) %>%
+    calc_molecular_weight(ncpus = ncpus) %>%
+    calc_number_of_atoms(ncpus = ncpus) %>%
+    calc_sequence_entropy(ncpus = ncpus) %>%
+    calc_conjoint_triads(ncpus = ncpus)
 
   # Add Npeptide percentages
   for (i in 1:max.N){
-    df <- calc_Npeptide_composition(df, N = i, cl = cl)
+    df <- calc_Npeptide_composition(df, N = i, ncpus = ncpus)
   }
 
   # Sort data.table (The variable names are initialised below just to
@@ -107,8 +91,6 @@ calc_features <- function(df,
   Info_epitope_id   <- Info_center_pos <- NULL
   df <- df[order(Info_sourceOrg_id, Info_protein_id, Info_epitope_id,
                  Info_center_pos), ]
-
-  if("cluster" %in% class(cl)) parallel::stopCluster(cl)
 
   return(df)
 }

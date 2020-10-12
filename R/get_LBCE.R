@@ -37,15 +37,7 @@ get_LBCE <- function(data_folder,
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1)
 
-
-  # Set up parallel processing
-  available.cores <- parallel::detectCores()
-  if (ncpus > available.cores){
-    cat("\nAttention: cores too large, we only have ", available.cores,
-        " cores.\nUsing ", available.cores - 1,
-        " cores for get_LBCE().")
-    ncpus <- available.cores - 1
-  }
+  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
@@ -56,12 +48,9 @@ get_LBCE <- function(data_folder,
                       "/00_epit_errlist_", ymd, ".rds")
   }
 
-
   # Get file list and initialise variables
   filelist    <- dir(normalizePath(data_folder), pattern = ".xml",
                      full.names = TRUE)
-
-
 
   # ==================================================
   t <- Sys.time()
@@ -69,18 +58,15 @@ get_LBCE <- function(data_folder,
       "\nStarted at", as.character(t), "\n")
 
   if (ncpus > 1){
-    cl <- ncpus
-    if (.Platform$OS.type == "windows"){
-      cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
-    }
+    cl <- set_mc(ncpus)
     df <- pbapply::pblapply(cl   = cl,
                             X    = filelist,
                             FUN  = process_xml_file,
                             type = "B",
                             mc.preschedule = FALSE)
+    close_mc(cl)
   } else {
-    cl <- 1
-    df <- pbapply::pblapply(cl   = cl,
+    df <- pbapply::pblapply(cl   = 1,
                             X    = filelist,
                             FUN  = process_xml_file,
                             type = "B")
@@ -105,9 +91,8 @@ get_LBCE <- function(data_folder,
     saveRDS(object = errlist, file = errfile)
   }
 
-  if("cluster" %in% class(cl)) parallel::stopCluster(cl)
-
   cat("\nDone!\n", nrow(df), "epitopes retrieved.\n",
       length(errlist), "processing errors.")
+
   invisible(df)
 }

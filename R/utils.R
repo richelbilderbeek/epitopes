@@ -25,3 +25,16 @@ mypb <- function(i, max_i, t0, npos){
                 pbstr, perc_done, as.numeric(td), attr(td, "units")))
   }
 }
+
+set_mc <- function(ncpus){
+  cl <- max(1, min(ncpus, parallel::detectCores() - 1))
+  if (cl > 1 && .Platform$OS.type == "windows"){
+    cl <- parallel::makeCluster(ncpus, setup_timeout = 1)
+  }
+  return(cl)
+}
+
+close_mc <- function(cl){
+  # Stop cluster
+  if("cluster" %in% class(cl)) parallel::stopCluster(cl)
+}
