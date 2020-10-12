@@ -28,25 +28,16 @@ calc_number_of_atoms <- function(df, cl){
                          "Number_of_sulphur_atoms_in_aa")]
   names(aa_prop)[-1] <- c("C", "H", "N", "O", "S")
 
-  myf <- function(x, aa_prop){
-    cnts <- stringr::str_count(x, aa_prop$One_letter_code)
-    as.data.frame(t(colSums(cnts * aa_prop[, -1])))
-  }
-  if (ismc(cl)){
-    tmp <- pbapply::pblapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop,
-                             mc.preschedule = FALSE)
-  } else {
-    tmp <- pbapply::pblapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop)
-  }
+  tmp <- pbapply::pblapply(cl  = cl,
+                           X   = df$Info_window_seq,
+                           FUN = function(x, aa_prop){
+                             cnts <- stringr::str_count(x, aa_prop$One_letter_code)
+                             as.data.frame(t(colSums(cnts * aa_prop[, -1])))},
+                           aa_prop = aa_prop)
 
   tmp <- data.table::rbindlist(tmp, use.names = TRUE)
   names(tmp) <- paste0("feat_", names(tmp), "_atoms")
 
   return(cbind(df, tmp))
+
 }

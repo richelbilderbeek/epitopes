@@ -25,10 +25,3 @@ mypb <- function(i, max_i, t0, npos){
                 pbstr, perc_done, as.numeric(td), attr(td, "units")))
   }
 }
-
-
-ismc <- function(cl){
-  # Check if multilpe cores are to be used. cl is either a cluster object or a
-  # numeric integer
-  return(length(cl) > 1 || is.numeric(cl) & cl > 1)
-}

@@ -21,30 +21,21 @@ calc_conjoint_triads <- function(df, cl){
                                  package = "epitopes"))
   aa_prop <- aa_prop[, c("One_letter_code", "CT_group")]
 
-  myf <- function(x, aa_prop){
-    idx <- stringr::str_locate(paste(aa_prop$One_letter_code,
-                                     collapse = ""),
-                               strsplit(x, "")[[1]])[, 1]
-    x <- paste(aa_prop$CT_group[idx], collapse = "")
-    ct <- stringr::str_sub(x,
-                           start = 1:(nchar(x) - 2),
-                           end   = 3:nchar(x))
+  tmp <- pbapply::pblapply(cl  = cl,
+                           X   = df$Info_window_seq,
+                           FUN = function(x, aa_prop){
+                             idx <- stringr::str_locate(paste(aa_prop$One_letter_code,
+                                                              collapse = ""),
+                                                        strsplit(x, "")[[1]])[, 1]
+                             x <- paste(aa_prop$CT_group[idx], collapse = "")
+                             ct <- stringr::str_sub(x,
+                                                    start = 1:(nchar(x) - 2),
+                                                    end   = 3:nchar(x))
 
-    # Return percent occurrence of CTs
-    as.data.frame(t(as.matrix(table(ct)))) / length(ct)
-  }
-  if (ismc(cl)){
-    tmp <- pbapply::pbsapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop,
-                             mc.preschedule = FALSE)
-  } else {
-    tmp <- pbapply::pbsapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop)
-  }
+                             # Return percent occurrence of CTs
+                             as.data.frame(t(as.matrix(table(ct)))) / length(ct)
+                           },
+                           aa_prop = aa_prop)
 
   # Add a dummy element with all possible triads
   dummy <- as.data.frame(matrix(0, ncol = 7 ^ 3, nrow = 1))

@@ -22,23 +22,14 @@ calc_molecular_weight <- function(df, cl){
                                  package = "epitopes"))
   aa_prop <- aa_prop[, c("One_letter_code", "Amino_acid_molecular_weight")]
 
-  myf <- function(x, aa_prop){
-    cnts <- stringr::str_count(x, aa_prop$One_letter_code)
-    sum(cnts * aa_prop$Amino_acid_molecular_weight)
-  }
-  if (ismc(cl)){
-    tmp <- pbapply::pbsapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop,
-                             mc.preschedule = FALSE)
-  } else {
-    tmp <- pbapply::pbsapply(cl  = cl,
-                             X   = df$Info_window_seq,
-                             FUN = myf,
-                             aa_prop = aa_prop)
-  }
 
+  tmp <- pbapply::pbsapply(cl  = cl,
+                           X   = df$Info_window_seq,
+                           FUN = function(x, aa_prop){
+                             cnts <- stringr::str_count(x, aa_prop$One_letter_code)
+                             sum(cnts * aa_prop$Amino_acid_molecular_weight)
+                           },
+                           aa_prop = aa_prop)
 
   return(cbind(df, feat_molecular_weight = as.numeric(tmp)))
 }
