@@ -37,8 +37,6 @@ get_LBCE <- function(data_folder,
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1)
 
-  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
-
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
@@ -57,20 +55,20 @@ get_LBCE <- function(data_folder,
   cat("Processing", length(filelist), "files using", ncpus, "cores",
       "\nStarted at", as.character(t), "\n")
 
+  cl <- set_mc(ncpus)
   if (ncpus > 1){
-    cl <- set_mc(ncpus)
     df <- pbapply::pblapply(cl   = cl,
                             X    = filelist,
                             FUN  = process_xml_file,
                             type = "B",
                             mc.preschedule = FALSE)
-    close_mc(cl)
   } else {
     df <- pbapply::pblapply(cl   = 1,
                             X    = filelist,
                             FUN  = process_xml_file,
                             type = "B")
   }
+  close_mc(cl)
 
 
   td <- Sys.time() - t

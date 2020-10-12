@@ -41,8 +41,6 @@ make_window_df <- function(df,
                           is.null(save_folder) | length(save_folder) == 1,
                           assertthat::is.count(ncpus))
 
-  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
-
   if(is.null(window_size)){
     if(!("min_epit" %in% names(attributes(df)))){
       stop("df must have a min_epit attribute when window_size == NULL")
@@ -89,20 +87,20 @@ make_window_df <- function(df,
                 return(x)},
               t = type)
 
+  cl <- set_mc(ncpus)
   if (ncpus > 1){
-    cl <- set_mc(ncpus)
     wdf <- pbapply::pblapply(cl   = cl,
                              X    = X,
                              FUN  = extract_windows,
                              ws   = window_size,
                              mc.preschedule = FALSE)
-    close_mc(cl)
   } else {
-    wdf <- pbapply::pblapply(cl   = 1,
+    wdf <- pbapply::pblapply(cl   = cl,
                              X    = X,
                              FUN  = extract_windows,
                              ws   = window_size)
   }
+  close_mc(cl)
 
 
   wdf <- data.table::rbindlist(wdf)

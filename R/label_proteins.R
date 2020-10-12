@@ -46,7 +46,6 @@ label_proteins <- function(proteins, epitopes,
                           is.character(set.positive),
                           assertthat::is.count(ncpus))
 
-  ncpus <- max(1, min(ncpus, parallel::detectCores() - 1))
 
   if(all(tolower(set.positive) == "any")) {
     set.positive <- "any"
@@ -80,17 +79,13 @@ label_proteins <- function(proteins, epitopes,
                nPos    = x$n_Positive,
                nNeg    = x$n_Negative)
   }
-  if (ncpus > 1) {
-    cl <- set_mc(ncpus)
-    tmp <- pbapply::pblapply(cl  = cl,
-                             X   = purrr::pmap(as.list(epitopes), list),
-                             FUN = myf)
-    close_mc(cl)
-  } else {
-    tmp <- pbapply::pblapply(cl  = 1,
-                             X   = purrr::pmap(as.list(epitopes), list),
-                             FUN = myf)
-  }
+
+  cl <- set_mc(ncpus)
+  tmp <- pbapply::pblapply(cl  = cl,
+                           X   = purrr::pmap(as.list(epitopes), list),
+                           FUN = myf)
+  close_mc(cl)
+
   cat("Done!\n")
 
   # Aggregate multiply-labelled entries. The variable names are initialised
