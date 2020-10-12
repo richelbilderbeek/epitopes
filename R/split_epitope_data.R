@@ -28,9 +28,10 @@
 #'        splitting purposes.
 #' @param split_perc numeric vector of desired splitting percentages. See
 #'        Details.
+#' @param split_names optional character vector with short names for each split.
 #' @param save_folder path to folder for saving the results.
 #'
-#' @return A list object containing the splitted data tables.
+#' @return A list object containing the split data tables.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -40,6 +41,7 @@
 split_epitope_data <- function(wdf,
                                split_level = "prot",
                                split_perc = c(70, 30),
+                               split_names = NULL,
                                save_folder = NULL){
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -48,7 +50,8 @@ split_epitope_data <- function(wdf,
                           split_level %in% c("org", "prot", "epit"),
                           is.numeric(split_perc),
                           all(sapply(split_perc, assertthat::is.count)),
-                          is.null(save_folder) | (is.character(save_folder)),
+                          is.null(split_names) | is.character(split_names),
+                          is.null(save_folder) | is.character(save_folder),
                           is.null(save_folder) | length(save_folder) == 1)
 
   # Check and adjust split sizes if necessary
@@ -62,8 +65,16 @@ split_epitope_data <- function(wdf,
     cat("\nNo splitting performed (split_perc = 100).")
     invisible(wdf)
   }
-
   nsplits <- length(split_perc)
+
+  # Set up split names
+  if (is.null(split_names)){
+    split_names <- 1:nsplits
+  } else if (length(split_names) < nsplits){
+    cat("\nLength of split names smaller than number of splits.",
+    "\nUsing split numbers instead.")
+    split_names <- 1:nsplits
+  }
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
@@ -72,7 +83,7 @@ split_epitope_data <- function(wdf,
     df_files <- character(nsplits)
     for (i in 1:nsplits){
       df_files[i] <- paste0(normalizePath(save_folder), "/", ymd,
-                            "_df_Split", i, ".rds")
+                            "_df_Split", split_names[i], ".rds")
     }
   }
 

@@ -8,6 +8,7 @@ split_epitope_data(
   wdf,
   split_level = "prot",
   split_perc = c(70, 30),
+  split_names = NULL,
   save_folder = NULL
 )
 }
@@ -24,10 +25,12 @@ splitting purposes.}
 \item{split_perc}{numeric vector of desired splitting percentages. See
 Details.}
 
+\item{split_names}{optional character vector with short names for each split.}
+
 \item{save_folder}{path to folder for saving the results.}
 }
 \value{
-A list object containing the splitted data tables.
+A list object containing the split data tables.
 }
 \description{
 Takes a data.table of data of class \emph{windowed_epit_dt} (returned by
