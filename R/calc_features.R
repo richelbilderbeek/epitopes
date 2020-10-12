@@ -92,5 +92,7 @@ calc_features <- function(df,
   df <- df[order(Info_sourceOrg_id, Info_protein_id, Info_epitope_id,
                  Info_center_pos), ]
 
+  class(df) <- unique(c(class(df), "windowed_epit_dt"))
+
   return(df)
 }
