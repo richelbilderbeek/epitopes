@@ -101,6 +101,7 @@ split_epitope_data <- function(wdf,
 
   # Determine which IDs go into which splits
   split_ids <- vector("list", nsplits)
+  names(split_ids) <- split_names
   for(i in 1:nsplits) split_ids[[i]] <- list(id_type = split_level,
                                              IDs = character(),
                                              Perc = 0)

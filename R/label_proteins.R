@@ -67,7 +67,7 @@ label_proteins <- function(proteins, epitopes,
     proteins <- make_window_df(proteins, window_size = 1, ncpus = ncpus)
   }
 
-  names(proteins)[which(names(proteins) == "Info_window_seq")] <- "Info_AA"
+  # names(proteins)[which(names(proteins) == "Info_window_seq")] <- "Info_AA"
 
   cat("\nExtracting label positions from 'epitopes'\n")
   myf <- function(x){

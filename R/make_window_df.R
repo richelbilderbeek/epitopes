@@ -88,18 +88,10 @@ make_window_df <- function(df,
               t = type)
 
   cl <- set_mc(ncpus)
-  if (ncpus > 1){
-    wdf <- pbapply::pblapply(cl   = cl,
-                             X    = X,
-                             FUN  = extract_windows,
-                             ws   = window_size,
-                             mc.preschedule = FALSE)
-  } else {
-    wdf <- pbapply::pblapply(cl   = cl,
-                             X    = X,
-                             FUN  = extract_windows,
-                             ws   = window_size)
-  }
+  wdf <- pbapply::pblapply(cl   = cl,
+                           X    = X,
+                           FUN  = extract_windows,
+                           ws   = window_size)
   close_mc(cl)
 
 

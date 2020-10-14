@@ -25,7 +25,6 @@
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk});
 #'         Jodie Ashford (\email{ashfojsm@@aston.ac.uk})
 #'
-#' @importFrom dplyr %>%
 #' @export
 #'
 calc_features <- function(df,
@@ -71,13 +70,12 @@ calc_features <- function(df,
   # Calculate features
   cat("\nCalculating features:")
 
-  df <- df %>%
-    calc_aa_composition(ncpus = ncpus) %>%
-    calc_aa_descriptors(ncpus = ncpus) %>%
-    calc_molecular_weight(ncpus = ncpus) %>%
-    calc_number_of_atoms(ncpus = ncpus) %>%
-    calc_sequence_entropy(ncpus = ncpus) %>%
-    calc_conjoint_triads(ncpus = ncpus)
+  df <- calc_aa_composition(df, ncpus = ncpus)
+  df <- calc_aa_descriptors(df, ncpus = ncpus)
+  df <- calc_molecular_weight(df, ncpus = ncpus)
+  df <- calc_number_of_atoms(df, ncpus = ncpus)
+  df <- calc_sequence_entropy(df, ncpus = ncpus)
+  df <- calc_conjoint_triads(df, ncpus = ncpus)
 
   # Add Npeptide percentages
   for (i in 1:max.N){

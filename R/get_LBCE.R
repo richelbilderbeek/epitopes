@@ -56,18 +56,10 @@ get_LBCE <- function(data_folder,
       "\nStarted at", as.character(t), "\n")
 
   cl <- set_mc(ncpus)
-  if (ncpus > 1){
-    df <- pbapply::pblapply(cl   = cl,
-                            X    = filelist,
-                            FUN  = process_xml_file,
-                            type = "B",
-                            mc.preschedule = FALSE)
-  } else {
-    df <- pbapply::pblapply(cl   = 1,
-                            X    = filelist,
-                            FUN  = process_xml_file,
-                            type = "B")
-  }
+  df <- pbapply::pblapply(cl   = cl,
+                          X    = filelist,
+                          FUN  = process_xml_file,
+                          type = "B")
   close_mc(cl)
 
 
