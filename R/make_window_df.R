@@ -78,7 +78,9 @@ make_window_df <- function(df,
             "TSeq_length")
 
   torm <- torm[torm %in% names(df)]
-  if(length(torm) > 0) df  <- df[, (torm) := NULL]
+  if(length(torm) > 0) {
+    df  <- df[, (torm) := NULL]
+  }
 
   # Convert df into a list of lists (for lapply)
   X <- lapply(purrr::pmap(as.list(df), list),

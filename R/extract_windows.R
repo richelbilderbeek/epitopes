@@ -22,7 +22,11 @@ extract_windows <- function(x, ws){
 
   # Initialise data frame
   x <- data.table::as.data.table(x)[rep(1, nw), ]
-  x <- x [, c("TSeq_sequence", "df_type", "start_pos", "end_pos") := NULL]
+
+  torm <- c("TSeq_sequence", "df_type", "start_pos", "end_pos")
+  torm <- torm[torm %in% names(x)]
+  if(length(torm) > 0) x <- x [, (torm) := NULL]
+
   x$center_pos <- (start_pos - (ws - 1) / 2):(stop_pos - (ws - 1) / 2)
   x$window_seq <- sapply(start_pos:stop_pos,
                          function(i, pseq, wl){ substr(pseq, i - wl, i + wl) },

@@ -58,7 +58,7 @@ label_proteins <- function(proteins, epitopes,
     if(!dir.exists(save_folder)) dir.create(save_folder)
     ymd <- gsub("-", "", Sys.Date())
     df_file <- paste0(normalizePath(save_folder), "/", ymd,
-                      "df_labelled_prots.rds")
+                      "_df_labelled_prots.rds")
   }
 
   # Prepare protein data.table for labeling
@@ -110,6 +110,10 @@ label_proteins <- function(proteins, epitopes,
     proteins$Class <- -1 + 2 * (proteins$Info_nNeg == 0)
   } else {
     proteins$Class <- -1 + 2 * (proteins$Info_nPos >= proteins$Info_nNeg)
+  }
+
+  if(!is.null(save_folder)) {
+    saveRDS(proteins, file = df_file)
   }
 
   return(proteins)

@@ -87,10 +87,19 @@ calc_features <- function(df,
   # internal to df)
   Info_sourceOrg_id <- Info_protein_id <- NULL
   Info_epitope_id   <- Info_center_pos <- NULL
-  df <- df[order(Info_sourceOrg_id, Info_protein_id, Info_epitope_id,
-                 Info_center_pos), ]
+  Info_UID <- NULL
+  if (type == "epit"){
+    df <- df[order(Info_sourceOrg_id, Info_protein_id, Info_epitope_id,
+                   Info_center_pos), ]
+    class(df) <- unique(c(class(df), "windowed_epit_dt"))
+  } else {
+    df <- df[order(Info_UID, Info_center_pos), ]
+    class(df) <- unique(c(class(df), "windowed_prot_dt"))
+  }
 
-  class(df) <- unique(c(class(df), "windowed_epit_dt"))
+  if(!is.null(save_folder)) {
+    saveRDS(df, df_file)
+  }
 
   return(df)
 }
