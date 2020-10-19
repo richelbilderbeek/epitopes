@@ -55,13 +55,10 @@ get_LBCE <- function(data_folder,
   cat("Processing", length(filelist), "files using", ncpus, "cores",
       "\nStarted at", as.character(t), "\n")
 
-  cl <- set_mc(ncpus)
-  df <- pbapply::pblapply(cl   = cl,
-                          X    = filelist,
-                          FUN  = process_xml_file,
-                          type = "B")
-  close_mc(cl)
-
+  df <- mypblapply(ncpus = ncpus,
+                   X     = filelist,
+                   FUN   = process_xml_file,
+                   type  = "B")
 
   td <- Sys.time() - t
   cat("Ended at", as.character(Sys.time()),

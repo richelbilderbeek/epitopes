@@ -41,3 +41,29 @@ close_mc <- function(cl){
   if("cluster" %in% class(cl)) parallel::stopCluster(cl)
   Sys.sleep(.1 + .1 * stats::runif(1))
 }
+
+
+mypblapply <- function(X, FUN, ncpus, ...){
+  if (ncpus == 1){
+    res <- lapply(X   = X,
+                  FUN = FUN,
+                  ...)
+  } else {
+    cl <- set_mc(ncpus)
+    if(.Platform$OS.type == "windows"){
+      res <- pbapply::pblapply(cl  = cl,
+                               X   = X,
+                               FUN = FUN,
+                               ...)
+    } else {
+      res <- pbapply::pblapply(cl  = cl,
+                               X   = X,
+                               FUN = FUN,
+                               mc.preschedule = FALSE,
+                               ...)
+    }
+    close_mc(cl)
+  }
+
+  return(res)
+}

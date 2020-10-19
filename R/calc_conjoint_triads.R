@@ -14,19 +14,17 @@
 #'
 calc_conjoint_triads <- function(df, ncpus){
 
-  cat("\nCalculating conjoint triads:\n")
+  cat("\nCalculating conjoint triads\n")
 
   # Load AA properties
   aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
                                  package = "epitopes"))
   aa_prop <- aa_prop[, c("One_letter_code", "CT_group")]
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_CT,
-                           aa_prop = aa_prop)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus   = ncpus,
+                    X       = df$Info_window_seq,
+                    FUN     = feat_CT,
+                    aa_prop = aa_prop)
 
   # Add a dummy element with all possible triads
   dummy <- as.data.frame(matrix(0, ncol = 7 ^ 3, nrow = 1))

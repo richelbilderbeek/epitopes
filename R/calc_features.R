@@ -39,6 +39,15 @@ calc_features <- function(df,
                           assertthat::is.count(max.N),
                           assertthat::is.count(ncpus))
 
+  ### TEMPORARY WORKAROUND: TO BE FIXED LATER
+  if (ncpus > 1){
+    cat("\n**************** NOTE ***************",
+        "\nFeature calculation routines are currently only running",
+        "\nsingle-core due to problems encountered when implementing multicore",
+        "\nparallelisation.\n********* ncpus forced to 1 *********")
+    ncpus <- 1
+  }
+
   type <- "prot"
   if("windowed_epit_dt" %in% class(df)){
     type <- "epit"

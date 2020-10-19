@@ -15,20 +15,17 @@
 
 calc_molecular_weight <- function(df, ncpus){
 
-  cat("\nCalculating molecular weight:\n")
+  cat("\nCalculating molecular weight\n")
 
   # Load AA properties
   aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
                                  package = "epitopes"))
   aa_prop <- aa_prop[, c("One_letter_code", "Amino_acid_molecular_weight")]
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pbsapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_MolWei,
-                           aa_prop = aa_prop)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus   = ncpus,
+                    X       = df$Info_window_seq,
+                    FUN     = feat_MolWei,
+                    aa_prop = aa_prop)
 
-
-  return(cbind(df, feat_molecular_weight = as.numeric(tmp)))
+  return(cbind(df, feat_molecular_weight = unlist(tmp)))
 }

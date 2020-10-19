@@ -18,15 +18,12 @@
 calc_Npeptide_composition <- function(df, N, ncpus){
 
   # Creates a list of tables contaning the dipeptide percentages for each window sequence in df
-  cat(paste0("\n Calculating ", N, "-mer composition:\n"))
+  cat(paste0("\nCalculating ", N, "-mer composition\n"))
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_NPep,
-                           N   = N)
-  close_mc(cl)
-
+  tmp <- mypblapply(ncpus = ncpus,
+                    X     = df$Info_window_seq,
+                    FUN   = feat_NPep,
+                    N     = N)
 
   # Add a dummy element with all possible triads
   dummy <- as.data.frame(matrix(0, ncol = 20 ^ N, nrow = 1))

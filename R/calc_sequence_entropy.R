@@ -17,14 +17,12 @@
 calc_sequence_entropy <- function(df, ncpus){
 
   # Entropy = -SUM(p(e)log2[p(e)])
-  cat("\nCalculating sequence entropy:\n")
+  cat("\nCalculating sequence entropy\n")
 
-  cl  <- set_mc(ncpus)
-  tmp <- pbapply::pbsapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_SeqEntr)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus = ncpus,
+                    X     = df$Info_window_seq,
+                    FUN   = feat_SeqEntr)
 
-  return(cbind(df, feat_seq_entropy = as.numeric(tmp)))
+  return(cbind(df, feat_seq_entropy = unlist(tmp)))
 
 }

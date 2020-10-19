@@ -89,13 +89,10 @@ make_window_df <- function(df,
                 return(x)},
               t = type)
 
-  cl <- set_mc(ncpus)
-  wdf <- pbapply::pblapply(cl   = cl,
-                           X    = X,
-                           FUN  = extract_windows,
-                           ws   = window_size)
-  close_mc(cl)
-
+  wdf <- mypblapply(ncpus = ncpus,
+                    X     = X,
+                    FUN   = extract_windows,
+                    ws    = window_size)
 
   wdf <- data.table::rbindlist(wdf)
   class(wdf) <- c(class(wdf), paste0("windowed_", type, "_dt"))

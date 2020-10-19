@@ -15,7 +15,7 @@
 #'
 calc_number_of_atoms <- function(df, ncpus){
 
-  cat("\nCalculating atomic composition:\n")
+  cat("\nCalculating atomic composition\n")
 
   # Load AA properties
   aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
@@ -28,12 +28,10 @@ calc_number_of_atoms <- function(df, ncpus){
                          "Number_of_sulphur_atoms_in_aa")]
   names(aa_prop)[-1] <- c("C", "H", "N", "O", "S")
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_NumAtom,
-                           aa_prop = aa_prop)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus   = ncpus,
+                    X       = df$Info_window_seq,
+                    FUN     = feat_NumAtom,
+                    aa_prop = aa_prop)
 
   tmp <- data.table::rbindlist(tmp, use.names = TRUE)
   names(tmp) <- paste0("feat_", names(tmp), "_atoms")

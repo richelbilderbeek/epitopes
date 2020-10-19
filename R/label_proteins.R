@@ -80,11 +80,9 @@ label_proteins <- function(proteins, epitopes,
                nNeg    = x$n_Negative)
   }
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = purrr::pmap(as.list(epitopes), list),
-                           FUN = myf)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus = ncpus,
+                    X     = purrr::pmap(as.list(epitopes), list),
+                    FUN   = myf)
 
   cat("Done!\n")
 

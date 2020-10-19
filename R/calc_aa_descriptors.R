@@ -99,13 +99,11 @@
 #'
 calc_aa_descriptors <- function(df, ncpus){
 
-  cat("\nCalculating AA descriptors:\n")
+  cat("\nCalculating AA descriptors\n")
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_AADesc)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus = ncpus,
+                    X     = df$Info_window_seq,
+                    FUN   = feat_AADesc)
 
   tmp <- data.table::rbindlist(tmp)
 

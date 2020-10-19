@@ -30,12 +30,10 @@ calc_aa_composition <- function(df, ncpus){
                   Basic     = c("H", "K", "R"),
                   Acidic    = c("B", "D", "E", "Z"))
 
-  cl <- set_mc(ncpus)
-  tmp <- pbapply::pblapply(cl  = cl,
-                           X   = df$Info_window_seq,
-                           FUN = feat_AAComp,
-                           AAtypes = AAtypes)
-  close_mc(cl)
+  tmp <- mypblapply(ncpus   = ncpus,
+                    X       = df$Info_window_seq,
+                    FUN     = feat_AAComp,
+                    AAtypes = AAtypes)
 
   tmp        <- data.table::rbindlist(tmp, use.names = TRUE)
   names(tmp) <- paste0("feat_Perc_", names(tmp))
