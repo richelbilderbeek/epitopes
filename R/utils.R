@@ -39,7 +39,6 @@ set_mc <- function(ncpus){
 close_mc <- function(cl){
   # Stop cluster
   if("cluster" %in% class(cl)) parallel::stopCluster(cl)
-  Sys.sleep(.1 + .1 * stats::runif(1))
 }
 
 

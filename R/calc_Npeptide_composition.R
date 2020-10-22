@@ -25,7 +25,7 @@ calc_Npeptide_composition <- function(df, N, ncpus){
                     FUN   = feat_NPep,
                     N     = N)
 
-  # Add a dummy element with all possible triads
+  # Add a dummy element with all possible n-mers
   dummy <- as.data.frame(matrix(0, ncol = 20 ^ N, nrow = 1))
   args <- vector(mode = "list", length = N)
   for (i in seq_along(args)) args[[i]] <- get_aa_codes()

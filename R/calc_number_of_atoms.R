@@ -20,12 +20,7 @@ calc_number_of_atoms <- function(df, ncpus){
   # Load AA properties
   aa_prop <- readRDS(system.file("extdata", "amino_acid_propensity.rds",
                                  package = "epitopes"))
-  aa_prop <- aa_prop[, c("One_letter_code",
-                         "Number_of_carbon_atoms_in_aa",
-                         "Number_of_hydrogen_atoms_in_aa",
-                         "Number_of_nitrogen_atoms_in_aa",
-                         "Number_of_oxygen_atoms_in_aa",
-                         "Number_of_sulphur_atoms_in_aa")]
+  aa_prop <- aa_prop[, c(2, 4:8)]
   names(aa_prop)[-1] <- c("C", "H", "N", "O", "S")
 
   tmp <- mypblapply(ncpus   = ncpus,
