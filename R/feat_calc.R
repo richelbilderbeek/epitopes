@@ -74,8 +74,9 @@ feat_calc <- function(x, max.N){
   ct <- stringr::str_sub(y,
                          start = 1:(nchar(y) - 2),
                          end   = 3:nchar(y))
-  tmp <- as.data.frame(t(as.matrix(table(ct)))) / length(ct)
-  tmp <- tmp[, -grep("\\*", names(tmp))]
+  tmp  <- as.data.frame(t(as.matrix(table(ct)))) / length(ct)
+  torm <- grep("\\*", names(tmp))
+  if(length(torm) > 0) tmp <- tmp[, -torm]
 
   f_CT[, sapply(names(tmp), function(k) which(names(f_CT) == k))] <- tmp
   names(f_CT) <- paste0("feat_CT", names(f_CT))
@@ -96,7 +97,8 @@ feat_calc <- function(x, max.N){
     i2  <- i1 + i - 1
     y   <- stringr::str_sub(x, i1, i2)
     tmp <- as.data.frame(t(as.matrix(table(y)))) / length(y)
-    tmp <- tmp[, -grep("X", names(tmp))]
+    torm <- grep("X", names(tmp))
+    if(length(torm) > 0) tmp <- tmp[, -torm]
 
     f_Kmer[, sapply(names(tmp), function(k) which(names(f_Kmer) == k))] <- tmp
   }
