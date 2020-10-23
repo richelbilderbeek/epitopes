@@ -82,6 +82,10 @@ calc_features <- function(df,
                     FUN     = feat_calc,
                     max.N   = max.N)
 
+  tmp <- data.table::rbindlist(tmp, use.names = TRUE, fill = TRUE)
+
+  df <- cbind(df, tmp)
+
   # Sort data.table (The variable names are initialised below just to
   # prevent NOTEs on CRAN. The data.table ordering uses references to variables
   # internal to df)
