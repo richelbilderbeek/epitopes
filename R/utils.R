@@ -24,6 +24,7 @@ mypb <- function(i, max_i, t0, npos){
     cat(sprintf("\r  |%s|%d%% processed. Elapsed time: %2.1f %s",
                 pbstr, perc_done, as.numeric(td), attr(td, "units")))
   }
+  invisible(NULL)
 }
 
 set_mc <- function(ncpus){
@@ -44,9 +45,15 @@ close_mc <- function(cl){
 
 mypblapply <- function(X, FUN, ncpus, ...){
   if (ncpus == 1){
-    res <- lapply(X   = X,
-                  FUN = FUN,
-                  ...)
+    t0 <- Sys.time()
+    res <- vector("list", length(X))
+    for (i in seq_along(X)){
+      mypb(i, length(X), t0, 40)
+      res[[i]] <- FUN(X[[i]], ...)
+    }
+    # res <- lapply(X   = X,
+    #               FUN = FUN,
+    #               ...)
   } else {
     cl <- set_mc(ncpus)
     if(.Platform$OS.type == "windows"){
