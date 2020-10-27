@@ -132,10 +132,9 @@ split_epitope_data <- function(wdf,
     Query_coverage <- Perc_identity <- QueryID <- SubjectID <- NULL
 
     # Filter relevant blast entries and variables
-    blast <- blast[(Query_coverage >= coverage_threshold) & (Perc_identity  >= identity_threshold), ]
-    blast <- blast[, list(QueryID, SubjectID)]
-    blast <- blast[!duplicated(t(apply(blast[, 1:2], 1, sort))), ]
-    blast <- sort(apply(blast, 1, paste, collapse=" "))
+    blast <- blast[(Query_coverage >= coverage_threshold) & (Perc_identity >= identity_threshold), ]
+    blast <- blast[!duplicated(t(apply(blast[, 1:2], 1, sort))), list(QueryID, SubjectID)]
+    blast <- apply(blast, 1, paste, collapse=" ")
   } else {
     blast <- character()
   }
@@ -150,14 +149,15 @@ split_epitope_data <- function(wdf,
   names(split_ids) <- split_names
   for(i in 1:nsplits) split_ids[[i]] <- list(id_type = split_level,
                                              IDs = character(),
+                                             IDgroups = vector("list"),
                                              Perc = 0)
   sc <- 1   # split counter
   nc <- 0   # number of attempts to attribute
   while (nrow(divs) > 0){
     IDgroup <- divs$id_var[1]
-    check <- TRUE
-    cc    <- 1
-    while(check){
+    go <- TRUE
+    cc <- 1
+    while(go){
       idx <- grep(IDgroup[cc], blast)
       if(length(idx) > 0){
         x <- blast[idx] # get entries that have cands[cc]
@@ -166,7 +166,7 @@ split_epitope_data <- function(wdf,
         IDgroup <- c(IDgroup, x)
         cc <- cc + 1
       } else {
-        check <- FALSE
+        go <- FALSE
       }
     }
 
@@ -174,8 +174,9 @@ split_epitope_data <- function(wdf,
 
     # If the current split (sc) can accommodate all the data in IDgroup
     if(Ptot <= split_perc[sc] - split_ids[[sc]]$Perc){
-      split_ids[[sc]]$IDs  <- c(split_ids[[sc]]$IDs, IDgroup)
-      split_ids[[sc]]$Perc <- split_ids[[sc]]$Perc + Ptot
+      split_ids[[sc]]$IDs      <- c(split_ids[[sc]]$IDs, IDgroup)
+      split_ids[[sc]]$Perc     <- split_ids[[sc]]$Perc + Ptot
+      split_ids[[sc]]$IDgroups <- c(split_ids[[sc]]$IDgroups, list(IDgroup))
       divs <- divs[-which(divs$id_var %in% IDgroup), ]
       nc <- 0
     } else {
