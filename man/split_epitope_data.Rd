@@ -9,7 +9,10 @@ split_epitope_data(
   split_level = "prot",
   split_perc = c(70, 30),
   split_names = NULL,
-  save_folder = NULL
+  save_folder = NULL,
+  blast_file = NULL,
+  coverage_threshold = 80,
+  identity_threshold = 80
 )
 }
 \arguments{
@@ -28,6 +31,15 @@ Details.}
 \item{split_names}{optional character vector with short names for each split.}
 
 \item{save_folder}{path to folder for saving the results.}
+
+\item{blast_file}{path to file containing all-vs-all BLASTp alignment results
+for all proteins in \strong{wdf}. See Details.}
+
+\item{coverage_threshold}{coverage threshold for grouping proteins by
+similarity, see Details.}
+
+\item{identity_threshold}{identity threshold for grouping proteins by
+similarity, see Details.}
 }
 \value{
 A list object containing the split data tables.
@@ -52,6 +64,12 @@ not be possible (e.g., if \code{split_level = "org"} and a single organism
 corresponds to 90\% of the data, one of the splits will necessarily correspond
 to at least 90\% of the data, regardless of the values informed in
 \code{split_perc}.
+
+If a BLASTp file is provided the routine will keep any pairs of proteins
+having (coverage >= \strong{coverage_threshold} AND
+identity >=  \strong{identity_threshold}) under the same split. This is useful to
+prevent accidental data leakage due to quasi-identical proteins with
+different UIDs. \strong{NOTE}: this only works if \verb{split_level == "prot}.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})
