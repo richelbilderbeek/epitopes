@@ -84,7 +84,7 @@ label_proteins <- function(proteins, epitopes,
                     X     = purrr::pmap(as.list(epitopes), list),
                     FUN   = myf)
 
-  cat("Done!\n")
+  cat(" - Done!\n")
 
   # Aggregate multiply-labelled entries. The variable names are initialised
   # below just to prevent NOTEs on CRAN. The dplyr functions use references to
