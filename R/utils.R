@@ -74,3 +74,22 @@ mypblapply <- function(X, FUN, ncpus, ...){
   return(res)
 }
 
+
+
+# function to run moving mean / moving mode on a prediction vector
+smooth_predictions <- function(x, window_size, type = "mode"){
+  xlen <- length(x)
+  y    <- x
+  for (i in 1:xlen){
+    i1 <- max(1, min(i - floor(window_size / 2),
+                     xlen - window_size + 1))
+    i2 <- min(xlen, i1 + window_size - 1)
+    if (type == "mean"){
+      y[i] <- mean(x[i1:i2])
+    } else if (type == "mode"){
+      uniqx <- unique(x[i1:i2])
+      y[i] <-uniqx[which.max(tabulate(match(x[i1:i2], uniqx)))]
+    } else stop("Unrecognised 'type' in smooth_predictions")
+  }
+  return(y)
+}

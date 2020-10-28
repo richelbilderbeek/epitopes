@@ -1,9 +1,7 @@
-#' Calculate epitope classification performance indices by individual position
+#' Calculate epitope classification performance indices
 #'
 #' This function is used to calculate several distinct BINARY classification
-#' performance indicators on a position-by-position manner (in contrast to a
-#' 'by-labelled-region' approach). `NA` values in either input vector are not
-#' considered in the calculations.
+#' performance indicators. `NA` values are not considered in the calculations.
 #'
 #' @param truth vector of reference values
 #' @param pred  vector of predicted values
@@ -12,13 +10,12 @@
 #'
 #' @return list containing several performance indicators
 #'
-#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk});
-#'         Jodie Ashford (\email{ashfojsm@@aston.ac.uk})
+#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @export
 #'
 
-calc_performance_perAA <- function(truth, pred, posValue = 1, negValue = -1){
+calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
 
   assertthat::assert_that(length(posValue) == 1,
                           length(negValue) == 1,
