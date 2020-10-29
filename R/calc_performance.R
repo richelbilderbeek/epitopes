@@ -20,8 +20,8 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
   assertthat::assert_that(length(posValue) == 1,
                           length(negValue) == 1,
                           length(truth) == length(pred),
-                          all(stats::na.omit(truth)) %in% c(posValue, negValue),
-                          all(stats::na.omit(pred))  %in% c(posValue, negValue))
+                          all(stats::na.omit(truth) %in% c(posValue, negValue)),
+                          all(stats::na.omit(pred)  %in% c(posValue, negValue)))
 
   TN <- as.numeric(sum(truth == negValue & pred == negValue))
   FN <- as.numeric(sum(truth == posValue & pred == negValue))
