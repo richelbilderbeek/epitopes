@@ -23,6 +23,10 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
                           all(stats::na.omit(truth) %in% c(posValue, negValue)),
                           all(stats::na.omit(pred)  %in% c(posValue, negValue)))
 
+  idx <- is.na(truth) | is.na(pred)
+  truth <- truth[-idx]
+  pred  <- pred[-idx]
+
   TN <- as.numeric(sum(truth == negValue & pred == negValue))
   FN <- as.numeric(sum(truth == posValue & pred == negValue))
   FP <- as.numeric(sum(truth == negValue & pred == posValue))
