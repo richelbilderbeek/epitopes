@@ -39,6 +39,8 @@
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @export
+#'
+#' @importFrom dplyr %>%
 
 prepare_join_df <- function(epitopes, proteins,
                             save_folder     = NULL,
@@ -146,6 +148,13 @@ prepare_join_df <- function(epitopes, proteins,
                                stringsAsFactors = FALSE))
     df <- df[-rm.idx, ]
   }
+
+  # TODO: Combine redundant entries
+  #multidx <- table(df$epitope_id)
+  #multidx <- multidx[multidx > 1]
+  # df <- as.data.frame(df) %>%
+  #   dplyr::group_by("epitope_id")
+
 
   # Set class
   if (set.positive == "any"){

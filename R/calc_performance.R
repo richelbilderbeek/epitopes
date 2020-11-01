@@ -23,7 +23,9 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
                           all(stats::na.omit(truth) %in% c(posValue, negValue)),
                           all(stats::na.omit(pred)  %in% c(posValue, negValue)))
 
-  idx <- which(is.na(truth) | is.na(pred))
+  idx   <- which(is.na(truth) | is.na(pred))
+  nPos  <- sum(pred == posValue)
+  nNeg  <- sum(pred == negValue)
   truth <- truth[-idx]
   pred  <- pred[-idx]
 
@@ -36,17 +38,20 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
   mccDen  <- (TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)
 
   out <- data.frame(
-    TP   = TP,
-    TN   = TN,
-    FP   = FP,
-    FN   = FN,
-    sens = TP / (TP + FN),
-    spec = TN / (TN + FP),
-    ppv  = TP / (TP + FP),
-    npv  = TN / (TN + FN),
-    f1   = 2 * TP / (2 * TP + FP + FN),
-    mcc  = mccNum / ifelse(mccDen == 0, 1, sqrt(mccDen)),
-    accuracy =  (TP + TN) / (TP + TN + FP + FN))
+    TP        = TP,
+    TN        = TN,
+    FP        = FP,
+    FN        = FN,
+    sens      = TP / (TP + FN),
+    spec      = TN / (TN + FP),
+    ppv       = TP / (TP + FP),
+    npv       = TN / (TN + FN),
+    f1        = 2 * TP / (2 * TP + FP + FN),
+    mcc       = mccNum / ifelse(mccDen == 0, 1, sqrt(mccDen)),
+    accuracy  =  (TP + TN) / (TP + TN + FP + FN),
+    n_predPos = nPos,
+    n_predNeg = nNeg,
+    n_NA      = length(idx))
 
   return(out)
 }
