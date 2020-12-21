@@ -90,8 +90,10 @@ filter_epitopes <- function(df,
 
   if (!is.null(removeIDs)){
     idx3 <- which(sapply(ids$org, FUN = fmatch, trg = target_rm))
-    ids  <- ids[-idx3, ]
-    df <- df[-idx3, ]
+    if (length(idx3) > 0){
+      ids  <- ids[-idx3, ]
+      df <- df[-idx3, ]
+    }
   }
 
 
