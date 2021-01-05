@@ -38,14 +38,11 @@ calc_features <- function(df,
                           assertthat::is.count(max.N),
                           assertthat::is.count(ncpus))
 
-  ### TEMPORARY WORKAROUND: TO BE FIXED LATER
-  # if (ncpus > 1){
-  #   cat("\n**************** NOTE ***************",
-  #       "\nFeature calculation routines are currently only running",
-  #       "\nsingle-core due to problems encountered when implementing multicore",
-  #       "\nparallelisation.\n********* ncpus forced to 1 *********")
-  #   ncpus <- 1
-  # }
+  # Prevent data table multithreads from crashing parallel routines
+  if (ncpus > 1) {
+    oldDTthreads <- data.table::getDTthreads(verbose = FALSE)
+    data.table::setDTthreads(threads = 1)
+  }
 
   type <- "prot"
   if("windowed_epit_dt" %in% class(df)){
@@ -103,6 +100,11 @@ calc_features <- function(df,
 
   if(!is.null(save_folder)) {
     saveRDS(df, df_file)
+  }
+
+  # return data.table to its original configuration
+  if (ncpus > 1) {
+    data.table::setDTthreads(threads = oldDTthreads)
   }
 
   return(df)
