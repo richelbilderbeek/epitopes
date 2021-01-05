@@ -70,14 +70,14 @@ calc_features <- function(df,
   cat("\nCalculating features")
   if (ncpus > 1) {
     DTthreads_old <- data.table::getDTthreads(verbose = FALSE)
-    data.table::setDTthreads(threads = 1, verbose = FALSE)
+    data.table::setDTthreads(threads = 1)
   }
   tmp <- mypblapply(ncpus   = ncpus,
                     X       = df$Info_window_seq,
                     FUN     = feat_calc,
                     max.N   = max.N)
   if (ncpus > 1) {
-    data.table::setDTthreads(threads = DTthreads_old, verbose = FALSE)
+    data.table::setDTthreads(threads = DTthreads_old)
   }
 
   tmp <- data.table::rbindlist(tmp, use.names = TRUE, fill = TRUE)
