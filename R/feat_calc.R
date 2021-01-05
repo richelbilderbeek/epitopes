@@ -25,6 +25,7 @@ feat_calc <- function(x, max.N){
               149.21, 132.12, 115.13, 146.15, 174.20,
               105.09, 119.12, 117.15, 204.22, 181.19))
 
+  exception_AA <- c("B", "Z", "X", "J")
 
   # ==================== Calculate features ==================== #
 
@@ -55,7 +56,7 @@ feat_calc <- function(x, max.N){
 
   # ----- AA Descriptors -----
   y <- strsplit(x, split = "")[[1]]
-  if (any(y == "X")) y <- y[-which(y == "X")]
+  if (any(y %in% exception_AA)) y <- y[-which(y %in% exception_AA)]
   f_AAd <- as.data.frame(t(colMeans(Peptides::aaDescriptors(y),
                                     na.rm = TRUE)))
   names(f_AAd) <- paste0("feat_", gsub("\\.[1-9]$", "", names(f_AAd)))
@@ -97,7 +98,7 @@ feat_calc <- function(x, max.N){
     i2  <- i1 + i - 1
     y   <- stringr::str_sub(x, i1, i2)
     tmp <- as.data.frame(t(as.matrix(table(y)))) / length(y)
-    torm <- grep("X", names(tmp))
+    torm <- grep("[BJXZ]", names(tmp))
     if(length(torm) > 0) tmp <- tmp[, -torm]
 
     f_Kmer[, sapply(names(tmp), function(k) which(names(f_Kmer) == k))] <- tmp
