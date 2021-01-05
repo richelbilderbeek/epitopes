@@ -55,6 +55,10 @@ mypblapply <- function(X, FUN, ncpus, ...){
     #               FUN = FUN,
     #               ...)
   } else {
+    # Prevent data table multithreads from crashing parallel routines
+    oldDTthreads <- data.table::getDTthreads(verbose = FALSE)
+    data.table::setDTthreads(threads = 1)
+
     cl <- set_mc(ncpus)
     if(.Platform$OS.type == "windows"){
       res <- pbapply::pblapply(cl  = cl,
@@ -69,6 +73,9 @@ mypblapply <- function(X, FUN, ncpus, ...){
                                ...)
     }
     close_mc(cl)
+
+    # return data.table to its original configuration
+    data.table::setDTthreads(threads = oldDTthreads)
   }
 
   return(res)

@@ -38,12 +38,6 @@ calc_features <- function(df,
                           assertthat::is.count(max.N),
                           assertthat::is.count(ncpus))
 
-  # Prevent data table multithreads from crashing parallel routines
-  if (ncpus > 1) {
-    oldDTthreads <- data.table::getDTthreads(verbose = FALSE)
-    data.table::setDTthreads(threads = 1)
-  }
-
   type <- "prot"
   if("windowed_epit_dt" %in% class(df)){
     type <- "epit"
@@ -100,11 +94,6 @@ calc_features <- function(df,
 
   if(!is.null(save_folder)) {
     saveRDS(df, df_file)
-  }
-
-  # return data.table to its original configuration
-  if (ncpus > 1) {
-    data.table::setDTthreads(threads = oldDTthreads)
   }
 
   return(df)
