@@ -4,32 +4,32 @@
 \alias{get_LBCE}
 \title{Extract linear B Cell epitopes from XML files retrieved from IEDB.}
 \usage{
-get_LBCE(data_folder = "./", ncpus = 1, save_folder = NULL)
+get_LBCE(data_folder, ncpus = 1, save_folder = NULL)
 }
 \arguments{
 \item{data_folder}{path (either relative or absolute) to the directory
 containing the XML files}
 
-\item{ncpus}{positive integer, number of cores to use (multi-core
-capabilities not yet available for Windows systems.)}
+\item{ncpus}{positive integer, number of cores to use}
 
-\item{save_folder}{path to folder for saving the results.}
+\item{save_folder}{path to folder for saving the output.}
 }
 \value{
-A data frame containing the extracted epitopes is returned invisibly.
+A \emph{data.table} containing the epitope data is returned invisibly.
 }
 \description{
-This function is used to extract information for **linear B-cell epitopes**
+This function is used to extract information for \emph{linear B-cell epitopes}
 from the XML files exported using the functionality provided by
-[IEDB](https://www.iedb.org/).
-It assumes that the user has downloaded the _Complete Database Export_ from
-the _XML Database Export_ field in IEDB's
-[Database Export](https://www.iedb.org/database_export_v3.php) and extracted
-it in a given folder, which is passed as an argument to the function.
+\href{https://www.iedb.org/}{IEDB}.
+It assumes that the user has downloaded the \emph{Complete Database Export} from
+the \emph{XML Database Export} field in IEDB's
+\href{https://www.iedb.org/database_export_v3.php}{Database Export} and extracted
+it in a given folder, which is passed as an argument to the function. This
+can be easily done with \code{\link[=get_IEDB]{get_IEDB()}}.
 }
 \examples{
 my.dir   <- system.file("extdata/xml_examples", package="epitopes")
-epitopes <- get_LBCE(my.dir, ncpus = 2)
+epitopes <- get_LBCE(my.dir)
 
 }
 \author{

@@ -7,14 +7,15 @@
 get_feature_functions()
 }
 \value{
-vector of funtion names.
+vector of function names.
 }
 \description{
-Prints the feature calculation functions available in the `epitopes` package
+Prints the feature calculation functions available in the \strong{epitopes}
+package
 }
 \details{
 This routine prints the names of the feature calculation functions available
-in the `epitopes` package, which are used within `calc_features()`.
+in the \strong{epitopes} package, which are used within \strong{calc_features()}.
 }
 \examples{
 get_feature_functions()

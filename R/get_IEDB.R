@@ -3,11 +3,11 @@
 #' This function is used to retrieve the full IEDB database from
 #' [IEDB](https://www.iedb.org) and extract it to a target folder.
 #'
-#' @param url URL of the .zip file containing the full IEDB
+#' @param url URL of the *.zip* file containing the full IEDB
 #'        export (XML).
 #' @param save_folder Path to folder for extracting the results. Defaults to
-#'        "iedb_yyyymmdd", where `yyyymmdd` is replaced by the current date.
-#' @param remove_zip logical flag: should the .ZIP file be deleted after
+#'        "iedb_yyyymmdd", where *yyyymmdd* is replaced by the current date.
+#' @param remove_zip logical flag: should the *.zip* file be deleted after
 #'        extraction?
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
@@ -29,10 +29,18 @@ get_IEDB <- function(url = "https://www.iedb.org/downloader.php?file_name=doc/ie
 
   # Download the file into save_folder and unzip it.
   if(!dir.exists(save_folder)) dir.create(save_folder)
-  utils::download.file(url, paste0(save_folder, "/iedb.zip"))
+  cat("\nDownloading file:\n")
+  utils::download.file(url, destfile = paste0(save_folder, "/iedb.zip"),
+                       quiet = FALSE)
+  cat("Unzipping file into folder:", save_folder,
+      "\n(This may take a while)")
   utils::unzip(paste0(save_folder, "/iedb.zip"), exdir = save_folder)
 
-  if(remove_zip) file.remove(paste0(save_folder, "/iedb.zip"))
+  if(remove_zip){
+    cat("\nRemoving ZIP file")
+    file.remove(paste0(save_folder, "/iedb.zip"))
+  }
+
 
   invisible(TRUE)
 }

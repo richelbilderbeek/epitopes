@@ -1,46 +1,37 @@
 # Function to extract windows from a given row of df
 # (local scope only - not exported)
-extract_windows <- function(x, window_size, step_size, window_exp){
+extract_windows <- function(x, ws){
 
-  # Initialise dataframe
-  wdf <- data.frame(window_seq = rep(NA_character_, x$epitope_len + 2),
-                    window_exp = rep(NA_character_, x$epitope_len + 2),
-                    protein_id = x$protein_id,
-                    epitope_id = x$epitope_id,
-                    center_pos = rep(NA_integer_, x$epitope_len + 2),
-                    start_pos  = rep(NA_integer_, x$epitope_len + 2),
-                    stop_pos   = rep(NA_integer_, x$epitope_len + 2),
-                    taxid      = x$protein_taxid,
-                    host_id    = x$host_id,
-                    org_id     = x$org_id,
-                    file_id    = x$file_id,
-                    Class      = x$Class,
-                    Type       = nullcheck(x$Type),
-                    stringsAsFactors = FALSE)
+  # Pad string at both ends
+  pseq  <- x$TSeq_sequence
+  nw    <- nchar(pseq)
+  char1 <- paste(rep(substr(pseq, 1, 1), (ws - 1) / 2),
+                 collapse = "")
+  charN <- paste(rep(substr(pseq, nw, nw), (ws - 1) / 2),
+                 collapse = "")
+  pseq  <- paste(char1, pseq, charN, collapse = "", sep = "")
 
-  if (window_exp <= 0) wdf$window_exp <- NULL
-
-  # Initial position for window (and expanded window)
-  i1   <- max(1, x$epitope_start - floor(window_size / 2))
-  i2   <- min(x$protein_len, i1 + window_size - 1)
-  i1e  <- max(1, i1 - window_exp)
-  i2e  <- min(x$protein_len, i2 + window_exp)
-  j    <- 1
-  stop <- FALSE
-  while(!stop){
-    wdf$window_seq[j] <- substr(x$protein_seq, i1, i2)
-    wdf$center_pos[j] <- x$epitope_start + (j - 1) * step_size
-    wdf$start_pos[j]  <- i1
-    wdf$stop_pos[j]   <- i2
-    if(window_exp > 0) wdf$window_exp[j] <- substr(x$protein_seq, i1e, i2e)
-    i1  <- i1 + step_size
-    i2  <- i2 + step_size
-    i1e <- i1e + step_size
-    i2e <- min(x$protein_len, i2e + step_size)
-    j   <- j + 1
-    if(i2 > min(x$protein_len,  x$epitope_stop + ceiling(window_size / 2) - 1)) {
-      stop <- TRUE
-    }
+  if(x$df_type == "prot"){
+    start_pos <- 1 + (ws - 1) / 2
+    stop_pos  <- nchar(pseq) - (ws - 1) / 2
+  } else {
+    start_pos <- x$start_pos + (ws - 1) / 2
+    stop_pos  <- x$end_pos + (ws - 1) / 2
+    nw        <- stop_pos - start_pos + 1
   }
-  return(wdf[!is.na(wdf$window_seq), ])
+
+  # Initialise data frame
+  x <- data.table::as.data.table(x)[rep(1, nw), ]
+
+  torm <- c("TSeq_sequence", "df_type", "start_pos", "end_pos")
+  torm <- torm[torm %in% names(x)]
+  if(length(torm) > 0) x <- x [, (torm) := NULL]
+
+  x$center_pos <- (start_pos - (ws - 1) / 2):(stop_pos - (ws - 1) / 2)
+  x$window_seq <- sapply(start_pos:stop_pos,
+                         function(i, pseq, wl){ substr(pseq, i - wl, i + wl) },
+                         pseq = pseq,
+                         wl   = (ws - 1) / 2)
+
+  return(x)
 }
