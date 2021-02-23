@@ -4,15 +4,20 @@
 \alias{smooth_predictions}
 \title{Smoothing of prediction vectors}
 \usage{
-smooth_predictions(x, window_size, type = "mode")
+smooth_predictions(x, window_size, type = "mode", minsize = 8)
 }
 \arguments{
 \item{x}{vector of predictions (must be numeric)}
 
-\item{window_size}{size of the sliding window}
+\item{window_size}{size of the sliding window. Only used if \code{type} is
+either \code{"mean"} or \code{"mode"}.}
 
-\item{type}{type of smoothing function to use. Accepts "mode" (for majority
-vote) or "mean".}
+\item{type}{type of smoothing function to use. Accepts "mode" (simple
+majority vote), "mean" or "minsize".}
+
+\item{minsize}{smallest sequence length for positive predictions.
+Stretches of positive-labelled positions shorter than \code{minsize} are
+flipped to negative (only works if \verb{type == "minsize}).}
 }
 \value{
 vector of smoothed prediction values.

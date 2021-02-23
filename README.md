@@ -1,19 +1,26 @@
-## epitopes package
+# epitopes package
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/fcampelo/epitopes/workflows/R-CMD-check/badge.svg)](https://github.com/fcampelo/epitopes/actions)
+  <!-- badges: end -->
 
 Processing and Feature Extraction of epitope data from the Immune Epitope Database ([IEDB](http://iedb.org))
 
 ## Authors: 
-- Felipe Campelo - [f.campelo@aston.ac.uk](mailto:f.campelo@aston.ac.uk)
-- Jodie Ashford - [ashfojsm@aston.ac.uk](ashfojsm@aston.ac.uk)
-- Francisco Lobo - [franciscolobo@ufmg.br](franciscolobo@ufmg.br)
+- Felipe Campelo - [f.campelo@aston.ac.uk](mailto:f.campelo@aston.ac.uk), [fcampelo@gmail.com](mailto:fcampelo@gmail.com)
+- Jodie Ashford - [ashfojsm@aston.ac.uk](mailto:ashfojsm@aston.ac.uk)
+
+## Contributors:
+- Francisco Lobo - [franciscolobo@ufmg.br](mailto:franciscolobo@ufmg.br)
+- Joao Reis-Cunha - [jaumlrc@gmail.com](jaumlrc@gmail.com)
 
 ## Current version:
 - Consolidation of linear B-cell epitopes from the full IEDB database
+- Data splitting for machine learning based on protein dissimilarity
 - Extraction of observations for feature calculation using a sliding window representation.
-- Calculation of summary peptide-based features.
+- Calculation of features.
 
 ## Upcoming:
-- Calculation of more features: cojoint triads and dipeptide frequencies (code tested, to be released to the package in late May/2020).
+- Modelling and plotting
 
 ## Usage  
 1. Download the Complete Database Export (XML format) from [https://www.iedb.org/database_export_v3.php](https://www.iedb.org/database_export_v3.php)  
