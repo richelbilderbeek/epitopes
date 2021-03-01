@@ -4,12 +4,14 @@
 \alias{calc_performance}
 \title{Calculate epitope classification performance indices}
 \usage{
-calc_performance(truth, pred, posValue = 1, negValue = -1)
+calc_performance(truth, pred, prob = NULL, posValue = 1, negValue = -1)
 }
 \arguments{
 \item{truth}{vector of reference values}
 
 \item{pred}{vector of predicted values}
+
+\item{prob}{optional, vector of predicted probabilities}
 
 \item{posValue}{value that indicates the "positive" class.}
 

@@ -5,6 +5,7 @@
 #'
 #' @param truth vector of reference values
 #' @param pred  vector of predicted values
+#' @param prob  optional, vector of predicted probabilities
 #' @param posValue value that indicates the "positive" class.
 #' @param negValue value that indicates the "negative" class.
 #'
@@ -15,7 +16,7 @@
 #' @export
 #'
 
-calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
+calc_performance <- function(truth, pred, prob = NULL, posValue = 1, negValue = -1){
 
   assertthat::assert_that(length(posValue) == 1,
                           length(negValue) == 1,
@@ -39,6 +40,28 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
   mccNum  <- TP * TN - FP * FN
   mccDen  <- (TP + FP) * (TP + FN) * (TN + FP) * (TN + FN)
 
+  if(!is.null(prob)){
+    # Implementation validated in large-samples against pROC::roc
+    df  <- data.frame(prob = prob, class = truth)
+    tr  <- sort(unique(prob), decreasing = TRUE)
+    tpr <- fpr <- numeric(length(tr))
+    auc <- 0
+    for (i in seq_along(tr)){
+      df$pred <- ifelse(df$prob >= tr[i],
+                        yes = posValue,
+                        no  = negValue)
+      tpr[i] <- sum(df$pred == posValue & df$class == posValue) / sum(df$class == posValue)
+      fpr[i] <- sum(df$pred == posValue & df$class == negValue) / sum(df$class == negValue)
+      if (i > 1){
+        auc <- auc + (fpr[i] - fpr[i - 1]) * (tpr[i] + tpr[i-1]) / 2
+      }
+    }
+  } else {
+    auc = NULL
+    tpr = NULL
+    fpr = NULL
+  }
+
   out <- data.frame(
     TP        = TP,
     TN        = TN,
@@ -51,6 +74,9 @@ calc_performance <- function(truth, pred, posValue = 1, negValue = -1){
     f1        = 2 * TP / ifelse(2 * TP + FP + FN == 0, 1, 2 * TP + FP + FN),
     mcc       = mccNum / ifelse(mccDen == 0, 1, sqrt(mccDen)),
     accuracy  =  (TP + TN) / (TP + TN + FP + FN),
+    auc       = auc,
+    tpr       = tpr,
+    fpr       = fpr,
     n_predPos = nPos,
     n_predNeg = nNeg,
     n_NA      = length(idx))
