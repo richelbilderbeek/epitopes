@@ -4,7 +4,14 @@
 \alias{calc_performance}
 \title{Calculate epitope classification performance indices}
 \usage{
-calc_performance(truth, pred, prob = NULL, posValue = 1, negValue = -1)
+calc_performance(
+  truth,
+  pred,
+  prob = NULL,
+  posValue = 1,
+  negValue = -1,
+  ret.as.list = FALSE
+)
 }
 \arguments{
 \item{truth}{vector of reference values}
@@ -16,6 +23,10 @@ calc_performance(truth, pred, prob = NULL, posValue = 1, negValue = -1)
 \item{posValue}{value that indicates the "positive" class.}
 
 \item{negValue}{value that indicates the "negative" class.}
+
+\item{ret.as.list}{optional, should the result be returned as a list (if
+TRUE the routine also returns the \code{tpr} and \code{fpr} vectors used to
+calculate AUC, if a \code{prob} vector is passed.)}
 }
 \value{
 list containing several performance indicators
