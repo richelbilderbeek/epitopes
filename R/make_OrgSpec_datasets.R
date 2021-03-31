@@ -106,9 +106,9 @@ make_OrgSpec_datasets <- function(epitopes, proteins, taxonomy_list,
                          set.positive = set.positive)
 
   # Filter epitopes by organism / host IDs
-  jdf <- filter_epitopes(df      = jdf,
-                         orgIDs  = orgIDs,
-                         hostIDs = hostIDs,
+  jdf <- filter_epitopes(df        = jdf,
+                         orgIDs    = orgIDs,
+                         hostIDs   = hostIDs,
                          removeIDs = removeIDs,
                          tax_list  = taxonomy_list)
 
