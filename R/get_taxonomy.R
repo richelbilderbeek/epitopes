@@ -116,5 +116,5 @@ get_taxonomy <- function(uids, save_folder = NULL){
   cat("\nDone!\n", length(reslist), "taxonomies retrieved.\n",
       length(errlist), "retrieval errors.")
 
-  invisible(reslist)
+  return(reslist)
 }

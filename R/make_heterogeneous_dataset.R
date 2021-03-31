@@ -112,15 +112,8 @@ make_heterogeneous_dataset <- function(epitopes, proteins, taxonomy_list,
   # Calculate features
   wdf <- calc_features(wdf, max.N = max.N, ncpus = ncpus)
 
-  saveRDS(wdf, paste0(save_folder, "df_heterogeneous.rds"))
+  saveRDS(wdf, paste0(save_folder, "/df_heterogeneous.rds"))
 
   return(wdf)
 }
-
-
-
-
-
-
-
 
