@@ -53,24 +53,24 @@
 #'
 #' @export
 #'
-make_datasets <- function(epitopes, proteins, taxonomy_list,
-                          orgIDs          = NULL,
-                          hostIDs         = NULL,
-                          removeIDs       = NULL,
-                          save_folder     = "./",
-                          min_epit        = 8,
-                          max_epit        = 25,
-                          only_exact      = FALSE,
-                          pos.mismatch.rm = "all",
-                          set.positive    = "mode",
-                          window_size     = 2 * min_epit - 1,
-                          max.N           = 2,
-                          split_level     = "prot",
-                          split_perc      = c(75, 25),
-                          split_names     = c("01_training", "02_holdout"),
-                          coverage_threshold = 80,
-                          identity_threshold = 80,
-                          ncpus           = 1){
+make_OrgSpec_datasets <- function(epitopes, proteins, taxonomy_list,
+                                  orgIDs          = NULL,
+                                  hostIDs         = NULL,
+                                  removeIDs       = NULL,
+                                  save_folder     = "./",
+                                  min_epit        = 8,
+                                  max_epit        = 25,
+                                  only_exact      = FALSE,
+                                  pos.mismatch.rm = "all",
+                                  set.positive    = "mode",
+                                  window_size     = 2 * min_epit - 1,
+                                  max.N           = 2,
+                                  split_level     = "prot",
+                                  split_perc      = c(75, 25),
+                                  split_names     = c("01_training", "02_holdout"),
+                                  coverage_threshold = 80,
+                                  identity_threshold = 80,
+                                  ncpus           = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
