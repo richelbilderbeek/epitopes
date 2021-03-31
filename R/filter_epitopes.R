@@ -13,6 +13,7 @@
 #'        (using *sourceOrg_id*).
 #' @param tax_load_file optional taxonomy file (RDS file generated either by this
 #'        function or by [get_taxonomy()]).
+#' @param tax_list optional taxonomy list (to be passed instead of tax_load_file)
 #' @param tax_save_folder optional folder saving the taxonomy. Ignored
 #'        if **tax_load_file** is not _NULL_.
 #'
@@ -29,6 +30,7 @@ filter_epitopes <- function(df,
                             hostIDs   = NULL,
                             removeIDs = NULL,
                             tax_load_file = NULL,
+                            tax_list    = NULL,
                             tax_save_folder = NULL) {
 
   # ========================================================================== #
@@ -36,13 +38,16 @@ filter_epitopes <- function(df,
   id_classes <- c("NULL", "numeric", "integer", "character")
   df_classes <- c("LBCE_dt", "joined_epit_dt", "windowed_epit_dt")
   assertthat::assert_that(is.data.frame(df),
-                          any(class(df)   %in% df_classes),
+                          any(class(df)   %in%  df_classes),
                           class(orgIDs)    %in% id_classes,
                           class(hostIDs)   %in% id_classes,
                           class(removeIDs) %in% id_classes,
-                          is.null(tax_load_file)   | file.exists(tax_load_file),
+                          is.null(tax_load_file)   | is.character(tax_load_file),
+                          is.null(tax_list)        | is.list(tax_list),
                           is.null(tax_save_folder) | is.character(tax_save_folder),
                           is.null(tax_save_folder) | length(tax_save_folder) == 1)
+
+  if(!is.null(tax_load_file)) assertthat::assert_that(file.exists(tax_load_file))
 
   # Standardise relevant variables:
   df_type <- class(df)[grep("_dt", class(df))]
@@ -52,8 +57,10 @@ filter_epitopes <- function(df,
     ids <- data.frame(org = df$Info_sourceOrg_id, host = df$Info_host_id)
   }
 
-  if (is.null(tax_load_file)){
+  if (is.null(tax_load_file) & is.null(tax_list)){
     tax  <- get_taxonomy(unique(ids$org), save_folder = tax_save_folder)
+  } else if (!is.null(tax_list)){
+    tax <- tax_list
   } else {
     tax <- readRDS(tax_load_file)
   }

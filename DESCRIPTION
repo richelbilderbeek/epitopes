@@ -27,6 +27,7 @@ Imports: assertthat (>= 0.2.1),
          Peptides (>= 2.4.1),
          pbapply (>= 1.4.0),
          stringr (>= 1.4.0),
+         seqinr (>= 4.2.0),
          utils
 Suggests: pkgdown, knitr
 Encoding: UTF-8

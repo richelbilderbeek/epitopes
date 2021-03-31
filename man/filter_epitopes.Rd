@@ -10,6 +10,7 @@ filter_epitopes(
   hostIDs = NULL,
   removeIDs = NULL,
   tax_load_file = NULL,
+  tax_list = NULL,
   tax_save_folder = NULL
 )
 }
@@ -29,6 +30,8 @@ filter_epitopes(
 
 \item{tax_load_file}{optional taxonomy file (RDS file generated either by this
 function or by \code{\link[=get_taxonomy]{get_taxonomy()}}).}
+
+\item{tax_list}{optional taxonomy list (to be passed instead of tax_load_file)}
 
 \item{tax_save_folder}{optional folder saving the taxonomy. Ignored
 if \strong{tax_load_file} is not \emph{NULL}.}
