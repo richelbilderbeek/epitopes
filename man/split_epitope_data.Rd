@@ -30,6 +30,8 @@ Details.}
 
 \item{split_names}{optional character vector with short names for each split.}
 
+\item{save_folder}{path to folder for saving the results.}
+
 \item{blast_file}{path to file containing all-vs-all BLASTp alignment results
 for all proteins in \strong{wdf}. See Details.}
 

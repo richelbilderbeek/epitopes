@@ -39,6 +39,7 @@ calc_performance <- function(truth, pred, prob = NULL,
   if(length(idx) > 0){
     truth <- truth[-idx]
     pred  <- pred[-idx]
+    prob  <- prob[-idx]
   }
 
   TN <- as.numeric(sum(truth == negValue & pred == negValue))

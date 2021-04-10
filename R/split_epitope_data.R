@@ -41,6 +41,7 @@
 #' similarity, see Details.
 #' @param identity_threshold identity threshold for grouping proteins by
 #' similarity, see Details.
+#' @param save_folder path to folder for saving the results.
 #'
 #' @return A list object containing the split data tables.
 #'
