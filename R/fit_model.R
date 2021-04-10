@@ -81,7 +81,7 @@ fit_model <- function(data.train,
     rf_class <- ifelse(rf_probs >= threshold, 1, -1)
 
     rf_preds <- data.test %>%
-      dplyr::select(all_of(c("Info_UID", "Info_center_pos", "Class"))) %>%
+      dplyr::select(dplyr::all_of(c("Info_UID", "Info_center_pos", "Class"))) %>%
       dplyr::bind_cols(pred_prob = rf_probs) %>%
       dplyr::mutate(Class       = as.numeric(as.character(Class)),
                     pred_class = as.numeric(as.character(rf_class)))
