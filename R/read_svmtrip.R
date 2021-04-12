@@ -9,13 +9,14 @@
 #' in `res.file`. Each position in a protein must be represented by a row in
 #' this data frame. Must have at least the columns *Info_UID* (with protein
 #' IDs) and *Info_center_pos* (with position on the protein).
+#' @param ... Currently unused.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @export
 #'
 
-read_svmtrip <- function(res.file, protID, proteins){
+read_svmtrip <- function(res.file, protID, proteins, ...){
   # ========================================================================== #
   # Sanity checks and initial definitions
   protCols <- c("Info_UID", "Info_center_pos")

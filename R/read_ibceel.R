@@ -4,6 +4,10 @@
 #'
 #' @param res.file path to the results file. Must be an HTML file containing the
 #' iBCE-EL output.
+#' @param split_string short string used to separate protein ID from position in
+#' the iBCE-EL output. This assumes that the iBCE-EL results were generated
+#' from a FASTA file in which each peptide had the ID string set as
+#' *proteinID<split_string>position*.
 #' @param ... Currently unused.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
@@ -11,7 +15,7 @@
 #' @export
 #'
 
-read_ibceel <- function(res.file, ...){
+read_ibceel <- function(res.file, split_string = "pp", ...){
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(file.exists(res.file))
@@ -19,7 +23,7 @@ read_ibceel <- function(res.file, ...){
   # ========================================================================== #
 
   preds  <- XML::readHTMLTable(res.file, header = TRUE)[[1]]
-  idvars <- strsplit(preds$`FASTA ID`, split = "pp")
+  idvars <- strsplit(preds$`FASTA ID`, split = split_string)
 
   preds$Info_UID        <- sapply(idvars, function(x) x[1])
   preds$Info_UID        <- gsub("-", "_", preds$Info_UID, fixed = TRUE)

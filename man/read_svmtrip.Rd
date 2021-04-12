@@ -4,7 +4,7 @@
 \alias{read_svmtrip}
 \title{Read saved output from SVMtrip}
 \usage{
-read_svmtrip(res.file, protID, proteins)
+read_svmtrip(res.file, protID, proteins, ...)
 }
 \arguments{
 \item{res.file}{path to the results file. Must be an HTML file containing the
@@ -16,6 +16,8 @@ SVMtrip output.}
 in \code{res.file}. Each position in a protein must be represented by a row in
 this data frame. Must have at least the columns \emph{Info_UID} (with protein
 IDs) and \emph{Info_center_pos} (with position on the protein).}
+
+\item{...}{Currently unused.}
 }
 \description{
 This function is used to read the saved HTML output from SVMtrip
