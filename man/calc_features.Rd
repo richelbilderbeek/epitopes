@@ -24,7 +24,7 @@ This function is used to calculate several distinct families of features for
 a vector of peptides.
 }
 \details{
-This function is partially based on functions \code{\link[Peptides:aacomp]{Peptides::aaComp()}}
+This function is partially based on functions \code{\link[Peptides:aaComp]{Peptides::aaComp()}}
 and \code{\link[Peptides:aaDescriptors]{Peptides::aaDescriptors()}} (check documentation for details).
 
 Some of the features are calculated based on an aminoacid propensity scale,

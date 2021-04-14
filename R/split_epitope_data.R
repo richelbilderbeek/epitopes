@@ -35,13 +35,13 @@
 #' @param split_perc numeric vector of desired splitting percentages. See
 #'        Details.
 #' @param split_names optional character vector with short names for each split.
-#' @param save_folder path to folder for saving the results.
 #' @param blast_file path to file containing all-vs-all BLASTp alignment results
 #'        for all proteins in **wdf**. See Details.
 #' @param coverage_threshold coverage threshold for grouping proteins by
 #' similarity, see Details.
 #' @param identity_threshold identity threshold for grouping proteins by
 #' similarity, see Details.
+#' @param save_folder path to folder for saving the results.
 #'
 #' @return A list object containing the split data tables.
 #'
@@ -66,9 +66,7 @@ split_epitope_data <- function(wdf,
                           is.numeric(split_perc),
                           all(sapply(split_perc, assertthat::is.count)),
                           is.null(blast_file) | is.character(blast_file),
-                          is.null(split_names) | is.character(split_names),
-                          is.null(save_folder) | is.character(save_folder),
-                          is.null(save_folder) | length(save_folder) == 1)
+                          is.null(split_names) | is.character(split_names))
 
   # Check and adjust split sizes if necessary
   ssp <- sum(split_perc)
@@ -90,17 +88,6 @@ split_epitope_data <- function(wdf,
     cat("\nLength of split names smaller than number of splits.",
     "\nUsing split numbers instead.")
     split_names <- 1:nsplits
-  }
-
-  # Check save folder and create file names
-  if(!is.null(save_folder)) {
-    if(!dir.exists(save_folder)) dir.create(save_folder)
-    ymd <- gsub("-", "", Sys.Date())
-    df_files <- character(nsplits)
-    for (i in 1:nsplits){
-      df_files[i] <- paste0(normalizePath(save_folder), "/", ymd,
-                            "_df_Split", split_names[i], ".rds")
-    }
   }
 
 
@@ -196,12 +183,9 @@ split_epitope_data <- function(wdf,
 
   for (i in seq_along(split_ids)){
     split_ids[[i]]$wdf <- wdf[which(id_var %in% split_ids[[i]]$IDs), ]
-    if(!is.null(save_folder)) {
-      saveRDS(split_ids[[i]]$wdf, file = df_files[i])
-    }
   }
 
-  invisible(split_ids)
+  return(split_ids)
 }
 
 

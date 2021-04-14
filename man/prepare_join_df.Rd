@@ -27,15 +27,12 @@ prepare_join_df(
 \item{max_epit}{positive integer, longest epitope to be considered}
 
 \item{only_exact}{logical, should only sequences labelled as "Exact Epitope"
-in variable \emph{epit_struc_def} be considered?}
+in variable \emph{epit_struc_def} (within \code{epitopes}) be considered?}
 
 \item{pos.mismatch.rm}{should epitopes with position mismatches be removed?
-Use "all" (default) for removing any position mismatch (i.e., if the
-protein substring between \emph{start_pos} and \emph{end_pos} does not
-correspond to \emph{epit_seq}) or "align" if the routine should attempt to
-fix \emph{start_pos} and \emph{end_pos} by searching for \emph{epit_seq} in the
-protein sequence. Removed entries are listed (if \strong{save_folder} is
-not \emph{NULL}) in the \emph{df_errlist} file.}
+Use "all" (default) for removing any position mismatch or "align"
+if the routine should attempt to
+search the epitope sequence in the protein sequence.}
 
 \item{set.positive}{how to decide whether an observation should be of the
 "Positive" (+1) class? Use "any" to set a sequence as positive if
@@ -50,16 +47,16 @@ Merges previously extracted epitopes and proteins, and performs some
 sanity checks and filtering.
 }
 \details{
-Entries in the \strong{epitopes} input are removed if they:
+Entries in the \code{epitopes} input are removed if they:
 \itemize{
 \item Lack a valid protein ID (i.e., one that has a corresponding entry in
-\strong{proteins})
+\code{proteins})
 \item Lack a valid string in \emph{epit_seq}
 \item Lack a valid definition in \emph{epit_struc_def}
-\item Have sequences shorter than \strong{min_epit} or longer than \strong{max_epit}.
+\item Have sequences shorter than \code{min_epit} or longer than \code{max_epit}.
 \item Have a mismatch between the sequence in \emph{epit_seq} and the
 corresponding sequence between \emph{start_pos} and \emph{end_pos} on the protein
-sequence (see description of parameter \strong{pos.mismatch.rm}).
+sequence (see description of parameter \code{pos.mismatch.rm}).
 }
 }
 \author{
