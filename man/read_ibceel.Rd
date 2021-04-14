@@ -4,11 +4,16 @@
 \alias{read_ibceel}
 \title{Read saved output from iBCE-EL}
 \usage{
-read_ibceel(res.file, ...)
+read_ibceel(res.file, split_string = "pp", ...)
 }
 \arguments{
 \item{res.file}{path to the results file. Must be an HTML file containing the
 iBCE-EL output.}
+
+\item{split_string}{short string used to separate protein ID from position in
+the iBCE-EL output. This assumes that the iBCE-EL results were generated
+from a FASTA file in which each peptide had the ID string set as
+\emph{proteinID<split_string>position}.}
 
 \item{...}{Currently unused.}
 }
