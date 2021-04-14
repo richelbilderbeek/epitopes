@@ -17,7 +17,9 @@
 #'
 #' @export
 #'
-smooth_predictions <- function(x, window_size, type = "mode", minsize = 8){
+smooth_predictions <- function(x, window_size = 15,
+                               type = "mode",
+                               minsize = 8){
 
   valid_types <- c("mean", "mode", "minsize")
   assertthat::assert_that(is.numeric(x),
