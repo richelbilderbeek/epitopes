@@ -22,6 +22,7 @@
 #'
 #' @export
 #'
+#' @importFrom dplyr %>%
 
 fit_model <- function(data.train,
                       data.test = NULL,
@@ -80,6 +81,9 @@ fit_model <- function(data.train,
     rf_probs <- test.pred$predictions[, "1"]
     rf_class <- ifelse(rf_probs >= threshold, 1, -1)
 
+    if(!("Info_UID" %in% names(data.test))){
+      data.test$Info_UID <- data.test$Info_protein_id
+    }
     rf_preds <- data.test %>%
       dplyr::select(dplyr::all_of(c("Info_UID", "Info_center_pos", "Class"))) %>%
       dplyr::bind_cols(pred_prob = rf_probs) %>%
