@@ -23,13 +23,9 @@
 .Rproj.user
 # Rprof temporary files
 Rprof.out
-doc
 Meta
 
 #*.rds
 
 #results/
 results/.DS_Store
-#results/.DS_Store
-inst/doc
-docs
