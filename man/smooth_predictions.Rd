@@ -4,7 +4,7 @@
 \alias{smooth_predictions}
 \title{Smoothing of prediction vectors}
 \usage{
-smooth_predictions(x, window_size = 11, type = "mode", minsize = 8)
+smooth_predictions(x, window_size = 15, type = "mode", minsize = 8)
 }
 \arguments{
 \item{x}{vector of predictions (must be numeric)}

@@ -27,7 +27,7 @@ retrieval of protein data from NBCI and Uniprot.
 - Plotting functions
 
 ## Usage  
-Check Vignette _Usage example_ for a quick tutorial.
+Check Vignette [Usage example](https://fcampelo.github.io/epitopes/articles/Usage-example.html) for a quick tutorial.
 
 ***
 

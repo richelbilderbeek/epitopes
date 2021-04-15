@@ -3,15 +3,10 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(rmarkdown.html_vignette.check_title = FALSE)
 
 suppressPackageStartupMessages({
   library(epitopes)
   library(seqinr)})
-
-my_perf <- readRDS("../inst/extdata/vignette_example01_myperf.rds")
-preds   <- readRDS("../inst/extdata/vignette_example01_preds.rds")
-myprot  <- readRDS("../inst/extdata/vignette_example01_myprot.rds")
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  library(epitopes)
@@ -100,14 +95,22 @@ myprot  <- readRDS("../inst/extdata/vignette_example01_myprot.rds")
 #                                        prob  = my.model$rf_probs,
 #                                        ret.as.list = TRUE)
 
-## ---- fig.align='center', fig.width=6-----------------------------------------
-# Plot ROC curve
-plot(my_perf$fpr, my_perf$tpr, type = "p", pch = 20, las = 1,
-     xlab = "FPR", ylab = "TPR", 
-     main = "ROC curve for O. volvulus predictor", 
-     sub = paste("AUC = ", signif(my_perf$auc, digits = 3)))
+## ---- eval=FALSE--------------------------------------------------------------
+#  # Plot ROC curve
+#  plot(my_perf$fpr, my_perf$tpr, type = "p", pch = 20, las = 1,
+#       xlab = "FPR", ylab = "TPR",
+#       main = "ROC curve for O. volvulus predictor",
+#       sub = paste("AUC = ", signif(my_perf$auc, digits = 3)))
+#  
+#  print(unlist(my_perf[c(5:12)]))
 
-print(unlist(my_perf[c(5:12)]))
+## ---- include=FALSE-----------------------------------------------------------
+# this comes from the actual simulation
+perf_vec <- c(0.7624003, 0.6491852, 0.7012283, 0.7167080, 
+              0.7305359, 0.4147487, 0.7079694, 0.7783327)
+names(perf_vec) <- c("sens", "spec", "ppv", "npv", 
+                     "f1", "mcc", "accuracy", "auc")
+print(perf_vec)
 
 ## ---- eval = FALSE------------------------------------------------------------
 #  # Get the first protein from the hold-out set as an example:
@@ -124,16 +127,16 @@ print(unlist(my_perf[c(5:12)]))
 #  preds    <- stats::predict(my.model$rf_model,
 #                             data = myprot_w)
 
-## ---- fig.align='center', fig.width=8-----------------------------------------
-# Smooth predictions (to remove very short positive sequences)
-myclass <- epitopes::smooth_predictions(as.numeric(preds$predictions[, 2] > 0.5),
-                                        minsize = 8)
-                                        
-plot(preds$predictions[, 2], type = "l", lwd = .5, las = 1, 
-     main = paste("Predictions for protein", myprot$UID[1]),
-     xlab = "Protein position",
-     ylab = "Probability / Prediction",
-     ylim = c(0, 1.05))
-points(myclass, type = "p", pch = 20, col = myclass + 1)
-points(myclass, type = "l", lwd = .3, col = "#77777777")
+## ---- eval=FALSE--------------------------------------------------------------
+#  # Smooth predictions (to remove very short positive sequences)
+#  myclass <- epitopes::smooth_predictions(as.numeric(preds$predictions[, 2] > 0.5),
+#                                          minsize = 8)
+#  
+#  plot(preds$predictions[, 2], type = "l", lwd = .5, las = 1,
+#       main = paste("Predictions for protein", myprot$UID[1]),
+#       xlab = "Protein position",
+#       ylab = "Probability / Prediction",
+#       ylim = c(0, 1.05))
+#  points(myclass, type = "p", pch = 20, col = myclass + 1)
+#  points(myclass, type = "l", lwd = .3, col = "#77777777")
 
