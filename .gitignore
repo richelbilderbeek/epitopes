@@ -29,3 +29,5 @@ Meta
 
 #results/
 results/.DS_Store
+doc
+inst/doc

@@ -230,13 +230,10 @@
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">my_perf</span><span class="op">$</span><span class="va">fpr</span>, <span class="va">my_perf</span><span class="op">$</span><span class="va">tpr</span>, type <span class="op">=</span> <span class="st">"p"</span>, pch <span class="op">=</span> <span class="fl">20</span>, las <span class="op">=</span> <span class="fl">1</span>,
      xlab <span class="op">=</span> <span class="st">"FPR"</span>, ylab <span class="op">=</span> <span class="st">"TPR"</span>, 
      main <span class="op">=</span> <span class="st">"ROC curve for O. volvulus predictor"</span>, 
-     sub <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"AUC = "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">signif</a></span><span class="op">(</span><span class="va">my_perf</span><span class="op">$</span><span class="va">auc</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p><img src="Usage-example_files/figure-html/unnamed-chunk-8-1.png" width="576" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R">
-<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">my_perf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>
-<span class="co">#&gt;      sens      spec       ppv       npv        f1       mcc  accuracy       auc </span>
-<span class="co">#&gt; 0.7624003 0.6491852 0.7012283 0.7167080 0.7305359 0.4147487 0.7079694 0.7783327</span></code></pre></div>
+     sub <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="st">"AUC = "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">signif</a></span><span class="op">(</span><span class="va">my_perf</span><span class="op">$</span><span class="va">auc</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
+
+<span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html">unlist</a></span><span class="op">(</span><span class="va">my_perf</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">5</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="ROC.png"></p>
 </div>
 <div id="apply-to-a-new-sequence" class="section level2">
 <h2 class="hasAnchor">
@@ -247,7 +244,7 @@
 <li>Calculate feature</li>
 <li>Pass the protein through the model using the <code>predict</code> function</li>
 </ul>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Get the first protein from the hold-out set as an example:</span>
 <span class="va">myprot</span> <span class="op">&lt;-</span> <span class="va">proteins</span><span class="op">[</span><span class="va">proteins</span><span class="op">$</span><span class="va">UID</span> <span class="op">==</span> <span class="va">splits</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">wdf</span><span class="op">$</span><span class="va">Info_protein_id</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>
 
@@ -261,7 +258,7 @@
 <span class="va">myprot_w</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="va">myprot_w</span><span class="op">)</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html">grepl</a></span><span class="op">(</span><span class="st">"Info_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">myprot_w</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
 <span class="va">preds</span>    <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">my.model</span><span class="op">$</span><span class="va">rf_model</span>,
                            data <span class="op">=</span> <span class="va">myprot_w</span><span class="op">)</span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># Smooth predictions (to remove very short positive sequences)</span>
 <span class="va">myclass</span> <span class="op">&lt;-</span> <span class="fu">epitopes</span><span class="fu">::</span><span class="fu"><a href="../reference/smooth_predictions.html">smooth_predictions</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">preds</span><span class="op">$</span><span class="va">predictions</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0.5</span><span class="op">)</span>,
                                         minsize <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>
@@ -273,7 +270,7 @@
      ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1.05</span><span class="op">)</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="va">myclass</span>, type <span class="op">=</span> <span class="st">"p"</span>, pch <span class="op">=</span> <span class="fl">20</span>, col <span class="op">=</span> <span class="va">myclass</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span><span class="op">(</span><span class="va">myclass</span>, type <span class="op">=</span> <span class="st">"l"</span>, lwd <span class="op">=</span> <span class="fl">.3</span>, col <span class="op">=</span> <span class="st">"#77777777"</span><span class="op">)</span></code></pre></div>
-<p><img src="Usage-example_files/figure-html/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;"></p>
+<p><img src="preds.png"></p>
 </div>
 </div>
   </div>
