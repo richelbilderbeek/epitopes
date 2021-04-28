@@ -117,3 +117,93 @@ label_proteins <- function(proteins, epitopes,
   return(proteins)
 
 }
+
+
+
+
+#' Label protein positions based on epitope data
+#'
+#' Takes a protein data frame and
+#' labels each protein position based on known epitope/non-epitope regions
+#' documented in an **epitopes** dataframe.
+#'
+#' @param epitopes data frame of epitope data.
+#' @param proteins data frame of protein data.
+#' @param ncpus number of cores to use.
+#'
+#' @return An updated protein dataframe with a Class attribute calculated for
+#' each position.
+#'
+#' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
+#'
+#' @export
+#'
+
+label_proteins2 <- function(proteins, epitopes, ncpus = 1){
+
+  # ========================================================================== #
+  # Sanity checks and initial definitions
+  assertthat::assert_that(is.data.frame(epitopes),
+                          is.data.frame(proteins),
+                          assertthat::is.count(ncpus))
+
+  # Prepare protein data for labeling
+  if(!("Info_center_pos" %in% names(proteins))){
+    # Convert proteins into windowed data format
+    proteins <- make_window_df(as.data.table(proteins),
+                               window_size = 1, ncpus = ncpus)
+  }
+
+  cat("\nExtracting label positions from 'epitopes'\n")
+  myf <- function(start_pos, end_pos, protein_id, epitope_id, nPos, nNeg){
+    st <- as.numeric(start_pos)
+    en <- as.numeric(end_pos)
+    if (!any(is.na(c(st, en)))){
+      data.frame(UID     = protein_id,
+                 pos     = st:en,
+                 epit_id = epitope_id,
+                 nPos    = nPos,
+                 nNeg    = nNeg)
+    } else {
+      data.frame(UID = character(), pos = numeric(), epit_id = character(),
+                 nPos = numeric(), nNeg = numeric())
+    }
+  }
+
+  tmp <- parallel::mcmapply(myf,
+                            epitopes$start_pos,
+                            epitopes$end_pos,
+                            epitopes$protein_id,
+                            epitopes$epitope_id,
+                            epitopes$n_Positive,
+                            epitopes$n_Negative,
+                            mc.cores = ncpus,
+                            SIMPLIFY = FALSE)
+  tmp <- data.table::rbindlist(tmp, use.names = TRUE)
+  cat(" - Done!\n")
+
+  # Aggregate multiply-labelled entries.
+  tmp$Class <- -1 + 2 * (tmp$nPos >= tmp$nNeg)
+  tmp <- tmp[, list(Info_epit_id = paste(unique(epit_id), collapse = ","),
+                    Info_nPos    = sum(Class == 1),
+                    Info_nNeg    = sum(Class == -1)),
+             by = list(UID, pos)]
+
+  # Join epitope labels into proteins dataset
+  proteins <- dplyr::left_join(proteins, tmp,
+                               by = c("Info_UID" = "UID",
+                                      "Info_center_pos" = "pos"))
+
+  # Set class
+  if (set.positive == "any"){
+    proteins$Class <- -1 + 2 * as.numeric(proteins$Info_nPos > 0)
+  } else if (set.positive == "all") {
+    proteins$Class <- -1 + 2 * (proteins$Info_nNeg == 0)
+  } else {
+    proteins$Class <- -1 + 2 * (proteins$Info_nPos >= proteins$Info_nNeg)
+  }
+
+  return(proteins)
+
+}
+

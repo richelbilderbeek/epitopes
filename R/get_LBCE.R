@@ -12,7 +12,7 @@
 #' @param data_folder path (either relative or absolute) to the directory
 #'        containing the XML files
 #' @param ncpus positive integer, number of cores to use
-#' @param save_folder path to folder for saving the output.
+#' @param save_folder path to folder saving the output.
 #'
 #' @return A *data.table* containing the epitope data is returned invisibly.
 #'
@@ -34,16 +34,14 @@ get_LBCE <- function(data_folder,
   assertthat::assert_that(is.character(data_folder), length(data_folder) == 1,
                           dir.exists(data_folder),
                           assertthat::is.count(ncpus),
-                          is.null(save_folder) | (is.character(save_folder)),
-                          is.null(save_folder) | length(save_folder) == 1)
+                          is.null(save_folder) | (is.character(save_folder) && length(save_folder) == 1))
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
-    ymd <- gsub("-", "", Sys.Date())
-    df_file <- paste0(normalizePath(save_folder), "/00_epitopes_", ymd, ".rds")
+    df_file <- paste0(normalizePath(save_folder), "/epitopes.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/00_epit_errlist_", ymd, ".rds")
+                      "/epit_errlist.rds")
   }
 
   # Get file list and initialise variables

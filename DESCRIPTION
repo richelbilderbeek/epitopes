@@ -1,7 +1,7 @@
 Package: epitopes
 Type: Package
 Title: Processing and Feature Extraction for Epitope Data
-Version: 0.5.1
+Version: 0.6.9000
 Date: 2021-04-10
 Author: c(person(given = "Felipe", family = "Campelo",
                     email = "f.campelo@aston.ac.uk",
@@ -29,6 +29,7 @@ Imports: assertthat (>= 0.2.1),
          stringr (>= 1.4.0),
          seqinr (>= 4.2.0),
          ranger (>= 0.12.1),
+         parallel,
          utils
 Suggests: 
     pkgdown,

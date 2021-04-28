@@ -41,10 +41,9 @@ get_taxonomy <- function(uids, save_folder = NULL){
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder)
-    ymd <- gsub("-", "", Sys.Date())
-    df_file <- paste0(normalizePath(save_folder), "/00_taxonomy_", ymd, ".rds")
+    df_file <- paste0(normalizePath(save_folder), "/00_taxonomy.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/00_taxonomy_not_retrieved_", ymd, ".rds")
+                      "/00_taxonomy_not_retrieved.rds")
     tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 
