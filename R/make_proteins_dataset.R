@@ -58,13 +58,15 @@ make_proteins_dataset <- function(epitopes, proteins, taxonomy_list, prot_IDs,
                          hostIDs   = hostIDs,
                          tax_list  = taxonomy_list)
 
-  res_prot  <- label_proteins(proteins[proteins$UID %in% prot_IDs, ],
+  target.prots <- proteins[proteins$UID %in% prot_IDs, ]
+
+  res_prot  <- label_proteins(target.prots,
                               epitopes = jdf,
                               set.positive = set.positive,
                               ncpus = ncpus)
   res_prot  <- res_prot[, c("Info_UID", "Info_center_pos", "Class")]
 
-  wres_prot <- make_window_df(proteins[proteins$UID %in% prot_IDs, ],
+  wres_prot <- make_window_df(target.prots,
                               window_size = window_size, ncpus = ncpus)
 
   wres_prot <- dplyr::left_join(wres_prot, res_prot,
@@ -73,10 +75,12 @@ make_proteins_dataset <- function(epitopes, proteins, taxonomy_list, prot_IDs,
 
   saveRDS(wres_prot, paste0(save_folder, "/prots_df.rds"))
   seqinr::write.fasta(as.list(gsub("[BJXZ]", "", wres_prot$Info_window_seq)),
-                      names = paste(wres_prot$Info_UID, wres_prot$Info_center_pos, sep = "pp"),
+                      names = paste(wres_prot$Info_UID,
+                                    wres_prot$Info_center_pos, sep = "pp"),
                       file.out = "./data/splits/prots_windows.fasta",
                       as.string = TRUE, nbchar = 10000)
-  seqinr::write.fasta(as.list(res_prot$TSeq_sequence), names = res_prot$UID,
+  seqinr::write.fasta(as.list(target.prots$TSeq_sequence),
+                      names = target.prots$UID,
                       file.out = paste0(save_folder, "/prots.fasta"),
                       as.string = TRUE, nbchar = 10000)
 
