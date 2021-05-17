@@ -19,7 +19,7 @@ process_individual_epitope_B <- function(idx, list_data){
   # ============= ONLY LINEAR B-CELL EPITOPES CROSS THIS LINE ============= #
 
   # Extract relevant fields.
-  out <- data.frame(
+  out <- data.table::data.table(
     pubmed_id      = nullcheck(list_data$Reference$Article$PubmedId),
     year           = nullcheck(list_data$Reference$Article$ArticleYear),
     epit_name      = nullcheck(ep$EpitopeName),

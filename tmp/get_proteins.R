@@ -25,17 +25,16 @@ get_proteins <- function(uids, save_folder = NULL){
   # ========================================================================== #
   # Sanity checks and initial definitions
   t0 <- Sys.time()
-  assertthat::assert_that(is.null(save_folder) | is.character(save_folder),
-                          length(save_folder) <= 1,
+  assertthat::assert_that(is.null(save_folder) | (is.character(save_folder) && length(save_folder) == 1),
                           is.character(uids),
                           length(uids) >= 1)
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
-    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
+    if(!dir.exists(save_folder)) dir.create(save_folder)
     df_file <- paste0(normalizePath(save_folder), "/00_proteins.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/00_proteins_not_retrieved.rds")
+                      "/00_prots_not_retrieved.rds")
     tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 
@@ -146,7 +145,11 @@ get_proteins <- function(uids, save_folder = NULL){
   if(length(errlist) > 0) reslist <- reslist[-errlist]
   errlist <- uids[errlist]
 
-  df <- dplyr::bind_rows(reslist)
+  df <- data.table::rbindlist(reslist,
+                              use.names = TRUE,
+                              fill      = TRUE)
+
+  class(df) <- c(class(df), "protein_dt")
 
   # Save results to file
   if(!is.null(save_folder)){

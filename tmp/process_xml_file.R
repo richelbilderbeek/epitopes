@@ -15,7 +15,7 @@ process_xml_file <- function(filename, type = "B", ...){
 
   if (errk) return("Error")
 
-  if (length(list_data$Reference$Epitopes) < 1) return(data.frame())
+  if (length(list_data$Reference$Epitopes) < 1) return(data.table::data.table())
 
   # ============= ONLY VALID LIST_DATA OBJECTS CROSS THIS LINE ============= #
   list_data$filename <- basename(filename)
@@ -24,9 +24,11 @@ process_xml_file <- function(filename, type = "B", ...){
                       FUN  = process_individual_epitope_B,
                       list_data = list_data)
   } else if (type == "T"){
-    # TODO: implement T cell epitope processor
     stop("T-cell epitope extraction still under development.")
+    #outlist <- lapply(list_data$Reference$Epitopes,
+    #                  FUN = process_individual_epitope_T,
+    #                  file_id = nullcheck(list_data$Reference$ReferenceId))
   } else stop("epitope type not recognised")
 
-  return(do.call(rbind, outlist))
+  return(data.table::rbindlist(outlist))
 }

@@ -14,7 +14,7 @@
 #' @param ncpus positive integer, number of cores to use
 #' @param save_folder path to folder saving the output.
 #'
-#' @return A data frame containing the epitope data.
+#' @return A *data.table* containing the epitope data is returned invisibly.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -31,19 +31,17 @@ get_LBCE <- function(data_folder,
 
   # ========================================================================== #
   # Sanity checks and initial definitions
-  assertthat::assert_that(is.character(data_folder),
-                          length(data_folder) == 1,
+  assertthat::assert_that(is.character(data_folder), length(data_folder) == 1,
                           dir.exists(data_folder),
                           assertthat::is.count(ncpus),
-                          is.null(save_folder) | is.character(save_folder),
-                          length(save_folder) <= 1)
+                          is.null(save_folder) | (is.character(save_folder) && length(save_folder) == 1))
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
-    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
+    if(!dir.exists(save_folder)) dir.create(save_folder)
     df_file <- paste0(normalizePath(save_folder), "/epitopes.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/epitopes_retrieval_errlist.rds")
+                      "/epit_errlist.rds")
   }
 
   # Get file list and initialise variables
@@ -53,7 +51,7 @@ get_LBCE <- function(data_folder,
   # ==================================================
   t <- Sys.time()
   cat("Processing", length(filelist), "files using", ncpus, "cores",
-      "\nStarted on", as.character(t), "\n")
+      "\nStarted at", as.character(t), "\n")
 
   df <- mypblapply(ncpus = ncpus,
                    X     = filelist,
@@ -61,29 +59,25 @@ get_LBCE <- function(data_folder,
                    type  = "B")
 
   td <- Sys.time() - t
-  cat("\nEnded at", as.character(Sys.time()),
+  cat("Ended at", as.character(Sys.time()),
       "\nElapsed time:", signif(as.numeric(td), 3), attr(td, "units"))
 
   erridx  <- which(sapply(df, function(x) is.character(x) && x == "Error"))
   errlist <- basename(filelist[erridx])
   if(length(erridx) > 0) df <- df[-erridx]
 
-  emptidx <- which(sapply(df, function(x) {is.null(x) || nrow(x) == 0}))
-  if(length(emptidx) > 0) df <- df[-emptidx]
+  emptidx <- which(sapply(df, function(x) nrow(x) == 0))
+  df      <- data.table::rbindlist(df[-emptidx])
 
-  if (length(df) > 0) {
-    df <- dplyr::bind_rows(df)
-  } else {
-    df <- data.frame()
-  }
+  class(df) <- c(class(df), "LBCE_dt")
 
   if(!is.null(save_folder)){
-    saveRDS(object = df, file = df_file)
-    if(length(erridx) > 0) saveRDS(object = errlist, file = errfile)
+    saveRDS(object = df,      file = df_file)
+    saveRDS(object = errlist, file = errfile)
   }
 
   cat("\nDone!\n", nrow(df), "epitopes retrieved.\n",
       length(errlist), "processing errors.")
 
-  return(df)
+  invisible(df)
 }
