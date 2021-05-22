@@ -33,9 +33,9 @@ get_proteins <- function(uids, save_folder = NULL){
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
-    df_file <- paste0(normalizePath(save_folder), "/00_proteins.rds")
+    df_file <- paste0(normalizePath(save_folder), "/proteins.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/00_proteins_not_retrieved.rds")
+                      "/proteins_retrieval_errlist.rds")
     tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 
@@ -145,6 +145,12 @@ get_proteins <- function(uids, save_folder = NULL){
 
   if(length(errlist) > 0) reslist <- reslist[-errlist]
   errlist <- uids[errlist]
+
+  reslist <- lapply(reslist,
+                    function(x) {
+                      x <- lapply(x, as.character)
+                      x$TSeq_length <- as.numeric(x$TSeq_length)
+                      return(x)})
 
   df <- dplyr::bind_rows(reslist)
 

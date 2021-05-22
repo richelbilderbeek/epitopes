@@ -15,7 +15,7 @@ containing the XML files}
 \item{save_folder}{path to folder saving the output.}
 }
 \value{
-A \code{data.table} object containing the epitope data.
+A data frame containing the epitope data.
 }
 \description{
 This function is used to extract information for \emph{linear B-cell epitopes}

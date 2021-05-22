@@ -34,25 +34,13 @@ mypblapply <- function(X, FUN, ncpus, ...){
       mypb(i, length(X), t0, 40)
       res[[i]] <- FUN(X[[i]], ...)
     }
-    # res <- lapply(X   = X,
-    #               FUN = FUN,
-    #               ...)
   } else {
-
     cl <- set_mc(ncpus)
-    if(.Platform$OS.type == "windows"){
-      res <- pbapply::pblapply(cl  = cl,
-                               X   = X,
-                               FUN = FUN,
-                               ...)
-    } else {
-      res <- pbapply::pblapply(cl  = cl,
-                               X   = X,
-                               FUN = FUN,
-                               ...)
-    }
+    res <- pbapply::pblapply(cl  = cl,
+                             X   = X,
+                             FUN = FUN,
+                             ...)
     close_mc(cl)
-
   }
 
   return(res)

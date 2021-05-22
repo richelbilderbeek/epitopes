@@ -17,7 +17,6 @@
 #'   entry in `proteins`)
 #'   \item Lack a valid string in *epit_seq*
 #'   \item Lack a valid definition in *epit_struc_def*
-#'   \item Have sequences shorter than `min_epit` or longer than `max_epit`.
 #'   \item Have a mismatch between the sequence in *epit_seq* and the
 #'   corresponding sequence between *start_pos* and *end_pos* on the protein
 #'   sequence.
@@ -29,8 +28,6 @@
 #' @param epitopes data frame of epitope data (returned by [get_LBCE()]).
 #' @param proteins data frame of protein data (returned by [get_proteins()]).
 #' @param save_folder path to folder for saving the results.
-#' @param min_epit positive integer, shortest epitope to be considered
-#' @param max_epit positive integer, longest epitope to be considered
 #' @param only_exact logical, should only sequences labelled as "Exact Epitope"
 #'        in variable *epit_struc_def* (within `epitopes`) be considered?
 #' @param set.positive how to decide whether an observation should be of the
@@ -39,7 +36,9 @@
 #'        or "all" to set it if $n_negative == 0$. Defaults to "mode".
 #' @param ncpus positive integer, number of cores to use
 #'
-#' @return A data frame containing the labeled proteins.
+#' @return A data frame containing all proteins mentioned that appear at least
+#' once in `epitopes$protein_id` (one row per aminoacid residue), containing
+#' the consolidated information extracted from `epitopes`.
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -48,13 +47,11 @@
 #' @importFrom dplyr %>%
 #' @importFrom rlang .data
 
-prepare_join_df <- function(epitopes, proteins,
-                            save_folder     = NULL,
-                            min_epit        = 8,
-                            max_epit        = 25,
-                            only_exact      = FALSE,
-                            set.positive    = c("any", "mode", "all"),
-                            ncpus           = 1){
+consolidate_data <- function(epitopes, proteins,
+                             save_folder     = NULL,
+                             only_exact      = FALSE,
+                             set.positive    = c("any", "mode", "all"),
+                             ncpus           = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -73,12 +70,6 @@ prepare_join_df <- function(epitopes, proteins,
   } else if(all(tolower(set.positive) == "all")) {
     set.positive <- "all"
   } else set.positive <- "mode"
-
-  # Check save folder and create file names
-  if(!is.null(save_folder)) {
-    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
-    df_file <- paste0(normalizePath(save_folder), "/labelled_prots.rds")
-  }
 
   # ========================================================================== #
   # Initial preprocessing
@@ -136,8 +127,7 @@ prepare_join_df <- function(epitopes, proteins,
     #
     # Consolidate information by protein-position
     dplyr::group_by(.data$Info_protein_id, .data$Info_pos) %>%
-    dplyr::summarise(Nsources = length(unique(.data$Info_pubmed_id)),
-                     across(-.data$Nsources, ~ paste(.x, collapse = ",")),
+    dplyr::summarise(across(everything(), ~ paste(.x, collapse = ",")),
                      .groups = "drop") %>%
     #
     # Remove duplicated information from specific fields
@@ -146,37 +136,31 @@ prepare_join_df <- function(epitopes, proteins,
                   Info_sourceOrg_id = get_uniques(.data$Info_sourceOrg_id),
                   Info_host_id      = get_uniques(.data$Info_host_id))
 
+  # function to determine class:
+  make_class <- function(pos, neg, set.positive){
+    pos <- as.numeric(strsplit(pos, ",")[[1]])
+    neg <- as.numeric(strsplit(neg, ",")[[1]])
+    class <- switch(set.positive,
+                    mode = sign(sum(sign(-1 + 2 * (pos > neg)))  - .1),
+                    any  = -1 + 2 * any(-1 + 2 * (pos > 0) > 0),
+                    all  = -1 + 2 * all(neg == 0 & pos > 0))
+    return(class)
+  }
+
   # Join epitope information onto long protein data frame
   cat("\nConsolidating data")
   df <- df %>%
-    dplyr::left_join(epit_summary, by = c("Info_protein_id", "Info_pos"))
+    dplyr::left_join(epit_summary, by = c("Info_protein_id", "Info_pos")) %>%
+    dplyr::select(-c("Info_sourceOrg_id")) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(Class = make_class(nPos, nNeg, set.positive)) %>%
+    ungroup()
 
-    # TODO:
-    # Attribute class to each position
-    # nchar(.data$epit_seq) >= min_epit,                  # filter by minimum length
-    # nchar(.data$epit_seq) <= max_epit) %>%              # filter by maximum length
-    # attribute unique (internal) peptide ID.
-
-
-
-
-
-    # Set class
-    if (set.positive == "any"){
-      df$Class <- -1 + 2 * as.numeric(df$n_Positive > 0)
-    } else if (set.positive == "all") {
-      df$Class <- -1 + 2 * (df$n_Negative == 0)
-    } else {
-      df$Class <- -1 + 2 * (df$n_Positive >= df$n_Negative)
-    }
-
-  class(df) <- c("data.table", "data.frame", "joined_epit_dt")
-  attr(df, "min_epit") <- min_epit
-
-  if(!is.null(save_folder)){
-    saveRDS(object = df,    file = df_file)
-    saveRDS(object = rm.df, file = errfile)
+  # Check save folder and create file names
+  if(!is.null(save_folder)) {
+    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
+    saveRDS(df, paste0(normalizePath(save_folder), "/labelled_prots.rds"))
   }
 
-  invisible(df)
+  return(df)
 }
