@@ -10,6 +10,30 @@ get_uniques <- function(x){
          })
 }
 
+# Function to find points where a vector changes values
+find_breaks <- function(x){
+  x[is.na(x)] <- Inf
+  xl <- dplyr::lag(x, default = -Inf)
+  return(x != xl)
+}
+
+# Function to build local neighbourhoods for non-NA peptides
+make_windows <- function(x, Class, window_size){
+  imax    <- length(x)
+  noNA    <- which(!is.na(Class))
+  windows <- rep(NA, length(x))
+  windows[noNA] <- sapply(noNA,
+                          function(y){
+                            idx <- (y - floor(window_size/2)):(y + floor(window_size/2))
+                            idx[which(idx <= 0)] <- 2 - idx[which(idx <= 0)]
+                            idx[which(idx > imax)] <- 2 * imax - idx[which(idx > length(x))]
+                            paste(x[idx], collapse = "")
+                          })
+  return(windows)
+}
+
+
+
 set_mc <- function(ncpus){
   cl <- max(1, min(ncpus, parallel::detectCores() - 1))
   if (cl > 1){

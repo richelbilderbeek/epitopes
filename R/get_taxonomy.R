@@ -26,23 +26,24 @@ get_taxonomy <- function(uids, save_folder = NULL){
   t0 <- Sys.time()
   ok_classes <- c("NULL", "numeric", "integer", "character")
   assertthat::assert_that(is.null(save_folder) | (is.character(save_folder)),
-                          length(save_folder) <= 1)
+                          length(save_folder) <= 1,
+                          any(class(uids) %in% ok_classes),
+                          length(uids) >= 1)
 
-  if(is.vector(uids)){
-    assertthat::assert_that(any(class(uids) %in% ok_classes),
-                            length(uids) >= 1)
-    uids <- as.character(uids)
-  } else {
-    assertthat::assert_that("LBCE_dt" %in% class(uids))
-    uids <- unique(uids$sourceOrg_id)
+  # Extract unique Taxonomy IDs for retrieval
+  if(is.character(uids)){
+    uids <- lapply(uids,
+                   function(x){strsplit(x, split = ",")[[1]]})
   }
+
+  uids <- unique(as.character(unlist(uids)))
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
-    if(!dir.exists(save_folder)) dir.create(save_folder)
-    df_file <- paste0(normalizePath(save_folder), "/00_taxonomy.rds")
+    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
+    df_file <- paste0(normalizePath(save_folder), "/taxonomy.rds")
     errfile <- paste0(normalizePath(save_folder),
-                      "/00_taxonomy_not_retrieved.rds")
+                      "/taxonomy_retrieval_errlist.rds")
     tmpf    <- tempfile(fileext = ".rds", tmpdir = save_folder)
   }
 

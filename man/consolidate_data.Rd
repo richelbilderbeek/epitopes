@@ -9,7 +9,7 @@ consolidate_data(
   proteins,
   save_folder = NULL,
   only_exact = FALSE,
-  set.positive = c("any", "mode", "all"),
+  set_positive = c("any", "mode", "all"),
   ncpus = 1
 )
 }
@@ -23,7 +23,7 @@ consolidate_data(
 \item{only_exact}{logical, should only sequences labelled as "Exact Epitope"
 in variable \emph{epit_struc_def} (within \code{epitopes}) be considered?}
 
-\item{set.positive}{how to decide whether an observation should be of the
+\item{set_positive}{how to decide whether an observation should be of the
 "Positive" (+1) or "Negative" (-1) class? Use "any" to set a sequence as positive if
 $n_positive > 0$, "mode" to set it if $n_positive >= n_negative$,
 or "all" to set it if $n_negative == 0$. Defaults to "mode".}

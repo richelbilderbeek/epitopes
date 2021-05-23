@@ -30,7 +30,7 @@
 #' @param save_folder path to folder for saving the results.
 #' @param only_exact logical, should only sequences labelled as "Exact Epitope"
 #'        in variable *epit_struc_def* (within `epitopes`) be considered?
-#' @param set.positive how to decide whether an observation should be of the
+#' @param set_positive how to decide whether an observation should be of the
 #'        "Positive" (+1) or "Negative" (-1) class? Use "any" to set a sequence as positive if
 #'        $n_positive > 0$, "mode" to set it if $n_positive >= n_negative$,
 #'        or "all" to set it if $n_negative == 0$. Defaults to "mode".
@@ -50,31 +50,30 @@
 consolidate_data <- function(epitopes, proteins,
                              save_folder     = NULL,
                              only_exact      = FALSE,
-                             set.positive    = c("any", "mode", "all"),
+                             set_positive    = c("any", "mode", "all"),
                              ncpus           = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(is.data.frame(epitopes),
                           is.data.frame(proteins),
-                          assertthat::is.count(min_epit),
-                          assertthat::is.count(max_epit),
-                          min_epit <= max_epit,
                           is.logical(only_exact), length(only_exact) == 1,
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1,
-                          is.character(set.positive))
+                          is.character(set_positive),
+                          assertthat::is.count(ncpus))
 
-  if(all(tolower(set.positive) == "any")) {
-    set.positive <- "any"
-  } else if(all(tolower(set.positive) == "all")) {
-    set.positive <- "all"
-  } else set.positive <- "mode"
+  if(all(tolower(set_positive) == "any")) {
+    set_positive <- "any"
+  } else if(all(tolower(set_positive) == "all")) {
+    set_positive <- "all"
+  } else set_positive <- "mode"
 
   # ========================================================================== #
   # Initial preprocessing
 
   # Filter epitopes
+  cat("\nCleaning epitopes dataset...")
   epitopes <- dplyr::filter(epitopes,
                             .data$protein_id %in% unique(proteins$UID),         # must have a corresponding protein
                             !is.na(.data$epit_seq),                             # must have an epit_seq
@@ -86,10 +85,11 @@ consolidate_data <- function(epitopes, proteins,
     dplyr::select(-"prot_substr")
 
   if (only_exact){
-    epitopes <- dplyr::filter(epitopes, epit_struc_def == "Exact Epitope")
+    epitopes <- dplyr::filter(epitopes, .data$epit_struc_def == "Exact Epitope")
   }
 
   # Filter proteins
+  cat("\nCleaning proteins datset...")
   df <- dplyr::filter(proteins,
                       .data$UID %in% unique(epitopes$protein_id),
                       .data$TSeq_seqtype == "protein",
@@ -120,14 +120,15 @@ consolidate_data <- function(epitopes, proteins,
                                           Info_epitope_id   = x$epitope_id,
                                           Info_sourceOrg_id = x$sourceOrg_id,
                                           Info_host_id      = x$host_id,
-                                          nPos              = x$n_Positive,
-                                          nNeg              = x$n_Negative)},
+                                          Info_nPos         = x$n_Positive,
+                                          Info_nNeg         = x$n_Negative)},
                              ncpus = ncpus) %>%
     dplyr::bind_rows() %>%
     #
     # Consolidate information by protein-position
     dplyr::group_by(.data$Info_protein_id, .data$Info_pos) %>%
-    dplyr::summarise(across(everything(), ~ paste(.x, collapse = ",")),
+    dplyr::summarise(dplyr::across(dplyr::everything(),
+                                   ~ paste(.x, collapse = ",")),
                      .groups = "drop") %>%
     #
     # Remove duplicated information from specific fields
@@ -137,10 +138,10 @@ consolidate_data <- function(epitopes, proteins,
                   Info_host_id      = get_uniques(.data$Info_host_id))
 
   # function to determine class:
-  make_class <- function(pos, neg, set.positive){
+  make_class <- function(pos, neg, set_positive){
     pos <- as.numeric(strsplit(pos, ",")[[1]])
     neg <- as.numeric(strsplit(neg, ",")[[1]])
-    class <- switch(set.positive,
+    class <- switch(set_positive,
                     mode = sign(sum(sign(-1 + 2 * (pos > neg)))  - .1),
                     any  = -1 + 2 * any(-1 + 2 * (pos > 0) > 0),
                     all  = -1 + 2 * all(neg == 0 & pos > 0))
@@ -148,13 +149,15 @@ consolidate_data <- function(epitopes, proteins,
   }
 
   # Join epitope information onto long protein data frame
-  cat("\nConsolidating data")
+  cat("\nConsolidating data...")
   df <- df %>%
     dplyr::left_join(epit_summary, by = c("Info_protein_id", "Info_pos")) %>%
     dplyr::select(-c("Info_sourceOrg_id")) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(Class = make_class(nPos, nNeg, set.positive)) %>%
-    ungroup()
+    dplyr::mutate(Class = make_class(.data$Info_nPos,
+                                     .data$Info_nNeg,
+                                     set_positive)) %>%
+    dplyr::ungroup()
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
