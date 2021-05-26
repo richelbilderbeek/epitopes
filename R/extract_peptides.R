@@ -11,7 +11,6 @@
 #' @param window_size positive integer, size of the local neighbourhood to be
 #' considered.
 #' @param save_folder path to folder for saving the results.
-#' @param ncpus positive integer, number of cores to use
 #'
 #' @return List containing two data frames:
 #'
@@ -32,7 +31,7 @@
 extract_peptides <- function(df,
                              min_peptide = 8, max_peptide = 30,
                              window_size = (2 * min_peptide) - 1,
-                             save_folder = NULL, ncpus = 1){
+                             save_folder = NULL){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -42,8 +41,7 @@ extract_peptides <- function(df,
                           min_peptide <= max_peptide,
                           assertthat::is.count(window_size),
                           is.null(save_folder) | (is.character(save_folder)),
-                          is.null(save_folder) | length(save_folder) == 1,
-                          assertthat::is.count(ncpus))
+                          is.null(save_folder) | length(save_folder) == 1)
 
   # ========================================================================== #
   # Identify contiguous labelled peptides in each protein
@@ -73,6 +71,7 @@ extract_peptides <- function(df,
                      Info_end_pos        = dplyr::last(.data$Info_pos),
                      Info_peptide        = paste(.data$Info_AA, collapse = ""),
                      Info_peptide_length = dplyr::n(),
+                     Class               = dplyr::first(.data$Class),
                      .groups = "drop")
 
 

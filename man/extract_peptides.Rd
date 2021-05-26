@@ -9,8 +9,7 @@ extract_peptides(
   min_peptide = 8,
   max_peptide = 30,
   window_size = (2 * min_peptide) - 1,
-  save_folder = NULL,
-  ncpus = 1
+  save_folder = NULL
 )
 }
 \arguments{
@@ -25,8 +24,6 @@ extract_peptides(
 considered.}
 
 \item{save_folder}{path to folder for saving the results.}
-
-\item{ncpus}{positive integer, number of cores to use}
 }
 \value{
 List containing two data frames:
