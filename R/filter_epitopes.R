@@ -42,8 +42,8 @@ filter_epitopes <- function(df,
                           is.list(tax_list))
 
   # Standardise relevant variables:
-  ids <- data.frame(org  = as.character(df[, which(names(df) == orgID_column)]),
-                    host = as.character(df[, which(names(df) == hostID_column)]))
+  ids <- data.frame(org  = as.character(df[, which(names(df) == orgID_column), drop = TRUE]),
+                    host = as.character(df[, which(names(df) == hostID_column), drop = TRUE]))
 
   # Function to extract the relevant organism IDs using the taxonomy data
   fextr <- function(x, tid){
