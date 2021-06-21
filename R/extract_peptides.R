@@ -66,6 +66,7 @@ extract_peptides <- function(df,
                   .data$Info_peptide_length <= max_peptide) %>%
     dplyr::group_by(.data$Info_PepID) %>%
     dplyr::summarise(Info_organism_id    = dplyr::first(.data$Info_organism_id),
+                     Info_host_id        = dplyr::first(.data$Info_host_id),
                      Info_protein_id     = dplyr::first(.data$Info_protein_id),
                      Info_start_pos      = dplyr::first(.data$Info_pos),
                      Info_end_pos        = dplyr::last(.data$Info_pos),

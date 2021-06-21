@@ -6,29 +6,32 @@
 \usage{
 split_epitope_data(
   df,
+  proteins,
+  save_folder,
   split_perc = c(75, 25),
-  split_names = NULL,
-  save_folder = NULL,
   coverage_threshold = 60,
-  identity_threshold = 60
+  identity_threshold = 60,
+  ncpus = 1
 )
 }
 \arguments{
 \item{df}{data frame of consolidated epitope information, returned by
 \code{\link[=extract_peptides]{extract_peptides()}} or \code{\link[=calculate_features]{calculate_features()}}.}
 
-\item{split_perc}{numeric vector of desired splitting percentages. See
-Details.}
-
-\item{split_names}{optional character vector with short names for each split.}
+\item{proteins}{data frame of protein data (returned by \code{\link[=get_proteins]{get_proteins()}}).}
 
 \item{save_folder}{path to folder for saving the results.}
+
+\item{split_perc}{numeric vector of desired splitting percentages. See
+Details.}
 
 \item{coverage_threshold}{coverage threshold for grouping proteins by
 similarity, see Details.}
 
 \item{identity_threshold}{identity threshold for grouping proteins by
 similarity, see Details.}
+
+\item{ncpus}{positive integer, number of cores to use}
 }
 \value{
 A list object containing the data splits and additional summary
