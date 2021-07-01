@@ -4,7 +4,7 @@
 \alias{read_abcpred}
 \title{Read saved output from ABCPred}
 \usage{
-read_abcpred(res.file, protID, proteins, ...)
+read_abcpred(res.file, protID, proteins, threshold = NULL, ...)
 }
 \arguments{
 \item{res.file}{path to the results file. Must be an HTML file containing the
@@ -16,6 +16,10 @@ ABCPred output.}
 in \code{res.file}. Each position in a protein must be represented by a row in
 this data frame. Must have at least the columns \emph{Info_UID} (with protein
 IDs) and \emph{Info_center_pos} (with position on the protein).}
+
+\item{threshold}{probability threshold for setting the class of a peptide as
+positive. If \code{NULL} the routine employs the threshold value used in the
+ABCPred call that generated the data in \code{res_file}.}
 
 \item{...}{Currently unused.}
 }
