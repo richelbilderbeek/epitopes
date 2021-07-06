@@ -51,7 +51,7 @@ read_abcpred <- function(res.file, protID, proteins, threshold = NULL, ...){
     if(is.null(threshold)) {
       proteins$ABCpred_class[idx] <- 1
     } else {
-      proteins$ABCpred_class[idx] <- as.numeric(proteins$ABCpred_prob[idx] > threshold)
+      proteins$ABCpred_class[idx] <- -1 + 2 * as.numeric(proteins$ABCpred_prob[idx] > threshold)
     }
   }
 
