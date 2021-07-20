@@ -103,12 +103,7 @@ split_epitope_data <- function(wdf,
     blast <- utils::read.csv(blast_file, sep = "\t",
                              header = FALSE,
                              stringsAsFactors = FALSE)
-    names(blast) <- c("QueryID", "SubjectID", "Alignment_length",
-                      "Query_length", "Subject_length", "Num_matches",
-                      "Perc_identity", "Query_coverage", "Num_mismatches",
-                      "Num_gaps", "Query_match_start", "Query_match_end",
-                      "Subject_match_start", "Subject_match_end",
-                      "E_value", "Score")
+    names(blast) <- c("QueryID", "SubjectID", "Perc_identity", "Query_coverage")
 
     blast$QueryID <- gsub("\\.[1-9]+$", "", blast$QueryID)
     blast$SubjectID <- gsub("\\.[1-9]+$", "", blast$SubjectID)

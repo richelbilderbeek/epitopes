@@ -27,7 +27,7 @@
 #' **NOTE**: this will require BLAST+ to be installed in your
 #' local machine. For details on how to set up BLAST+ on your machine, check
 #' <https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download>.
-#' This function was developed using package `blast 2.10.0`.
+#' This function was developed for versions `blast 2.10.0` or later.
 #'
 #' @inheritParams prepare_join_df
 #' @inheritParams filter_epitopes
@@ -126,13 +126,17 @@ make_OrgSpec_datasets <- function(epitopes, proteins, taxonomy_list,
 
   if (split_level == "prot") {
     # Check that BLASTp is installed
-    a <- tryCatch(system("blastp -version"), warning = function(x){"Nope!"})
+    a <- tryCatch(system2("blastp", args = "-version",
+                          stdout = TRUE, stderr = TRUE),
+                  error   = function(c){"Nope!"},
+                  warning = function(c){"Nope!"})
     if (a == "Nope!"){
       message("\nBLASTp not installed.
               \rPlease check function documentation for instructions.
               \rSplitting will be done using only protein IDs.")
 
     } else {
+      blast_v <- strsplit(a[1], split = ": ", fixed = TRUE)[[1]][2]
       BLAST_path <- paste0(save_folder, "/BLASTp")
       if(!dir.exists(BLAST_path)) dir.create(BLAST_path)
 
@@ -141,10 +145,19 @@ make_OrgSpec_datasets <- function(epitopes, proteins, taxonomy_list,
       seqinr::write.fasta(as.list(prots$TSeq_sequence), names = prots$UID,
                           file.out = fn, as.string = TRUE, nbchar = 100000)
 
+      #if(gsub("\\+", "", blast_v) == "2.10.0"){
+      blast_call <- paste0("blastp -query ", fn, " -db ", fn, " -seg no ",
+                           "-outfmt '6 qseqid sseqid pident qcovhsp' > ",
+                           fn, "-BLAST")
+      # } else {
+      #   blast_call <- paste0("blastp -query ", fn, " -db ", fn, " -seg no ",
+      #                        "-outfmt '6 qseqid sseqid length qlen slen nident pident qcovhsp mismatch gaps qstart qend sstart send evalue score' > ",
+      #                        fn, "-BLAST")
+      #
+      #
+      # }
       system(paste0("makeblastdb -in ", fn, " -dbtype prot"))
-      system(paste0("blastp -query ", fn, " -db ", fn, " -seg no ",
-                    "-outfmt '6 qseqid sseqid length qlen slen nident pident qcovhsp mismatch gaps qstart qend sstart send evalue score' > ",
-                    fn, "-BLAST"))
+      system(blast_call)
     }
   }
 
@@ -153,7 +166,7 @@ make_OrgSpec_datasets <- function(epitopes, proteins, taxonomy_list,
                                split_level = split_level,
                                split_perc  = split_perc,
                                split_names = split_names,
-                               blast_file  = unlist(ifelse(a == "Nope!",
+                               blast_file  = unlist(ifelse(a[1] == "Nope!",
                                                            list(NULL),
                                                            paste0(fn, "-BLAST"))),
                                coverage_threshold = coverage_threshold,
