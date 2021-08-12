@@ -1,10 +1,10 @@
-run_blast <- function(BLAST_path, prots, ncpus){
+run_blast <- function(BLAST_path, proteins, ncpus){
 
   # Run BLASTp to determine protein similarities
   if(!dir.exists(BLAST_path)) dir.create(BLAST_path, recursive = TRUE)
-  fn <- gsub("//", "/", paste0(BLAST_path, "/prots.fasta"), fixed = TRUE)
+  fn <- gsub("//", "/", paste0(BLAST_path, "/proteins.fasta"), fixed = TRUE)
 
-  seqinr::write.fasta(as.list(prots$TSeq_sequence), names = prots$UID,
+  seqinr::write.fasta(as.list(proteins$TSeq_sequence), names = proteins$UID,
                       file.out = fn, as.string = TRUE, nbchar = 100000)
 
   message("===========================================\nBuilding BLASTp database")
@@ -23,6 +23,7 @@ run_blast <- function(BLAST_path, prots, ncpus){
 
   blast$QueryID   <- gsub("\\.[1-9]+$", "", blast$QueryID)
   blast$SubjectID <- gsub("\\.[1-9]+$", "", blast$SubjectID)
+  blast <- blast[-which(blast$QueryID == blast$SubjectID), ]
 
   return(blast)
 

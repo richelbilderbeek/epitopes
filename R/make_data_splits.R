@@ -85,7 +85,7 @@ split_epitope_data <- function(df, proteins, save_folder,
     proteins <- proteins %>%
       dplyr::filter(.data$UID %in% unique(df$Info_protein_id)) %>%
       dplyr::select(.data$UID, .data$TSeq_sequence)
-    blast <- run_blast(BLAST_path, prots, ncpus)
+    blast <- run_blast(BLAST_path, proteins, ncpus)
 
 
 
