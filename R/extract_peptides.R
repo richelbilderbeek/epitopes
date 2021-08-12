@@ -7,7 +7,9 @@
 #' @param df data frame of consolidated protein-epitope data, returned by
 #' [consolidate_data()].
 #' @param min_peptide positive integer, shortest peptide to be considered
-#' @param max_peptide positive integer, longest peptide to be considered
+#' (applies to both **positive** and **negative** observations)
+#' @param max_epitope positive integer, longest peptide to be considered (only
+#' applies to **positive** observations.)
 #' @param window_size positive integer, size of the local neighbourhood to be
 #' considered.
 #' @param save_folder path to folder for saving the results.
@@ -16,7 +18,7 @@
 #'
 #' \itemize{
 #'    \item A data frame containing the labeled positions of `df` (filtered by
-#' *min_peptide* and *max_peptide*) with a new column expressing the local
+#' *min_epitope* and *max_epitope*) with a new column expressing the local
 #' neighbourhood of each position (to be used for feature calculation)
 #'    \item A data frame containing the individual peptides and classes
 #' }
@@ -29,7 +31,7 @@
 #' @importFrom rlang .data
 
 extract_peptides <- function(df,
-                             min_peptide = 8, max_peptide = 30,
+                             min_peptide = 8, max_epitope = 30,
                              window_size = (2 * min_peptide) - 1,
                              save_folder = NULL){
 
@@ -37,8 +39,8 @@ extract_peptides <- function(df,
   # Sanity checks and initial definitions
   assertthat::assert_that(is.data.frame(df),
                           assertthat::is.count(min_peptide),
-                          assertthat::is.count(max_peptide),
-                          min_peptide <= max_peptide,
+                          assertthat::is.count(max_epitope),
+                          min_peptide <= max_epitope,
                           assertthat::is.count(window_size),
                           is.null(save_folder) | (is.character(save_folder)),
                           is.null(save_folder) | length(save_folder) == 1)
@@ -63,7 +65,7 @@ extract_peptides <- function(df,
   peptides <- df %>%
     dplyr::filter(!is.na(.data$Class),
                   .data$Info_peptide_length >= min_peptide,
-                  .data$Info_peptide_length <= max_peptide) %>%
+                  (.data$Class == -1) | (.data$Info_peptide_length <= max_epitope)) %>%
     dplyr::group_by(.data$Info_PepID) %>%
     dplyr::summarise(Info_organism_id    = dplyr::first(.data$Info_organism_id),
                      Info_host_id        = dplyr::first(.data$Info_host_id),
@@ -86,9 +88,10 @@ extract_peptides <- function(df,
                                              window_size)) %>%
     dplyr::filter(!is.na(.data$Class),
                   .data$Info_peptide_length >= min_peptide,
-                  .data$Info_peptide_length <= max_peptide) %>%
+                  (.data$Class == -1) | (.data$Info_peptide_length <= max_epitope)) %>%
     dplyr::select(.data$Info_PepID, dplyr::everything(),
-                  -.data$IsBreak, -.data$Info_peptide_length, .data$Class)
+                  -.data$IsBreak, -.data$Info_peptide_length, .data$Class) %>%
+    dplyr::ungroup()
 
 
   # Check save folder and save files

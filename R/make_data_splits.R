@@ -1,27 +1,11 @@
-#' Split epitope data based on protein similarity.
+#' Split peptide data conditionally on peptide or protein similarity.
 #'
-#' Takes a dataframe of consolidated epitope data (returned by
-#' [extract_peptides()] or [calculate_features()]) and splits it into
-#' mutually exclusive sets of observations, such that observations originating
-#' from proteins with **similarity** and/or **coverage** greater than a given
-#' threshold are always placed together in the splits.
-#'
-#' If the sum of **split_perc** is less than 100 an extra split is generated
-#' with the remaining observations - e.g., `split_perc = c(50, 30)` results in
-#' three sets with an approximately 50/30/20 percent split of observations.
-#' If the sum is greater than 100 the splits are linearly scaled down so that
-#' the sum becomes 100. Note that split percents correspond to the number of
-#' **observations**, not the number of unique protein IDs.
-#'
-#' This function will attempt to approximate the desired split levels, but
-#' depending on the size of the input data frame it may not be possible.
-#' It will also try to maintain approximately the same class balance
-#' across the splits.
+
 #'
 #' **NOTE**: this routine requires BLAST+ to be installed in your
 #' local machine. For details on how to set up BLAST+ on your machine, check
 #' <https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download>.
-#' This function was developed using package `blast 2.10.0`.
+#' This function was tested with BLAST versions 2.10.0 and 2.12.0.
 #'
 #' @param df data frame of consolidated epitope information, returned by
 #' [extract_peptides()] or [calculate_features()].
@@ -47,22 +31,31 @@
 #'
 
 split_epitope_data <- function(df, proteins,
-                               save_folder,
+                               split_level = "protein",
                                split_perc = c(75, 25),
-                               coverage_threshold = 60,
-                               identity_threshold = 60,
-                               ncpus = 1){
+                               coverage_threshold = 75,
+                               identity_threshold = 75,
+                               ncpus = 1,
+                               save_folder = NULL){
+
   # ========================================================================== #
   # Sanity checks and initial definitions
   assertthat::assert_that(is.data.frame(df),
                           is.data.frame(proteins),
+                          tolower(split_level) %in% c("protein", "peptide"),
                           is.numeric(split_perc),
-                          all(sapply(split_perc, assertthat::is.count)),
+                          all(split_perc > 0),
+                          sum(split_perc) == 100,
                           assertthat::is.count(coverage_threshold),
                           coverage_threshold >= 0, coverage_threshold <= 100,
                           assertthat::is.count(identity_threshold),
                           identity_threshold >= 0, identity_threshold <= 100,
                           is.character(save_folder), length(save_folder) == 1)
+
+
+
+
+
 
   # Check if BLAST is installed
   errk <- FALSE
@@ -82,20 +75,7 @@ split_epitope_data <- function(df, proteins,
   }
 
   # Check and adjust split sizes if necessary
-  ssp <- sum(split_perc)
-  if (ssp < 100){
-    split_perc <- c(split_perc, 100 - ssp)
-    cat("\nSplit percentages adjusted to: [",
-        paste(split_perc, collapse = ", "), "]")
-  } else if (ssp > 100){
-    split_perc <- 100 * split_perc / ssp
-    cat("\nSplit percentages adjusted to: [",
-        paste(split_perc, collapse = ", "), "]")
-  }
-  if (ssp >= 100 & length(split_perc) == 1){
-    cat("\nNo splitting performed.")
-    return(df)
-  }
+
   nsplits <- length(split_perc)
 
   # Set up split names
