@@ -1,5 +1,22 @@
 run_blast <- function(BLAST_path, proteins, ncpus){
 
+  # Check if BLAST is installed
+  errk <- FALSE
+  tryCatch({
+    invisible(utils::capture.output(
+      blast_version <- system("blastp -version", intern = TRUE)[1]))},
+    error   = function(c) {errk <<- TRUE},
+    warning = function(c) {errk <<- TRUE},
+    finally = NULL)
+
+  if (errk){
+    stop(paste0("\nBLAST+ not found.",
+                "\nPlease follow the instructions in",
+                "\nhttps://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download",
+                "\nto set up BLAST+ on your machine.",
+                "\n**************************************"))
+  }
+
   # Run BLASTp to determine protein similarities
   if(!dir.exists(BLAST_path)) dir.create(BLAST_path, recursive = TRUE)
   fn <- gsub("//", "/", paste0(BLAST_path, "/proteins.fasta"), fixed = TRUE)

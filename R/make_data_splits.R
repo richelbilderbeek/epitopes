@@ -63,23 +63,6 @@ split_epitope_data <- function(df, proteins, save_folder,
 
   if(split_level == "protein"){
 
-    # Check if BLAST is installed
-    errk <- FALSE
-    tryCatch({
-      invisible(utils::capture.output(
-        blast_version <- system("blastp -version", intern = TRUE)[1]))},
-      error   = function(c) {errk <<- TRUE},
-      warning = function(c) {errk <<- TRUE},
-      finally = NULL)
-
-    if (errk){
-      stop(paste0("\nBLAST+ not found.",
-                  "\nPlease follow the instructions in",
-                  "\nhttps://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download",
-                  "\nto set up BLAST+ on your machine.",
-                  "\n**************************************"))
-    }
-
     # Run blast
     BLAST_path <- paste0(save_folder, "/BLASTp")
     proteins <- proteins %>%
