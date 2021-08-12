@@ -44,13 +44,13 @@ get_proteins <- function(uids, save_folder = NULL){
   nerr    <- Inf
 
   # First try retrieving from NCBI/protein
-  cat("Trying to retrieve", length(reslist), "proteins",
-      "\nStarted at", as.character(t0),
-      "\nThis may take a while...")
+  message("Trying to retrieve ", length(reslist), " proteins",
+          "\nStarted at ", as.character(t0),
+          "\nThis may take a while...")
   while(length(errlist) < nerr && length(errlist) > 0){
     nerr <- length(errlist)
-    cat("\nTrying to retrieve", length(errlist),
-        "entries from NCBI (db = protein)")
+    message("Trying to retrieve ", length(errlist),
+        " entries from NCBI (db = protein)")
     cc <- 0
     for (idx in errlist){
       # Try fetching data
@@ -97,7 +97,7 @@ get_proteins <- function(uids, save_folder = NULL){
     nerr <- Inf
     while(length(errlist) < nerr && length(errlist) > 0){
       nerr <- length(errlist)
-      cat("\nTrying to retrieve", length(errlist), "entries from Uniprot")
+      message("\nTrying to retrieve ", length(errlist), " entries from Uniprot")
       cc <- 0
       for (idx in errlist){
         # Try fetching data
@@ -161,8 +161,8 @@ get_proteins <- function(uids, save_folder = NULL){
     if(file.exists(tmpf)) file.remove(tmpf)
   }
 
-  cat("\nDone!\n", nrow(df), "proteins retrieved.\n",
-      length(errlist), "retrieval errors.")
+  message("\nDone!\n", nrow(df), " proteins retrieved.\n",
+      length(errlist), " retrieval errors.")
 
   invisible(df)
 }

@@ -52,8 +52,8 @@ get_LBCE <- function(data_folder,
 
   # ==================================================
   t <- Sys.time()
-  cat("Processing", length(filelist), "files using", ncpus, "cores",
-      "\nStarted on", as.character(t), "\n")
+  message("Processing ", length(filelist), " files using", ncpus, " cores",
+      "\nStarted at ", as.character(t), "\n")
 
   df <- mypblapply(ncpus = ncpus,
                    X     = filelist,
@@ -61,8 +61,8 @@ get_LBCE <- function(data_folder,
                    type  = "B")
 
   td <- Sys.time() - t
-  cat("\nEnded at", as.character(Sys.time()),
-      "\nElapsed time:", signif(as.numeric(td), 3), attr(td, "units"))
+  message("Ended at ", as.character(Sys.time()),
+      "\nElapsed time: ", signif(as.numeric(td), 3), " ", attr(td, "units"))
 
   erridx  <- which(sapply(df, function(x) is.character(x) && x == "Error"))
   errlist <- basename(filelist[erridx])
@@ -82,8 +82,8 @@ get_LBCE <- function(data_folder,
     if(length(erridx) > 0) saveRDS(object = errlist, file = errfile)
   }
 
-  cat("\nDone!\n", nrow(df), "epitopes retrieved.\n",
-      length(errlist), "processing errors.")
+  message("Done!\n", nrow(df), " epitopes retrieved.\n",
+      length(errlist), " processing errors.")
 
   return(df)
 }

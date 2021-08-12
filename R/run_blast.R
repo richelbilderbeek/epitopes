@@ -7,10 +7,10 @@ run_blast <- function(BLAST_path, prots, ncpus){
   seqinr::write.fasta(as.list(prots$TSeq_sequence), names = prots$UID,
                       file.out = fn, as.string = TRUE, nbchar = 100000)
 
-  cat("===========================================\nBuilding BLASTp database")
+  message("===========================================\nBuilding BLASTp database")
   system(paste0("makeblastdb -in ", fn, " -dbtype prot"))
 
-  cat("\n===========================================\nRunning BLASTp\n")
+  message("===========================================\nRunning BLASTp\n")
   system(paste0("blastp -num_threads ", ncpus, " -query ", fn, " -db ", fn, " -seg no ",
                 "-outfmt '6 qseqid sseqid length qlen slen nident pident",
                 " qcovhsp mismatch gaps qstart qend sstart send evalue score' > ",

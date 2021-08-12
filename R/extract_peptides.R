@@ -47,7 +47,7 @@ extract_peptides <- function(df,
 
   # ========================================================================== #
   # Identify contiguous labelled peptides in each protein
-  cat("\nIdentifying contiguous labeled regions...")
+  message("Identifying contiguous labeled regions...")
   df <- df %>%
     dplyr::group_by(.data$Info_protein_id) %>%
     dplyr::mutate(IsBreak = find_breaks(.data$Class),
@@ -61,7 +61,7 @@ extract_peptides <- function(df,
 
   # Extract individual contiguous peptides of length between min_peptide and
   # max_peptide
-  cat("\nExtracting labelled peptides...")
+  message("Extracting labelled peptides...")
   peptides <- df %>%
     dplyr::filter(!is.na(.data$Class),
                   .data$Info_peptide_length >= min_peptide,
@@ -80,7 +80,7 @@ extract_peptides <- function(df,
 
   # Update df to include local neighbourhood and remove NA regions and those
   # that do not comply with min_peptide and max_peptide
-  cat("\nExtracting windows...")
+  message("Extracting windows...")
   df <- df %>%
     dplyr::group_by(.data$Info_protein_id) %>%
     dplyr::mutate(Info_window = make_windows(.data$Info_AA,

@@ -53,7 +53,7 @@ get_taxonomy <- function(uids, save_folder = NULL){
 
   while(length(errlist) < nerr && length(errlist) > 0){
     nerr <- length(errlist)
-    cat("\nTrying to retrieve", length(errlist), "entries from NCBI (db = taxonomy)")
+    message("Trying to retrieve ", length(errlist), " entries from NCBI (db = taxonomy)")
     cc <- 0
     for (idx in errlist){
       errk <- FALSE
@@ -110,8 +110,8 @@ get_taxonomy <- function(uids, save_folder = NULL){
     if(file.exists(tmpf)) file.remove(tmpf)
   }
 
-  cat("\nDone!\n", length(reslist), "taxonomies retrieved.\n",
-      length(errlist), "retrieval errors.")
+  message("Done!\n", length(reslist), " taxonomies retrieved.\n",
+          length(errlist), " retrieval errors.")
 
   return(reslist)
 }

@@ -74,7 +74,7 @@ consolidate_data <- function(epitopes, proteins,
   # Initial preprocessing
 
   # Filter epitopes
-  cat("\nCleaning epitopes dataset...")
+  message("Cleaning epitopes dataset...")
   epitopes <- dplyr::filter(epitopes,
                             .data$protein_id %in% unique(proteins$UID),         # must have a corresponding protein
                             !is.na(.data$epit_seq),                             # must have an epit_seq
@@ -90,7 +90,7 @@ consolidate_data <- function(epitopes, proteins,
   }
 
   # Filter proteins
-  cat("\nCleaning proteins datset...")
+  message("Cleaning proteins datset...")
   df <- dplyr::filter(proteins,
                       .data$UID %in% unique(epitopes$protein_id),
                       .data$TSeq_seqtype == "protein",
@@ -100,7 +100,7 @@ consolidate_data <- function(epitopes, proteins,
   # Build long data frame
 
   # Build long protein data frame
-  cat("\nBuilding long data frame: proteins\n")
+  message("Building long data frame: proteins\n")
   df <- mypblapply(split(df, seq(nrow(df))),
                    FUN = function(x){
                      data.frame(Info_organism_id = x$TSeq_taxid,
@@ -112,7 +112,7 @@ consolidate_data <- function(epitopes, proteins,
     dplyr::bind_rows()
 
   # Build long epitope data frame
-  cat("\nBuilding long data frame: epitopes\n")
+  message("Building long data frame: epitopes\n")
   epit_summary <- mypblapply(split(epitopes, seq(nrow(epitopes))),
                              FUN = function(x){
                                data.frame(Info_protein_id   = x$protein_id,
@@ -150,7 +150,7 @@ consolidate_data <- function(epitopes, proteins,
   }
 
   # Join epitope information onto long protein data frame
-  cat("\nConsolidating data...")
+  message("Consolidating data...")
   df <- df %>%
     dplyr::left_join(epit_summary, by = c("Info_protein_id", "Info_pos")) %>%
     dplyr::select(-c("Info_sourceOrg_id")) %>%

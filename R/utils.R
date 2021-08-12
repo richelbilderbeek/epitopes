@@ -75,7 +75,7 @@ mypblapply <- function(X, FUN, ncpus, ...){
 mypb <- function(i, max_i, t0, npos){
   nb <- max(1, ceiling(max_i / npos))
   if (i == 0){
-    pbstr <- paste0("\n  |", paste(rep("_", npos), collapse = ""), "|")
+    pbstr <- paste0("  |", paste(rep("_", npos), collapse = ""), "|")
     cat(pbstr, "0% processed. Elapsed time: 0s")
   } else if (i >= (max_i - 1)) {
     pbstr <- paste(rep(">", times = npos), collapse = "")

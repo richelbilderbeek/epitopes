@@ -30,19 +30,19 @@
 #' @export
 #'
 
-split_epitope_data <- function(df, proteins,
+split_epitope_data <- function(df, proteins, save_folder,
                                split_level = "protein",
                                split_perc = c(75, 25),
                                coverage_threshold = 75,
                                identity_threshold = 75,
-                               ncpus = 1,
-                               save_folder = NULL){
+                               ncpus = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
+  split_level <- tolower(split_level)
   assertthat::assert_that(is.data.frame(df),
                           is.data.frame(proteins),
-                          tolower(split_level) %in% c("protein", "peptide"),
+                          split_level %in% c("protein", "peptide"),
                           is.numeric(split_perc),
                           all(split_perc > 0),
                           sum(split_perc) == 100,
@@ -53,35 +53,50 @@ split_epitope_data <- function(df, proteins,
                           is.character(save_folder), length(save_folder) == 1)
 
 
-
-
-
-
-  # Check if BLAST is installed
-  errk <- FALSE
-  tryCatch({
-    invisible(utils::capture.output(
-      blast_version <- system("blastp -version", intern = TRUE)[1]))},
-    error   = function(c) {errk <<- TRUE},
-    warning = function(c) {errk <<- TRUE},
-    finally = NULL)
-
-  if (errk){
-    stop(paste0("\nBLAST+ not found.",
-                "\nPlease follow the instructions in",
-                "\nhttps://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download",
-                "\nto set up BLAST+ on your machine.",
-                "\n**************************************"))
-  }
-
-  # Check and adjust split sizes if necessary
-
-  nsplits <- length(split_perc)
-
   # Set up split names
+  nsplits     <- length(split_perc)
   split_names <- paste0("split_",
                         sprintf("%02d", 1:nsplits), "_",
-                        sprintf("%02d", split_perc))
+                        sprintf("%02d", round(split_perc)))
+
+  message("Performing data split at ", split_level, " level")
+
+  if(split_level == "protein"){
+
+    # Check if BLAST is installed
+    errk <- FALSE
+    tryCatch({
+      invisible(utils::capture.output(
+        blast_version <- system("blastp -version", intern = TRUE)[1]))},
+      error   = function(c) {errk <<- TRUE},
+      warning = function(c) {errk <<- TRUE},
+      finally = NULL)
+
+    if (errk){
+      stop(paste0("\nBLAST+ not found.",
+                  "\nPlease follow the instructions in",
+                  "\nhttps://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download",
+                  "\nto set up BLAST+ on your machine.",
+                  "\n**************************************"))
+    }
+
+    # Run blast
+    BLAST_path <- paste0(save_folder, "/BLASTp")
+    proteins <- proteins %>%
+      dplyr::filter(.data$UID %in% unique(df$Info_protein_id)) %>%
+      dplyr::select(.data$UID, .data$TSeq_sequence)
+    blast <- run_blast(BLAST_path, prots, ncpus)
+
+
+
+  }
+
+
+
+
+
+
+
 
   # ========================================================================== #
   # Run blast
