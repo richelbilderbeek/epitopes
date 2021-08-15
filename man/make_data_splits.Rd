@@ -6,13 +6,15 @@
 \usage{
 make_data_splits(
   df,
-  proteins,
-  save_folder,
+  peptides = NULL,
+  proteins = NULL,
   split_level = "protein",
-  split_perc = c(75, 25),
-  coverage_threshold = 75,
-  identity_threshold = 75,
-  ncpus = 1
+  split_perc = c(0.75, 0.25),
+  similarity_threshold = 0.7,
+  save_folder = NULL,
+  ncpus = 1,
+  substitution_matrix = "BLOSUM62",
+  SAopts = list()
 )
 }
 \arguments{
@@ -21,28 +23,25 @@ make_data_splits(
 
 \item{proteins}{data frame of protein data (returned by \code{\link[=get_proteins]{get_proteins()}}).}
 
-\item{save_folder}{path to folder for saving the results.}
-
 \item{split_perc}{numeric vector of desired splitting percentages. See
 Details.}
+
+\item{save_folder}{path to folder for saving the results.}
+
+\item{ncpus}{positive integer, number of cores to use}
 
 \item{coverage_threshold}{coverage threshold for grouping proteins by
 similarity, see Details.}
 
 \item{identity_threshold}{identity threshold for grouping proteins by
 similarity, see Details.}
-
-\item{ncpus}{positive integer, number of cores to use}
 }
 \value{
 A list object containing the data splits and additional summary
 information.
 }
 \description{
-\strong{NOTE}: this routine requires BLAST+ to be installed in your
-local machine. For details on how to set up BLAST+ on your machine, check
-\url{https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download}.
-This function was tested with BLAST versions 2.10.0 and 2.12.0.
+Split peptide data conditionally on peptide or protein similarity.
 }
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})

@@ -28,7 +28,7 @@ make_data_splits <- function(df,
                              proteins    = NULL,
                              split_level = "protein",
                              split_perc  = c(.75, .25),
-                             similarity_threshold = .6,
+                             similarity_threshold = .7,
                              save_folder = NULL,
                              ncpus       = 1,
                              substitution_matrix = "BLOSUM62",
@@ -51,14 +51,7 @@ make_data_splits <- function(df,
 
   diss_t <- 1 - similarity_threshold
 
-  # Set up split names
-  nsplits     <- length(split_perc)
-  split_names <- paste0("split_",
-                        sprintf("%02d", 1:nsplits), "_",
-                        sprintf("%02d", round(split_perc)))
-
   message("Performing data split at ", split_level, " level")
-
   if(split_level == "peptide"){
     X <- peptides %>%
       dplyr::select(IDs  = Info_PepID,
@@ -107,125 +100,32 @@ make_data_splits <- function(df,
                      P    = nPos / N)
 
   # Define split alllocations
-  y <- optimise_splits(Y, Nstar, alpha, SAopts)
+  if(!("maxit" %in% names(SAopts))) SAopts$maxit <- 2000 * round(log10(length(split_perc) ^ nrow(Y)))
+  y <- optimise_splits(Y, Nstar = split_perc, alpha, SAopts)
 
   Y$allocation <- y$x
 
+  X <- dplyr::left_join(dplyr::select(X, -c("SEQs")),
+                        dplyr::select(Y, c("group", "allocation")),
+                        by = "group")
+  if(split_level == "peptide"){
+    df <- dplyr::left_join(df, X, by = c("Info_PepID" = "IDs"))
+  } else if(split_level == "protein"){
+    df <- dplyr::left_join(df, X, by = c("Info_protein_id" = "IDs"))
+  }
 
-#
-#
-#
-#
-#   id.var <- gsub("\\.[1-9]+$", "", df$Info_protein_id)
-#   #
-#   #   # Run blast
-#   #   BLAST_path <- paste0(save_folder, "/BLASTp")
-#   #   proteins <- proteins %>%
-#   #     dplyr::filter(.data$UID %in% unique(df$Info_protein_id)) %>%
-#   #     dplyr::select(.data$UID, .data$TSeq_sequence)
-#   #   blast <- run_blast(BLAST_path, proteins, ncpus)
-#   #   blast <- blast %>%
-#   #     dplyr::rowwise() %>%
-#   #     dplyr::mutate(Pair = paste(t(apply(cbind(.data$QueryID, .data$SubjectID),
-#   #                                        MARGIN = 1, FUN = sort)),
-#   #                                collapse = " "))
-#   #
-#   #
-#   #   # Turn blast results into a dissimilarity matrix
-#   #   for (i in seq_along(unique(blast$QueryID))){
-#   #     for (j in seq_along(unique(blast$SubjectID))){
-#   #
-#   #     }
-#   #   }
-#
-#
-#
-#   # Filter relevant blast entries and variables
-#   ID_pairs <- blast %>%
-#     dplyr::filter((.data$Query_coverage >= coverage_threshold) | (.data$Perc_identity >= identity_threshold),
-#                   !duplicated(t(apply(cbind(.data$QueryID, .data$SubjectID), 1, sort)))) %>%
-#     dplyr::select(.data$QueryID, .data$SubjectID) %>%
-#     apply(MARGIN = 1, paste, collapse = " ")
-#
-#   # Get the frequencies of occurrence of each ID
-#   divs <- as.data.frame(sort(table(id.var), decreasing = TRUE),
-#                         stringsAsFactors = FALSE)
-#   divs$Freq <- 100 * divs$Freq / length(id.var)
-#
-#   # Initialise splits
-#   split_ids <- vector("list", nsplits)
-#   names(split_ids) <- split_names
-#   for(i in 1:nsplits) split_ids[[i]] <- list(id_type = split_level,
-#                                              IDs = character(),
-#                                              IDgroups = vector("list"),
-#                                              Perc = 0)
-#
-#
-# }
-#
-# # ========================================================================== #
-# # Determine the similarity clusters
-#
-# # Get the frequencies of occurrence of each ID
-# divs <- as.data.frame(sort(table(id_var), decreasing = TRUE),
-#                       stringsAsFactors = FALSE)
-# divs$Freq <- 100 * divs$Freq / length(id_var)
-#
-# # Determine which IDs go into which splits
-# split_ids <- vector("list", nsplits)
-# names(split_ids) <- split_names
-# for(i in 1:nsplits) split_ids[[i]] <- list(id_type = split_level,
-#                                            IDs = character(),
-#                                            IDgroups = vector("list"),
-#                                            Perc = 0)
-# sc <- 1   # split counter
-# nc <- 0   # number of attempts to attribute
-# while (nrow(divs) > 0){
-#   IDgroup <- divs$id_var[1]
-#   go <- TRUE
-#   cc <- 1
-#   while(go){
-#     idx <- grep(IDgroup[cc], blast)
-#     if(length(idx) > 0){
-#       x <- blast[idx] # get entries that have cands[cc]
-#       blast <- blast[-idx]
-#       x <- gsub(paste0("\\s*", IDgroup[cc], "\\s*"), "", x)
-#       IDgroup <- c(IDgroup, x)
-#       cc <- cc + 1
-#     } else {
-#       go <- FALSE
-#     }
-#   }
-#
-#   Ptot <- sum(divs$Freq[divs$id_var %in% IDgroup])
-#
-#   # If the current split (sc) can accommodate all the data in IDgroup
-#   if(Ptot <= split_perc[sc] - split_ids[[sc]]$Perc){
-#     split_ids[[sc]]$IDs      <- c(split_ids[[sc]]$IDs, IDgroup)
-#     split_ids[[sc]]$Perc     <- split_ids[[sc]]$Perc + Ptot
-#     split_ids[[sc]]$IDgroups <- c(split_ids[[sc]]$IDgroups, list(IDgroup))
-#     divs <- divs[-which(divs$id_var %in% IDgroup), ]
-#     nc <- 0
-#   } else {
-#     nc <- nc + 1
-#   }
-#   if (nc > nsplits) break
-#
-#   sc <- 1 + sc %% nsplits
-# }
-#
-# # Allocate any remaining ones
-# if (length(divs) > 0){
-#   sidx <- which.max(split_perc - sapply(split_ids, function(x) x$Perc))
-#   split_ids[[sidx]]$IDs  <- c(split_ids[[sidx]]$IDs, divs$id_var)
-#   split_ids[[sidx]]$Perc <- split_ids[[sidx]]$Perc + sum(divs$Freq)
-# }
-#
-# for (i in seq_along(split_ids)){
-#   split_ids[[i]]$wdf <- wdf[which(id_var %in% split_ids[[i]]$IDs), ]
-# }
-#
-# return(split_ids)
+  # Build splits
+  splits <- lapply(seq_along(split_perc), function(i){dplyr::filter(df, allocation == i)})
+  names(splits) <- paste0("split_",
+                          sprintf("%02d", seq_along(split_perc)), "_",
+                          sprintf("%02d", round(100*split_perc)))
+  names(y$xl)          <- names(splits)
+  names(y$solstats$Gj) <- names(splits)
+  names(y$solstats$pj) <- names(splits)
+
+  return(list(splits = splits,
+              allocation = y$xl,
+              split_perc = y$solstats$Gj,
+              split_balance = y$solstats$pj,
+              overall_balance = y$solstats$Pstar))
 }
-
-

@@ -19,12 +19,16 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts){
   # === Initial definitions === #
   # Objective function
   objfun <- function(x, alpha, Y, Nstar, ...){
+    tmp <- getstats(x, Y, Nstar)
+    sum(alpha * (tmp$Gj - Nstar)^2 + (1 - alpha) * (tmp$pj - tmp$Pstar)^2)
+  }
+  getstats <- function(x, Y, Nstar){
     Pstar <- sum(Y$nPos) / sum(Y$N)
     ymatr <- matrix(round(x), ncol = length(Nstar), nrow = length(x), byrow = FALSE)
     ymatr <- ymatr == matrix(seq_along(Nstar), ncol = length(Nstar), nrow = length(x), byrow = TRUE)
     Gj    <- colSums(ymatr * Y$N) / sum(Y$N)
     pj    <- colSums(ymatr * Y$nPos) / (colSums(ymatr * Y$N) + 1e-12)
-    sum(alpha * (Gj - Nstar)^2 + (1 - alpha) * (pj - Pstar)^2)
+    return(list(Gj = Gj, pj = pj, Pstar = Pstar))
   }
 
   # Movement function
@@ -100,9 +104,9 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts){
 
   # === Run optimisation === #
   message("Optimising splits with alpha = ", alpha,
-          "\n(Number of possibilities: ", signif(length(Nstar) ^ nrow(Y), 3), ")")
+          "\n(Number of possibilities: ~", signif(length(Nstar) ^ nrow(Y), 3), ")")
   if(length(Nstar) ^ nrow(Y) < 1e6){
-    message("Running exhaustive search (", length(Nstar) ^ nrow(Y), " possible combinations)")
+    message("Running exhaustive search...")
     # If the search space is small enough, exhaustive search suffices
     states <- do.call(expand.grid,
                       lapply(1:nrow(Y), function(x){1:length(Nstar)}))
@@ -114,8 +118,8 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts){
     cost       <- min(y)
   } else {
     x0 <- makesol(alpha, Y, Nstar)
-    message("Initial solution build: Cost = ", signif(objfun(x0, alpha, Y, Nstar), 3))
-    message("Running Simulated Annealing...")
+    message("Initial solution built: Cost = ", signif(objfun(x0, alpha, Y, Nstar), 3))
+    message("Running Simulated Annealing (maxit = ", SAopts$maxit, ")")
     y  <- stats::optim(par = x0, fn = objfun, gr = neighbour, method = "SANN",
                        alpha = alpha, Y = Y, Nstar = Nstar,
                        control = SAopts)
@@ -124,5 +128,9 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts){
     cost       <- y$value
   }
 
-  return(list(x = assignment, cost = cost))
+  # Cast x as an allocation list
+  xl <- lapply(seq_along(Nstar), function(i){seq_along(assignment)[assignment == i]})
+  solstats <- getstats(assignment, Y, Nstar)
+
+  return(list(x = assignment, cost = cost, solstats = solstats, xl = xl))
 }
