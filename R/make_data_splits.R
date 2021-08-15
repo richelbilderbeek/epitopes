@@ -89,6 +89,12 @@
 #' @param proteins data frame of proteins, returned by [get_proteins()] and
 #'        filtered to remove any proteins not present in `df$Info_protein_id`.
 #'        Only needed if `split_level == "protein"`
+#' @param split_level which sequence should be used as the splitting level.
+#'        Accepts "protein" (uses similarity of the full protein sequences,
+#'        `proteins$TSeq_sequence`, to determine which observations should stay
+#'        together in the splits) or "peptide" (uses similarity of the labelled
+#'        peptides, `peptides$Info_peptide`). See **Grouping strategy** for
+#'        details.
 #' @param split_prop numeric vector of target proportions for each split
 #'        (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
 #'        sum(pk) = 1).
@@ -169,12 +175,12 @@ make_data_splits <- function(df,
   message("Performing data split at ", split_level, " level")
   if(split_level == "peptide"){
     X <- peptides %>%
-      dplyr::select(IDs  = Info_PepID,
-                    SEQs = Info_peptide)
+      dplyr::select(IDs  = .data$Info_PepID,
+                    SEQs = .data$Info_peptide)
   } else if(split_level == "protein"){
     X <- proteins %>%
-      dplyr::select(IDs  = UID,
-                    SEQs = TSeq_sequence)
+      dplyr::select(IDs  = .data$UID,
+                    SEQs = .data$TSeq_sequence)
   }
 
   # Run Smith-Waterman local alignment and build similarity score matrix
@@ -209,14 +215,17 @@ make_data_splits <- function(df,
   }
   Y <- Y %>%
     dplyr::group_by(.data$group) %>%
-    dplyr::summarise(nPos = sum(Class == 1),
-                     nNeg = sum(Class == -1),
+    dplyr::summarise(nPos = sum(.data$Class == 1),
+                     nNeg = sum(.data$Class == -1),
                      N    = dplyr::n(),
-                     P    = nPos / N)
+                     P    = .data$nPos / dplyr::n())
 
   # Define split alllocations
-  if(!("maxit" %in% names(SAopts))) SAopts$maxit <- 2000 * round(log10(length(split_prop) ^ nrow(Y)))
-  y <- optimise_splits(Y, Nstar = split_prop, alpha, SAopts)
+  if(!("maxit" %in% names(SAopts))) {
+    SAopts$maxit <- 2000 * round(log10(length(split_prop) ^ nrow(Y)))
+  }
+  y <- optimise_splits(Y = Y, Nstar = split_prop, alpha = alpha,
+                       SAopts = SAopts, ncpus = ncpus)
 
   Y$allocation <- y$x
 
@@ -230,7 +239,7 @@ make_data_splits <- function(df,
   }
 
   # Build splits
-  splits <- lapply(seq_along(split_prop), function(i){dplyr::filter(df, allocation == i)})
+  splits <- lapply(seq_along(split_prop), function(i){dplyr::filter(df, .data$allocation == i)})
   names(splits) <- paste0("split_",
                           sprintf("%02d", seq_along(split_prop)), "_",
                           sprintf("%02d", round(100*split_prop)))

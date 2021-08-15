@@ -30,6 +30,13 @@ returned by \code{\link[=extract_peptides]{extract_peptides()}}). Only needed if
 filtered to remove any proteins not present in \code{df$Info_protein_id}.
 Only needed if \code{split_level == "protein"}}
 
+\item{split_level}{which sequence should be used as the splitting level.
+Accepts "protein" (uses similarity of the full protein sequences,
+\code{proteins$TSeq_sequence}, to determine which observations should stay
+together in the splits) or "peptide" (uses similarity of the labelled
+peptides, \code{peptides$Info_peptide}). See \strong{Grouping strategy} for
+details.}
+
 \item{split_prop}{numeric vector of target proportions for each split
 (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
 sum(pk) = 1).}
