@@ -135,6 +135,10 @@
 #'          hierarchical clustering using dissimilarity matrix `diss.matrix`.
 #' }
 #'
+#' If the splitting is impossible (e.g., if the number of clusters is smaller
+#' than the desired number of splits) the function throws a warning and returns
+#' a list with only **SW.scores**, **diss.matrix** and **clusters**.
+#'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
 #' @importFrom dplyr %>%
@@ -157,20 +161,29 @@ make_data_splits <- function(df,
 
   # ========================================================================== #
   # Sanity checks and initial definitions
-  # split_level <- tolower(split_level)
-  # assertthat::assert_that(is.data.frame(df),
-  #                         is.data.frame(proteins),
-  #                         split_level %in% c("protein", "peptide"),
-  #                         is.numeric(split_prop),
-  #                         all(split_prop > 0),
-  #                         sum(split_prop) == 100,
-  #                         assertthat::is.count(coverage_threshold),
-  #                         coverage_threshold >= 0, coverage_threshold <= 100,
-  #                         assertthat::is.count(identity_threshold),
-  #                         identity_threshold >= 0, identity_threshold <= 100,
-  #                         is.character(save_folder), length(save_folder) == 1)
+  split_level <- tolower(split_level)
+  assertthat::assert_that(is.data.frame(df),
+                          is.null(peptides) | is.data.frame(peptides),
+                          is.null(proteins) | is.data.frame(proteins),
+                          length(split_level) == 1,
+                          split_level %in% c("peptide", "protein"),
+                          is.numeric(split_prop), length(split_prop) > 1,
+                          all(split_prop > 0), all(split_prop < 1),
+                          sum(split_prop) == 1,
+                          is.numeric(similarity_threshold),
+                          length(similarity_threshold) == 1,
+                          similarity_threshold > 0, similarity_threshold < 1,
+                          exists(data(substitution_matrix,
+                                      package = "Biostrings")),
+                          is.numeric(alpha), length(alpha) == 1,
+                          alpha >= 0, alpha <= 1,
+                          is.list(SAopts),
+                          is.null(save_folder) | (is.character(save_folder)),
+                          is.null(save_folder) | length(save_folder) == 1,
+                          assertthat::is.count(ncpus))
 
   diss_t <- 1 - similarity_threshold
+  # ========================================================================== #
 
   message("Performing data split at ", split_level, " level")
   if(split_level == "peptide"){
@@ -206,6 +219,15 @@ make_data_splits <- function(df,
   message("Extracting clusters (Hierarchical, single linkage)")
   clusters <- stats::hclust(d = stats::as.dist(diss), method = "single")
   X$group  <- stats::cutree(clusters, h = diss_t)
+
+  if(length(unique(X$group)) < length(split_prop)){
+    warning("Impossible to divide data into ", length(split_prop),
+            " splits at similarity level ", similarity_threshold,
+            ".\nTry a higher similarity threshold or a smaller number of splits.")
+    return(list(SW.scores       = scores,
+                diss.matrix     = diss,
+                clusters        = clusters))
+  }
 
   # Check how many positive / negative examples per group
   if (split_level == "protein") {
@@ -247,6 +269,16 @@ make_data_splits <- function(df,
   names(y$solstats$Gj) <- names(splits)
   names(y$solstats$pj) <- names(splits)
 
+  # Check save folder and create file names
+  if(!is.null(save_folder)) {
+    if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
+    for (i in seq_along(splits)){
+      saveRDS(splits[[i]],
+              paste0(normalizePath(save_folder), "/", names(splits)[i], ".rds"))
+    }
+  }
+
+  # return results
   return(list(splits          = splits,
               split_props     = y$solstats$Gj,
               split_balance   = y$solstats$pj,

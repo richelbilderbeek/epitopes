@@ -83,6 +83,10 @@ or proteins (if \code{split_level == "protein"}).
 \item \strong{clusters}: clusters of proteins / peptides extracted by
 hierarchical clustering using dissimilarity matrix \code{diss.matrix}.
 }
+
+If the splitting is impossible (e.g., if the number of clusters is smaller
+than the desired number of splits) the function throws a warning and returns
+a list with only \strong{SW.scores}, \strong{diss.matrix} and \strong{clusters}.
 }
 \description{
 Split the windowed epitope data returned by \code{\link[=extract_peptides]{extract_peptides()}} into
