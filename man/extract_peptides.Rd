@@ -7,7 +7,7 @@
 extract_peptides(
   df,
   min_peptide = 8,
-  max_peptide = 30,
+  max_epitope = 30,
   window_size = (2 * min_peptide) - 1,
   save_folder = NULL
 )
@@ -16,9 +16,11 @@ extract_peptides(
 \item{df}{data frame of consolidated protein-epitope data, returned by
 \code{\link[=consolidate_data]{consolidate_data()}}.}
 
-\item{min_peptide}{positive integer, shortest peptide to be considered}
+\item{min_peptide}{positive integer, shortest peptide to be considered
+(applies to both \strong{positive} and \strong{negative} observations)}
 
-\item{max_peptide}{positive integer, longest peptide to be considered}
+\item{max_epitope}{positive integer, longest peptide to be considered (only
+applies to \strong{positive} observations.)}
 
 \item{window_size}{positive integer, size of the local neighbourhood to be
 considered.}
@@ -30,7 +32,7 @@ List containing two data frames:
 
 \itemize{
 \item A data frame containing the labeled positions of \code{df} (filtered by
-\emph{min_peptide} and \emph{max_peptide}) with a new column expressing the local
+\emph{min_epitope} and \emph{max_epitope}) with a new column expressing the local
 neighbourhood of each position (to be used for feature calculation)
 \item A data frame containing the individual peptides and classes
 }

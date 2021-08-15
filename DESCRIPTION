@@ -23,11 +23,10 @@ Imports: assertthat (>= 0.2.1),
          dplyr (>= 0.8.3),
          rlang (>= 0.4.10),
          reutils (>= 0.2.3),
-         Peptides (>= 2.4.1),
          pbapply (>= 1.4.0),
          stringr (>= 1.4.0),
-         seqinr (>= 4.2.0),
          ranger (>= 0.12.1),
+         Biostrings (>= 2.60.2),
          parallel,
          utils
 Suggests: 

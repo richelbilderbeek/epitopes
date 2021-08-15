@@ -21,8 +21,10 @@ run_blast <- function(BLAST_path, proteins, ncpus){
   if(!dir.exists(BLAST_path)) dir.create(BLAST_path, recursive = TRUE)
   fn <- gsub("//", "/", paste0(BLAST_path, "/proteins.fasta"), fixed = TRUE)
 
-  seqinr::write.fasta(as.list(proteins$TSeq_sequence), names = proteins$UID,
-                      file.out = fn, as.string = TRUE, nbchar = 100000)
+  x        <- proteins$TSeq_sequence
+  names(x) <- proteins$UID
+  x        <- Biostrings::AAStringSet(x)
+  Biostrings::writeXStringSet(x, filepath = fn, format="fasta")
 
   message("===========================================\nBuilding BLASTp database")
   system(paste0("makeblastdb -in ", fn, " -dbtype prot"))
@@ -38,9 +40,8 @@ run_blast <- function(BLAST_path, proteins, ncpus){
 
   names(blast) <- c("QueryID", "SubjectID", "Perc_identity", "Query_coverage")
 
-  blast$QueryID   <- gsub("\\.[1-9]+$", "", blast$QueryID)
-  blast$SubjectID <- gsub("\\.[1-9]+$", "", blast$SubjectID)
-  blast <- blast[-which(blast$QueryID == blast$SubjectID), ]
+  # blast$QueryID   <- gsub("\\.[1-9]+$", "", blast$QueryID)
+  # blast$SubjectID <- gsub("\\.[1-9]+$", "", blast$SubjectID)
 
   return(blast)
 
