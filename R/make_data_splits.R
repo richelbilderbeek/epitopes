@@ -1,19 +1,133 @@
-#' Split peptide data conditionally on peptide or protein similarity.
+#' Split epitope data.
 #'
-#' @param df data frame of consolidated epitope information, returned by
-#' [extract_peptides()] or [calculate_features()].
-#' @param proteins data frame of protein data (returned by [get_proteins()]).
+#' Split the windowed epitope data returned by [extract_peptides()] into
+#' non-overlapping subsets. Proteins / peptides with similarities higher than
+#' a predefined threshold are always placed in the same split to prevent data
+#' leakage in machine learning. This routine tries to simultaneously approximate
+#' the user-defined proportions and maintain the overall class balance within
+#' each split.
+#'
+#' @section **Grouping strategy**:
+#' The first step of this routine is to group the observations at either the
+#' proteins or the peptide level (depending on input parameter `split_level`).
+#' Local alignment scores for all pairs of sequences are calculated using the
+#' implementation of the Smith-Waterman algorithm available in function
+#' [Biostrings::pairwiseAlignment()], with default parameters and the scoring
+#' matrix defined in `substitution_matrix`. These scores are returned as
+#' element **SW.scores** of the output list.
+#'
+#' The dissimilarity matrix is calculated based on **SW.scores**, as:
+#'
+#' `diss[i,j] = 1 - SW.scores[i,j] / min(SW.scores[i,i], SW.scores[j,j])`
+#'
+#' which gives a value between 0 (perfect similarity) and 1 (maximum
+#' dissimilarity). `diss[i,j]` will be 0 if and only if the shorter sequence is
+#' fully and perfectly contained in the longer one; and will be 1 if and only
+#' if the Smith-Waterman alignment score is zero.
+#'
+#' The dissimilarity matrix (returned as element **diss.matrix** of the output
+#' list) is used to calculate a hierarchical clustering of
+#' the sequences, and input parameter `similarity_threshold` is then used to
+#' define the resulting similarity clusters. Single-linkage is used, to
+#' guarantee that any pair of sequences with similarity
+#' greater than the threshold will always be contained within the same cluster.
+#' The resulting clusters (returned as element **clusters** of the output list)
+#' represent the allocation units that are considered by the optimisation
+#' to split the data.
+#'
+#' @section Optimisation Problem:
+#' This routine attempts to simultaneously minimise two objectives: (i) the
+#' difference between the actual proportion of data within each split and the
+#' desired levels informed by `split_prop`, and (ii) the difference between the
+#' proportion of _positive_ observations within each split and the overall
+#' proportion in the data. A simple linear aggregation strategy is used to
+#' define the following optimisation problem. Let:
+#' \itemize{
+#'    \item nC: number of clusters.
+#'    \item xi: integer variable defining the split to which cluster i is allocated.
+#'    \item Ni+: number of _positive_ observations in cluster i.
+#'    \item Ni: total number of observations in cluster i.
+#'    \item Nj*: desired proportion of data for split j.
+#'    \item P*: proportion of _positive_ observations in the whole data.
+#' }
+#'
+#' We want to solve the problem:
+#'
+#' `minimize sum_j{ alpha x (Gj - Nj*)^2 + (1-alpha) x (pj - P*)^2 }`
+#'
+#' With:
+#' \itemize{
+#'     \item `xi \in {1, 2, ..., nC}`
+#'     \item `yij = ifelse(xi == j, 1, 0)`
+#'     \item `Gj = sum_i{ yij * Ni } / sum_i{ Ni }`
+#'     \item `pj = sum_i{ yij * Ni+ } / sum_i{ yij * Ni }`
+#'}
+#'
+#' Input parameter `alpha` regulates the relative importance attributed to
+#' each of the two objectives. At the limits, `alpha = 0` ignores the desired
+#' proportions and
+#' focuses only on defining splits with class balances that are as close as
+#' possible to __P*__, whereas `alpha = 0` ignores the class balance and tries
+#' to simply generate splits that are as faithful as possible to the desired
+#' proportions. An approximation to the Pareto-optimal front can be obtained
+#' by varying `alpha` between these two values.
+#'
+#' The search space of this optimisation problem has a cardinality of
+#' `number.of.splits ^ nC`. If the cardinality is under `10^6` possible
+#' allocations then this routine performs enumerative search and is guaranteed
+#' to return the global optimum. For larger search spaces a
+#' constructive heuristic followed by Simulated Annealing (see [stats::optim()]
+#' for details) is used. Input parameter `SAopts` can be used to pass control
+#' parameters to the Simulated Annealing.
+#'
+#'
+#' @param df data frame of windowed epitope data (returned by
+#'        [extract_peptides()]).
+#' @param peptides data frame of individual peptides present in `df` (also
+#'        returned by [extract_peptides()]). Only needed if
+#'        `split_level == "peptide"`.
+#' @param proteins data frame of proteins, returned by [get_proteins()] and
+#'        filtered to remove any proteins not present in `df$Info_protein_id`.
+#'        Only needed if `split_level == "protein"`
+#' @param split_prop numeric vector of target proportions for each split
+#'        (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
+#'        sum(pk) = 1).
+#' @param similarity_threshold similarity threshold for grouping observations.
+#'        See **Grouping strategy** for details.
+#' @param substitution_matrix character string indicating the substitution
+#'        matrix to be used to calculate the peptide / protein alignments.
+#'        Must be a matrix recognised by [Biostrings::substitution.matrices()]
+#'        (e.g., "BLOSUM45", "PAM30", etc.)
+#' @param alpha weight parameter to regulate focus on maximising match to desired
+#'        split proportions (`split_prop`) vs. on approximating the class
+#'        balance of the full data set. Must be a numeric value between 0 and 1.
+#'        See **Optimisation Problem** for details.
+#' @param SAopts list of control parameters to be used by the simulated
+#'        annealing (SANN) algorithm. See [stats::optim()] for details.
 #' @param save_folder path to folder for saving the results.
-#' @param split_perc numeric vector of desired splitting percentages. See
-#'        Details.
-#' @param coverage_threshold coverage threshold for grouping proteins by
-#' similarity, see Details.
-#' @param identity_threshold identity threshold for grouping proteins by
-#' similarity, see Details.
-#' @param ncpus positive integer, number of cores to use
+#' @param ncpus positive integer, number of cores to use.
 #'
-#' @return A list object containing the data splits and additional summary
-#' information.
+#' @return A list object containing:
+#' \itemize{
+#'    \item **splits**: named list containing the data splits.
+#'    \item **split_props**: vector with the proportion of the total data that
+#'          was allocated to each split.
+#'    \item **split_balance**: vector with the proportion of positive
+#'          observations in each split.
+#'    \item **target_props**: vector with the desired split proportions (same as
+#'          input parameter `split_prop`).
+#'    \item **target_balance**: proportion of positive observations in the full
+#'          data set (i.e., in the input dataframe `df`).
+#'    \item **alpha**: weight parameter used in the optimisation (same as
+#'          input parameter `alpha`).
+#'    \item **SW.scores**: matrix of local alignment (Smith-Waterman) similarity
+#'          scores calculated for the peptides (if `split_level == "peptide"`)
+#'          or proteins (if `split_level == "protein"`).
+#'    \item **diss.matrix**: dissimilarity matrix calculated using the
+#'          `SW.scores`. See **Grouping strategy**.
+#'    \item **clusters**: clusters of proteins / peptides extracted by
+#'          hierarchical clustering using dissimilarity matrix `diss.matrix`.
+#' }
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
 #'
@@ -27,12 +141,13 @@ make_data_splits <- function(df,
                              peptides    = NULL,
                              proteins    = NULL,
                              split_level = "protein",
-                             split_perc  = c(.75, .25),
+                             split_prop  = c(.75, .25),
                              similarity_threshold = .7,
-                             save_folder = NULL,
-                             ncpus       = 1,
                              substitution_matrix = "BLOSUM62",
-                             SAopts = list()){
+                             alpha  = 0.5,
+                             SAopts = list(),
+                             save_folder = NULL,
+                             ncpus       = 1){
 
   # ========================================================================== #
   # Sanity checks and initial definitions
@@ -40,9 +155,9 @@ make_data_splits <- function(df,
   # assertthat::assert_that(is.data.frame(df),
   #                         is.data.frame(proteins),
   #                         split_level %in% c("protein", "peptide"),
-  #                         is.numeric(split_perc),
-  #                         all(split_perc > 0),
-  #                         sum(split_perc) == 100,
+  #                         is.numeric(split_prop),
+  #                         all(split_prop > 0),
+  #                         sum(split_prop) == 100,
   #                         assertthat::is.count(coverage_threshold),
   #                         coverage_threshold >= 0, coverage_threshold <= 100,
   #                         assertthat::is.count(identity_threshold),
@@ -100,8 +215,8 @@ make_data_splits <- function(df,
                      P    = nPos / N)
 
   # Define split alllocations
-  if(!("maxit" %in% names(SAopts))) SAopts$maxit <- 2000 * round(log10(length(split_perc) ^ nrow(Y)))
-  y <- optimise_splits(Y, Nstar = split_perc, alpha, SAopts)
+  if(!("maxit" %in% names(SAopts))) SAopts$maxit <- 2000 * round(log10(length(split_prop) ^ nrow(Y)))
+  y <- optimise_splits(Y, Nstar = split_prop, alpha, SAopts)
 
   Y$allocation <- y$x
 
@@ -115,17 +230,21 @@ make_data_splits <- function(df,
   }
 
   # Build splits
-  splits <- lapply(seq_along(split_perc), function(i){dplyr::filter(df, allocation == i)})
+  splits <- lapply(seq_along(split_prop), function(i){dplyr::filter(df, allocation == i)})
   names(splits) <- paste0("split_",
-                          sprintf("%02d", seq_along(split_perc)), "_",
-                          sprintf("%02d", round(100*split_perc)))
+                          sprintf("%02d", seq_along(split_prop)), "_",
+                          sprintf("%02d", round(100*split_prop)))
   names(y$xl)          <- names(splits)
   names(y$solstats$Gj) <- names(splits)
   names(y$solstats$pj) <- names(splits)
 
-  return(list(splits = splits,
-              allocation = y$xl,
-              split_perc = y$solstats$Gj,
-              split_balance = y$solstats$pj,
-              overall_balance = y$solstats$Pstar))
+  return(list(splits          = splits,
+              split_props     = y$solstats$Gj,
+              split_balance   = y$solstats$pj,
+              target_props    = split_prop,
+              target_balance  = y$solstats$Pstar,
+              alpha           = alpha,
+              SW.scores       = scores,
+              diss.matrix     = diss,
+              clusters        = clusters))
 }

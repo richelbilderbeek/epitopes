@@ -2,47 +2,166 @@
 % Please edit documentation in R/make_data_splits.R
 \name{make_data_splits}
 \alias{make_data_splits}
-\title{Split peptide data conditionally on peptide or protein similarity.}
+\title{Split epitope data.}
 \usage{
 make_data_splits(
   df,
   peptides = NULL,
   proteins = NULL,
   split_level = "protein",
-  split_perc = c(0.75, 0.25),
+  split_prop = c(0.75, 0.25),
   similarity_threshold = 0.7,
-  save_folder = NULL,
-  ncpus = 1,
   substitution_matrix = "BLOSUM62",
-  SAopts = list()
+  alpha = 0.5,
+  SAopts = list(),
+  save_folder = NULL,
+  ncpus = 1
 )
 }
 \arguments{
-\item{df}{data frame of consolidated epitope information, returned by
-\code{\link[=extract_peptides]{extract_peptides()}} or \code{\link[=calculate_features]{calculate_features()}}.}
+\item{df}{data frame of windowed epitope data (returned by
+\code{\link[=extract_peptides]{extract_peptides()}}).}
 
-\item{proteins}{data frame of protein data (returned by \code{\link[=get_proteins]{get_proteins()}}).}
+\item{peptides}{data frame of individual peptides present in \code{df} (also
+returned by \code{\link[=extract_peptides]{extract_peptides()}}). Only needed if
+\code{split_level == "peptide"}.}
 
-\item{split_perc}{numeric vector of desired splitting percentages. See
-Details.}
+\item{proteins}{data frame of proteins, returned by \code{\link[=get_proteins]{get_proteins()}} and
+filtered to remove any proteins not present in \code{df$Info_protein_id}.
+Only needed if \code{split_level == "protein"}}
+
+\item{split_prop}{numeric vector of target proportions for each split
+(i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
+sum(pk) = 1).}
+
+\item{similarity_threshold}{similarity threshold for grouping observations.
+See \strong{Grouping strategy} for details.}
+
+\item{substitution_matrix}{character string indicating the substitution
+matrix to be used to calculate the peptide / protein alignments.
+Must be a matrix recognised by \code{\link[Biostrings:substitution_matrices]{Biostrings::substitution.matrices()}}
+(e.g., "BLOSUM45", "PAM30", etc.)}
+
+\item{alpha}{weight parameter to regulate focus on maximising match to desired
+split proportions (\code{split_prop}) vs. on approximating the class
+balance of the full data set. Must be a numeric value between 0 and 1.
+See \strong{Optimisation Problem} for details.}
+
+\item{SAopts}{list of control parameters to be used by the simulated
+annealing (SANN) algorithm. See \code{\link[stats:optim]{stats::optim()}} for details.}
 
 \item{save_folder}{path to folder for saving the results.}
 
-\item{ncpus}{positive integer, number of cores to use}
-
-\item{coverage_threshold}{coverage threshold for grouping proteins by
-similarity, see Details.}
-
-\item{identity_threshold}{identity threshold for grouping proteins by
-similarity, see Details.}
+\item{ncpus}{positive integer, number of cores to use.}
 }
 \value{
-A list object containing the data splits and additional summary
-information.
+A list object containing:
+\itemize{
+\item \strong{splits}: named list containing the data splits.
+\item \strong{split_props}: vector with the proportion of the total data that
+was allocated to each split.
+\item \strong{split_balance}: vector with the proportion of positive
+observations in each split.
+\item \strong{target_props}: vector with the desired split proportions (same as
+input parameter \code{split_prop}).
+\item \strong{target_balance}: proportion of positive observations in the full
+data set (i.e., in the input dataframe \code{df}).
+\item \strong{alpha}: weight parameter used in the optimisation (same as
+input parameter \code{alpha}).
+\item \strong{SW.scores}: matrix of local alignment (Smith-Waterman) similarity
+scores calculated for the peptides (if \code{split_level == "peptide"})
+or proteins (if \code{split_level == "protein"}).
+\item \strong{diss.matrix}: dissimilarity matrix calculated using the
+\code{SW.scores}. See \strong{Grouping strategy}.
+\item \strong{clusters}: clusters of proteins / peptides extracted by
+hierarchical clustering using dissimilarity matrix \code{diss.matrix}.
+}
 }
 \description{
-Split peptide data conditionally on peptide or protein similarity.
+Split the windowed epitope data returned by \code{\link[=extract_peptides]{extract_peptides()}} into
+non-overlapping subsets. Proteins / peptides with similarities higher than
+a predefined threshold are always placed in the same split to prevent data
+leakage in machine learning. This routine tries to simultaneously approximate
+the user-defined proportions and maintain the overall class balance within
+each split.
 }
+\section{\strong{Grouping strategy}}{
+
+The first step of this routine is to group the observations at either the
+proteins or the peptide level (depending on input parameter \code{split_level}).
+Local alignment scores for all pairs of sequences are calculated using the
+implementation of the Smith-Waterman algorithm available in function
+\code{\link[Biostrings:pairwiseAlignment]{Biostrings::pairwiseAlignment()}}, with default parameters and the scoring
+matrix defined in \code{substitution_matrix}. These scores are returned as
+element \strong{SW.scores} of the output list.
+
+The dissimilarity matrix is calculated based on \strong{SW.scores}, as:
+
+\code{diss[i,j] = 1 - SW.scores[i,j] / min(SW.scores[i,i], SW.scores[j,j])}
+
+which gives a value between 0 (perfect similarity) and 1 (maximum
+dissimilarity). \code{diss[i,j]} will be 0 if and only if the shorter sequence is
+fully and perfectly contained in the longer one; and will be 1 if and only
+if the Smith-Waterman alignment score is zero.
+
+The dissimilarity matrix (returned as element \strong{diss.matrix} of the output
+list) is used to calculate a hierarchical clustering of
+the sequences, and input parameter \code{similarity_threshold} is then used to
+define the resulting similarity clusters. Single-linkage is used, to
+guarantee that any pair of sequences with similarity
+greater than the threshold will always be contained within the same cluster.
+The resulting clusters (returned as element \strong{clusters} of the output list)
+represent the allocation units that are considered by the optimisation
+to split the data.
+}
+
+\section{Optimisation Problem}{
+
+This routine attempts to simultaneously minimise two objectives: (i) the
+difference between the actual proportion of data within each split and the
+desired levels informed by \code{split_prop}, and (ii) the difference between the
+proportion of \emph{positive} observations within each split and the overall
+proportion in the data. A simple linear aggregation strategy is used to
+define the following optimisation problem. Let:
+\itemize{
+\item nC: number of clusters.
+\item xi: integer variable defining the split to which cluster i is allocated.
+\item Ni+: number of \emph{positive} observations in cluster i.
+\item Ni: total number of observations in cluster i.
+\item Nj*: desired proportion of data for split j.
+\item P*: proportion of \emph{positive} observations in the whole data.
+}
+
+We want to solve the problem:
+
+\verb{minimize sum_j\{ alpha x (Gj - Nj*)^2 + (1-alpha) x (pj - P*)^2 \}}
+
+With:
+\itemize{
+\item \verb{xi \\in \{1, 2, ..., nC\}}
+\item \code{yij = ifelse(xi == j, 1, 0)}
+\item \verb{Gj = sum_i\{ yij * Ni \} / sum_i\{ Ni \}}
+\item \verb{pj = sum_i\{ yij * Ni+ \} / sum_i\{ yij * Ni \}}
+}
+
+Input parameter \code{alpha} regulates the relative importance attributed to
+each of the two objectives. At the limits, \code{alpha = 0} ignores the desired
+proportions and
+focuses only on defining splits with class balances that are as close as
+possible to \strong{P*}, whereas \code{alpha = 0} ignores the class balance and tries
+to simply generate splits that are as faithful as possible to the desired
+proportions. An approximation to the Pareto-optimal front can be obtained
+by varying \code{alpha} between these two values.
+
+The search space of this optimisation problem has a cardinality of
+\code{number.of.splits ^ nC}. If the cardinality is under \code{10^6} possible
+allocations then this routine performs enumerative search and is guaranteed
+to return the global optimum. For larger search spaces a
+constructive heuristic followed by Simulated Annealing (see \code{\link[stats:optim]{stats::optim()}}
+for details) is used. Input parameter \code{SAopts} can be used to pass control
+parameters to the Simulated Annealing.
+}
+
 \author{
 Felipe Campelo (\email{f.campelo@aston.ac.uk})
 }
