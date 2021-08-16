@@ -5,7 +5,6 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts, ncpus){
   # xi  : integer variable, split to which group i is allocated
   # Ni+ : number of positive observations in group i
   # Ni  : total number of observations in group i
-  # pi  : proportion of positives in the whole data
   # Nj* : desired proportion of data for split j
   # P*  : proportion of positive observations in whole data
   #
