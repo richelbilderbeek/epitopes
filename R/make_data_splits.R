@@ -173,8 +173,6 @@ make_data_splits <- function(df,
                           is.numeric(similarity_threshold),
                           length(similarity_threshold) == 1,
                           similarity_threshold > 0, similarity_threshold < 1,
-                          exists(data(substitution_matrix,
-                                      package = "Biostrings")),
                           is.numeric(alpha), length(alpha) == 1,
                           alpha >= 0, alpha <= 1,
                           is.list(SAopts),
@@ -198,15 +196,19 @@ make_data_splits <- function(df,
 
   # Run Smith-Waterman local alignment and build similarity score matrix
   message("Calculating similarities (normalized Smith-Waterman scores)")
-  scores <- mypblapply(X   = X$SEQs,
-                       FUN = function(x){
-                         Biostrings::pairwiseAlignment(pattern = rep(x, length(X$SEQs)),
-                                                       subject = X$SEQs,
-                                                       substitutionMatrix = substitution_matrix,
-                                                       type = "local",
-                                                       scoreOnly = TRUE)},
+  scores <- mypblapply(X   = seq_along(X$SEQs),
+                       FUN = function(i){
+                         patt <- rep(X$SEQs[i], times = 1 + length(X$SEQs) - i)
+                         subj <- X$SEQs[i:length(X$SEQs)]
+                         vals <- Biostrings::pairwiseAlignment(pattern = patt,
+                                                               subject = subj,
+                                                               substitutionMatrix = substitution_matrix,
+                                                               type = "local",
+                                                               scoreOnly = TRUE)
+                          return(c(rep(NA, i - 1), vals))
+                         },
                        ncpus = ncpus) %>%
-    do.call(what = rbind)
+    do.call(what = cbind)
 
   # Build denominator matrix: D_{ij} = min(scores_{i,i}, scores{j,j})
   denom <- matrix(pmin(rep(diag(scores), times = nrow(scores)),
