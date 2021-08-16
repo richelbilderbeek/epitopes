@@ -1,4 +1,5 @@
 optimise_splits <- function(Y, Nstar, alpha, SAopts, ncpus){
+  # TODO: generalise to more than 2 classes.
   # Solve the following optimization problem:
   # Let:
   # xi  : integer variable, split to which group i is allocated

@@ -281,6 +281,8 @@ make_data_splits <- function(df,
   }
 
   # return results
+  names(X) <- c("ID", "Cluster", "Allocation")
+  X <- dplyr::arrange(X, .data$Allocation, .data$Cluster)
   return(list(splits          = splits,
               split_props     = y$solstats$Gj,
               split_balance   = y$solstats$pj,
@@ -289,5 +291,7 @@ make_data_splits <- function(df,
               alpha           = alpha,
               SW.scores       = scores,
               diss.matrix     = diss,
-              clusters        = clusters))
+              clusters        = clusters,
+              cluster.alloc   = y$xl,
+              cluster.IDs     = X))
 }
