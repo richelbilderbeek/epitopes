@@ -31,7 +31,7 @@ or "all" to set it if $n_negative == 0$. Defaults to "mode".}
 \item{ncpus}{positive integer, number of cores to use}
 }
 \value{
-A data frame containing all proteins mentioned that appear at least
+Data frame containing all proteins mentioned that appear at least
 once in \code{epitopes$protein_id} (one row per aminoacid residue), containing
 the consolidated information extracted from \code{epitopes}.
 }

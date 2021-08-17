@@ -30,12 +30,13 @@
 #' the sequences, and input parameter `similarity_threshold` is then used to
 #' define the resulting similarity clusters. Single-linkage is used, to
 #' guarantee that any pair of sequences with similarity
-#' greater than the threshold will always be contained within the same cluster.
+#' greater than `similarity_threshold` will always be contained within the same
+#' cluster.
 #' The resulting clusters (returned as element **clusters** of the output list)
 #' represent the allocation units that are considered by the optimisation
 #' to split the data.
 #'
-#' @section Optimisation Problem:
+#' @section **Optimisation Problem**:
 #' This routine attempts to simultaneously minimise two objectives: (i) the
 #' difference between the actual proportion of data within each split and the
 #' desired levels informed by `split_prop`, and (ii) the difference between the
@@ -43,21 +44,22 @@
 #' proportion in the data. A simple linear aggregation strategy is used to
 #' define the following optimisation problem. Let:
 #' \itemize{
-#'    \item nC: number of clusters.
-#'    \item xi: integer variable defining the split to which cluster i is allocated.
+#'    \item nC:  number of clusters.
+#'    \item K:   number of splits.
+#'    \item xi:  integer variable defining the split to which cluster i is allocated.
 #'    \item Ni+: number of _positive_ observations in cluster i.
-#'    \item Ni: total number of observations in cluster i.
-#'    \item Nj*: desired proportion of data for split j.
-#'    \item P*: proportion of _positive_ observations in the whole data.
+#'    \item Ni:  total number of observations in cluster i.
+#'    \item Gj*: desired proportion of data for split j.
+#'    \item P*:  proportion of _positive_ observations in the whole data.
 #' }
 #'
 #' We want to solve the problem:
 #'
-#' `minimize sum_j{ alpha x (Gj - Nj*)^2 + (1-alpha) x (pj - P*)^2 }`
+#' `minimize sum_j{ alpha x (Gj - Gj*)^2 + (1-alpha) x (pj - P*)^2 }`
 #'
 #' With:
 #' \itemize{
-#'     \item `xi \in {1, 2, ..., nC}`
+#'     \item `xi \in {1, ..., K}`, for all `i = 1, ..., nC`
 #'     \item `yij = ifelse(xi == j, 1, 0)`
 #'     \item `Gj = sum_i{ yij * Ni } / sum_i{ Ni }`
 #'     \item `pj = sum_i{ yij * Ni+ } / sum_i{ yij * Ni }`
@@ -73,7 +75,7 @@
 #' by varying `alpha` between these two values.
 #'
 #' The search space of this optimisation problem has a cardinality of
-#' `number.of.splits ^ nC`. If the cardinality is under `10^6` possible
+#' `K ^ nC`. If the cardinality is under `10^6` possible
 #' allocations then this routine performs enumerative search and is guaranteed
 #' to return the global optimum. For larger search spaces a
 #' constructive heuristic followed by Simulated Annealing (see [stats::optim()]
@@ -81,20 +83,18 @@
 #' parameters to the Simulated Annealing.
 #'
 #'
-#' @param df data frame of windowed epitope data (returned by
-#'        [extract_peptides()]).
-#' @param peptides data frame of individual peptides present in `df` (also
-#'        returned by [extract_peptides()]). Only needed if
-#'        `split_level == "peptide"`.
-#' @param proteins data frame of proteins, returned by [get_proteins()] and
-#'        filtered to remove any proteins not present in `df$Info_protein_id`.
-#'        Only needed if `split_level == "protein"`
-#' @param split_level which sequence should be used as the splitting level.
+#' @param peptides.list list object returned by [extract_peptides()], containing
+#'        the data frame of windowed epitope data (**df**) and the data frame of
+#'        individual peptides (**peptides**).
+#' @param proteins data frame of proteins, returned by [get_proteins()]
+#'        containing all proteins listed in `peptides.list$df$Info_protein_id`.
+#' @param split_level which sequences should be used to calculate similarity
+#'        for splitting the data.
 #'        Accepts "protein" (uses similarity of the full protein sequences,
 #'        `proteins$TSeq_sequence`, to determine which observations should stay
 #'        together in the splits) or "peptide" (uses similarity of the labelled
-#'        peptides, `peptides$Info_peptide`). See **Grouping strategy** for
-#'        details.
+#'        peptides, `peptides.list$peptides$Info_peptide`).
+#'        See **Grouping strategy** for details.
 #' @param split_prop numeric vector of target proportions for each split
 #'        (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
 #'        sum(pk) = 1).
@@ -110,30 +110,36 @@
 #'        See **Optimisation Problem** for details.
 #' @param SAopts list of control parameters to be used by the simulated
 #'        annealing (SANN) algorithm. See [stats::optim()] for details.
-#' @param save_folder path to folder for saving the results.
+#' @param save_folder path to folder for saving the results. It will save the
+#' results as file *peptides_list.rds* (overwriting if necessary)
 #' @param ncpus positive integer, number of cores to use.
 #'
 #' @return A list object containing:
 #' \itemize{
-#'    \item **splits**: named list containing the data splits.
-#'    \item **split_props**: vector with the proportion of the total data that
-#'          was allocated to each split.
-#'    \item **split_balance**: vector with the proportion of positive
-#'          observations in each split.
-#'    \item **target_props**: vector with the desired split proportions (same as
-#'          input parameter `split_prop`).
-#'    \item **target_balance**: proportion of positive observations in the full
-#'          data set (i.e., in the input dataframe `df`).
-#'    \item **alpha**: weight parameter used in the optimisation (same as
-#'          input parameter `alpha`).
-#'    \item **SW.scores**: matrix of local alignment (Smith-Waterman) similarity
-#'          scores calculated for the peptides (if `split_level == "peptide"`)
-#'          or proteins (if `split_level == "protein"`).
-#'    \item **diss.matrix**: dissimilarity matrix calculated using the
-#'          `SW.scores`. See **Grouping strategy**.
-#'    \item **clusters**: clusters of proteins / peptides extracted by
-#'          hierarchical clustering using dissimilarity matrix `diss.matrix`.
-#' }
+#'    \item **df**: `peptides.list$df` updated to contain cluster number and
+#'          split allocation of each entry
+#'    \item **peptides**: `peptides.list$peptides` updated to contain cluster
+#'          number and split allocation of each entry
+#'    \item **proteins**: data frame containing data on all proteins listed in
+#'          `df$Info_protein_id`.
+#'    \item **peptide.attrs**: list inherited from `peptides.list`, containing
+#'          relevant attributes used in the earlier call to [extract_peptides()].
+#'    \item **splits.attrs**: list containing information about the splitting:
+#'    \itemize{
+#'        \item *split_level*: same as input parameter `split_level`
+#'        \item *similarity_threshold*: same as input parameter `similarity_threshold`
+#'        \item *substitution_matrix*: same as input parameter `substitution_matrix`
+#'        \item *split_props*: proportion of data allocated to each split
+#'        \item *split_balance*: proportion of positive observations in each split
+#'        \item *target_props*: same as input parameter `split_prop`
+#'        \item *target_balance*: proportion of positive observations in full data
+#'        \item *alpha*: same as input parameter `alpha`
+#'        \item *SW.scores*: local alignment scores between each sequence (Smith-Waterman)
+#'        \item *diss.matrix*: dissimilarity matrix (see **Grouping strategy** for details)
+#'        \item *clusters*: `hclust` object with clustering structure.
+#'        \item *cluster.alloc*: data frame summarising the split allocations.
+#'    }
+#'  }
 #'
 #' If the splitting is impossible (e.g., if the number of clusters is smaller
 #' than the desired number of splits) the function throws a warning and returns
@@ -147,9 +153,8 @@
 #' @export
 #'
 
-make_data_splits <- function(df,
-                             peptides    = NULL,
-                             proteins    = NULL,
+make_data_splits <- function(peptides.list,
+                             proteins,
                              split_level = "protein",
                              split_prop  = c(.75, .25),
                              similarity_threshold = .7,
@@ -162,9 +167,9 @@ make_data_splits <- function(df,
   # ========================================================================== #
   # Sanity checks and initial definitions
   split_level <- tolower(split_level)
-  assertthat::assert_that(is.data.frame(df),
-                          is.null(peptides) | is.data.frame(peptides),
-                          is.null(proteins) | is.data.frame(proteins),
+  assertthat::assert_that(is.list(peptides.list),
+                          all(c("df", "peptides") %in% names(peptides.list)),
+                          is.data.frame(proteins),
                           length(split_level) == 1,
                           split_level %in% c("peptide", "protein"),
                           is.numeric(split_prop), length(split_prop) > 1,
@@ -180,7 +185,11 @@ make_data_splits <- function(df,
                           is.null(save_folder) | length(save_folder) == 1,
                           assertthat::is.count(ncpus))
 
-  diss_t <- 1 - similarity_threshold
+  diss_t   <- 1 - similarity_threshold
+  df       <- peptides.list$df
+  peptides <- peptides.list$peptides
+  proteins <- proteins %>% dplyr::filter(.data$UID %in% df$Info_protein_id)
+
   # ========================================================================== #
 
   message("Performing data split at ", split_level, " level")
@@ -205,8 +214,8 @@ make_data_splits <- function(df,
                                                                substitutionMatrix = substitution_matrix,
                                                                type = "local",
                                                                scoreOnly = TRUE)
-                          return(c(rep(NA, i - 1), vals))
-                         },
+                         return(c(rep(NA, i - 1), vals))
+                       },
                        ncpus = ncpus) %>%
     do.call(what = cbind)
 
@@ -216,13 +225,14 @@ make_data_splits <- function(df,
                   nrow  = nrow(scores), byrow = FALSE)
 
   # Calculate normalized dissimilarity
+  rownames(scores) <- colnames(scores) <- X$IDs
   diss <- 1 - scores / denom
 
   message("Extracting clusters (Hierarchical, single linkage)")
   clusters <- stats::hclust(d = stats::as.dist(diss), method = "single")
-  X$group  <- stats::cutree(clusters, h = diss_t)
+  X$Cluster  <- stats::cutree(clusters, h = diss_t)
 
-  if(length(unique(X$group)) < length(split_prop)){
+  if(length(unique(X$Cluster)) < length(split_prop)){
     warning("Impossible to divide data into ", length(split_prop),
             " splits at similarity level ", similarity_threshold,
             ".\nTry a higher similarity threshold or a smaller number of splits.")
@@ -238,7 +248,7 @@ make_data_splits <- function(df,
     Y <- df %>% dplyr::left_join(X, by = c("Info_PepID" = "IDs"))
   }
   Y <- Y %>%
-    dplyr::group_by(.data$group) %>%
+    dplyr::group_by(.data$Cluster) %>%
     dplyr::summarise(nPos = sum(.data$Class == 1),
                      nNeg = sum(.data$Class == -1),
                      N    = dplyr::n(),
@@ -246,52 +256,60 @@ make_data_splits <- function(df,
 
   # Define split alllocations
   if(!("maxit" %in% names(SAopts))) {
-    SAopts$maxit <- 2000 * round(log10(length(split_prop) ^ nrow(Y)))
+    SAopts$maxit <- min(1e5, 2000 * round(log10(length(split_prop) ^ nrow(Y))))
   }
   y <- optimise_splits(Y = Y, Nstar = split_prop, alpha = alpha,
                        SAopts = SAopts, ncpus = ncpus)
 
-  Y$allocation <- y$x
+  Y$Split <- y$x
 
   X <- dplyr::left_join(dplyr::select(X, -c("SEQs")),
-                        dplyr::select(Y, c("group", "allocation")),
-                        by = "group")
+                        dplyr::select(Y, c("Cluster", "Split")),
+                        by = "Cluster") %>%
+    dplyr::arrange(.data$Split, .data$Cluster)
   if(split_level == "peptide"){
-    df <- dplyr::left_join(df, X, by = c("Info_PepID" = "IDs"))
+    names(X)[1] <- "Info_PepID"
+    df          <- dplyr::left_join(df, X, by = "Info_PepID")
+    peptides    <- dplyr::left_join(peptides, X, by = "Info_PepID")
   } else if(split_level == "protein"){
-    df <- dplyr::left_join(df, X, by = c("Info_protein_id" = "IDs"))
+    names(X)[1] <- "Info_protein_id"
+    df <- dplyr::left_join(df, X, by = "Info_protein_id")
+    peptides <- dplyr::left_join(peptides, X, by = "Info_protein_id")
   }
 
-  # Build splits
-  splits <- lapply(seq_along(split_prop), function(i){dplyr::filter(df, .data$allocation == i)})
-  names(splits) <- paste0("split_",
-                          sprintf("%02d", seq_along(split_prop)), "_",
-                          sprintf("%02d", round(100*split_prop)))
-  names(y$xl)          <- names(splits)
-  names(y$solstats$Gj) <- names(splits)
-  names(y$solstats$pj) <- names(splits)
+  names(y$solstats$Gj) <- paste0("split_",
+                                 sprintf("%02d_%02d",
+                                         seq_along(split_prop),
+                                         round(100*split_prop)))
+  names(y$solstats$pj) <- names(y$solstats$Gj)
+
+
+  # Build outlist
+  outlist          <- peptides.list
+  outlist$df       <- df
+  outlist$peptides <- peptides
+  outlist$proteins <- proteins
+  outlist$splits.attrs <- list(
+    split_level          = split_level,
+    similarity_threshold = similarity_threshold,
+    substitution_matrix  = substitution_matrix,
+    split_props          = y$solstats$Gj,
+    split_balance        = y$solstats$pj,
+    target_props         = split_prop,
+    target_balance       = y$solstats$Pstar,
+    alpha                = alpha,
+    SW.scores            = scores,
+    diss.matrix          = diss,
+    clusters             = clusters,
+    cluster.alloc        = X)
+
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
-    for (i in seq_along(splits)){
-      saveRDS(splits[[i]],
-              paste0(normalizePath(save_folder), "/", names(splits)[i], ".rds"))
-    }
+    saveRDS(outlist, paste0(normalizePath(save_folder), "/peptides_list.rds"))
   }
 
   # return results
-  names(X) <- c("ID", "Cluster", "Allocation")
-  X <- dplyr::arrange(X, .data$Allocation, .data$Cluster)
-  return(list(splits          = splits,
-              split_props     = y$solstats$Gj,
-              split_balance   = y$solstats$pj,
-              target_props    = split_prop,
-              target_balance  = y$solstats$Pstar,
-              alpha           = alpha,
-              SW.scores       = scores,
-              diss.matrix     = diss,
-              clusters        = clusters,
-              cluster.alloc   = y$xl,
-              cluster.IDs     = X))
+  return(outlist)
 }

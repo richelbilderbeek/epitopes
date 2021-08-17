@@ -25,16 +25,19 @@ applies to \strong{positive} observations.)}
 \item{window_size}{positive integer, size of the local neighbourhood to be
 considered.}
 
-\item{save_folder}{path to folder for saving the results.}
+\item{save_folder}{path to folder for saving the results. It will save the
+results as file \emph{peptides_list.rds} (overwriting if necessary)}
 }
 \value{
 List containing two data frames:
 
 \itemize{
-\item A data frame containing the labeled positions of \code{df} (filtered by
-\emph{min_epitope} and \emph{max_epitope}) with a new column expressing the local
-neighbourhood of each position (to be used for feature calculation)
-\item A data frame containing the individual peptides and classes
+\item \strong{df}:  data frame containing the labeled positions of \code{df}
+(filtered by \emph{min_peptide} and \emph{max_epitope}) with a new column
+\strong{Info_window} containing the local neighbourhood of each position
+(to be used for feature calculation)
+\item \strong{peptides}: data frame containing one peptides per row, together
+with its calculated Class attribute value.
 }
 }
 \description{

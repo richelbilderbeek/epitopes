@@ -12,15 +12,18 @@
 #' applies to **positive** observations.)
 #' @param window_size positive integer, size of the local neighbourhood to be
 #' considered.
-#' @param save_folder path to folder for saving the results.
+#' @param save_folder path to folder for saving the results. It will save the
+#' results as file *peptides_list.rds* (overwriting if necessary)
 #'
 #' @return List containing two data frames:
 #'
 #' \itemize{
-#'    \item A data frame containing the labeled positions of `df` (filtered by
-#' *min_epitope* and *max_epitope*) with a new column expressing the local
-#' neighbourhood of each position (to be used for feature calculation)
-#'    \item A data frame containing the individual peptides and classes
+#'    \item **df**:  data frame containing the labeled positions of `df`
+#'    (filtered by *min_peptide* and *max_epitope*) with a new column
+#'    **Info_window** containing the local neighbourhood of each position
+#'    (to be used for feature calculation)
+#'    \item **peptides**: data frame containing one peptides per row, together
+#'    with its calculated Class attribute value.
 #' }
 #'
 #' @author Felipe Campelo (\email{f.campelo@@aston.ac.uk})
@@ -94,14 +97,19 @@ extract_peptides <- function(df,
     dplyr::ungroup()
 
 
+  outlist <- list(df       = df,
+                  peptides = peptides,
+                  peptide.attrs = list(min_peptide = min_peptide,
+                                       max_epitope = max_epitope,
+                                       window_size = window_size))
+
   # Check save folder and save files
   if(!is.null(save_folder)) {
     if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
-    saveRDS(peptides, paste0(normalizePath(save_folder), "/peptides.rds"))
-    saveRDS(df, paste0(normalizePath(save_folder), "/windowed_df.rds"))
+    saveRDS(outlist, paste0(normalizePath(save_folder), "/peptides_list.rds"))
   }
 
-  return(list(df = df, peptides = peptides))
+  return(outlist)
 }
 
 

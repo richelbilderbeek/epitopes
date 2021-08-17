@@ -36,7 +36,7 @@
 #'        or "all" to set it if $n_negative == 0$. Defaults to "mode".
 #' @param ncpus positive integer, number of cores to use
 #'
-#' @return A data frame containing all proteins mentioned that appear at least
+#' @return Data frame containing all proteins mentioned that appear at least
 #' once in `epitopes$protein_id` (one row per aminoacid residue), containing
 #' the consolidated information extracted from `epitopes`.
 #'

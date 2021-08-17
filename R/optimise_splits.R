@@ -1,20 +1,29 @@
+#  Solve the following optimization problem:
+#  Let:
+#  \itemize{
+#     \item nC:  number of clusters.
+#     \item K:   number of splits.
+#     \item xi:  integer variable defining the split to which cluster i is allocated.
+#     \item Ni+: number of _positive_ observations in cluster i.
+#     \item Ni:  total number of observations in cluster i.
+#     \item Gj*: desired proportion of data for split j.
+#     \item P*:  proportion of _positive_ observations in the whole data.
+#  }
+#
+#  The problem is:
+#
+#  `minimize sum_j{ alpha x (Gj - Gj*)^2 + (1-alpha) x (pj - P*)^2 }`
+#
+#  With:
+#  \itemize{
+#      \item `xi \in {1, ..., K}`, for all `i = 1, ..., nC`
+#      \item `yij = ifelse(xi == j, 1, 0)`
+#      \item `Gj = sum_i{ yij * Ni } / sum_i{ Ni }`
+#      \item `pj = sum_i{ yij * Ni+ } / sum_i{ yij * Ni }`
+# }
+
 optimise_splits <- function(Y, Nstar, alpha, SAopts, ncpus){
   # TODO: generalise to more than 2 classes.
-  # Solve the following optimization problem:
-  # Let:
-  # xi  : integer variable, split to which group i is allocated
-  # Ni+ : number of positive observations in group i
-  # Ni  : total number of observations in group i
-  # Nj* : desired proportion of data for split j
-  # P*  : proportion of positive observations in whole data
-  #
-  # minimize sum_j{ alpha x (Gj - Nj*)^2 + (1-alpha) x (pj - P*)^2 }
-  #
-  # With:
-  #   yij = ifelse(x[i] == j, 1, 0)
-  #   Gj = sum_i{ yij * Ni } / sum_i{ Ni }
-  #   pj = sum_i{ yij * Ni+ } / sum_i{ yij * Ni }
-
 
   # === Initial definitions === #
   # Objective function
@@ -87,12 +96,12 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts, ncpus){
       split.idx <- which.max(Cap)
       # Check which allocation would result in largest objfun reduction
       tmpal <- c(0, 0, Inf)
-      for (i in seq_along(Y2$group)){
+      for (i in seq_along(Y2$Cluster)){
         tmpx <- x0
-        tmpx[Y2$group[i]] <- split.idx
+        tmpx[Y2$Cluster[i]] <- split.idx
         tmpy <- objfun(tmpx, alpha, Y, Nstar)
         if (tmpy < tmpal[3]){
-          tmpal <- c(i, Y2$group[i], tmpy)
+          tmpal <- c(i, Y2$Cluster[i], tmpy)
         }
       }
       x0[tmpal[2]]   <- split.idx

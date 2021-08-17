@@ -5,9 +5,8 @@
 \title{Split epitope data.}
 \usage{
 make_data_splits(
-  df,
-  peptides = NULL,
-  proteins = NULL,
+  peptides.list,
+  proteins,
   split_level = "protein",
   split_prop = c(0.75, 0.25),
   similarity_threshold = 0.7,
@@ -19,23 +18,20 @@ make_data_splits(
 )
 }
 \arguments{
-\item{df}{data frame of windowed epitope data (returned by
-\code{\link[=extract_peptides]{extract_peptides()}}).}
+\item{peptides.list}{list object returned by \code{\link[=extract_peptides]{extract_peptides()}}, containing
+the data frame of windowed epitope data (\strong{df}) and the data frame of
+individual peptides (\strong{peptides}).}
 
-\item{peptides}{data frame of individual peptides present in \code{df} (also
-returned by \code{\link[=extract_peptides]{extract_peptides()}}). Only needed if
-\code{split_level == "peptide"}.}
+\item{proteins}{data frame of proteins, returned by \code{\link[=get_proteins]{get_proteins()}}
+containing all proteins listed in \code{peptides.list$df$Info_protein_id}.}
 
-\item{proteins}{data frame of proteins, returned by \code{\link[=get_proteins]{get_proteins()}} and
-filtered to remove any proteins not present in \code{df$Info_protein_id}.
-Only needed if \code{split_level == "protein"}}
-
-\item{split_level}{which sequence should be used as the splitting level.
+\item{split_level}{which sequences should be used to calculate similarity
+for splitting the data.
 Accepts "protein" (uses similarity of the full protein sequences,
 \code{proteins$TSeq_sequence}, to determine which observations should stay
 together in the splits) or "peptide" (uses similarity of the labelled
-peptides, \code{peptides$Info_peptide}). See \strong{Grouping strategy} for
-details.}
+peptides, \code{peptides.list$peptides$Info_peptide}).
+See \strong{Grouping strategy} for details.}
 
 \item{split_prop}{numeric vector of target proportions for each split
 (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
@@ -57,31 +53,38 @@ See \strong{Optimisation Problem} for details.}
 \item{SAopts}{list of control parameters to be used by the simulated
 annealing (SANN) algorithm. See \code{\link[stats:optim]{stats::optim()}} for details.}
 
-\item{save_folder}{path to folder for saving the results.}
+\item{save_folder}{path to folder for saving the results. It will save the
+results as file \emph{peptides_list.rds} (overwriting if necessary)}
 
 \item{ncpus}{positive integer, number of cores to use.}
 }
 \value{
 A list object containing:
 \itemize{
-\item \strong{splits}: named list containing the data splits.
-\item \strong{split_props}: vector with the proportion of the total data that
-was allocated to each split.
-\item \strong{split_balance}: vector with the proportion of positive
-observations in each split.
-\item \strong{target_props}: vector with the desired split proportions (same as
-input parameter \code{split_prop}).
-\item \strong{target_balance}: proportion of positive observations in the full
-data set (i.e., in the input dataframe \code{df}).
-\item \strong{alpha}: weight parameter used in the optimisation (same as
-input parameter \code{alpha}).
-\item \strong{SW.scores}: matrix of local alignment (Smith-Waterman) similarity
-scores calculated for the peptides (if \code{split_level == "peptide"})
-or proteins (if \code{split_level == "protein"}).
-\item \strong{diss.matrix}: dissimilarity matrix calculated using the
-\code{SW.scores}. See \strong{Grouping strategy}.
-\item \strong{clusters}: clusters of proteins / peptides extracted by
-hierarchical clustering using dissimilarity matrix \code{diss.matrix}.
+\item \strong{df}: \code{peptides.list$df} updated to contain cluster number and
+split allocation of each entry
+\item \strong{peptides}: \code{peptides.list$peptides} updated to contain cluster
+number and split allocation of each entry
+\item \strong{proteins}: data frame containing data on all proteins listed in
+\code{df$Info_protein_id}.
+\item \strong{peptide.attrs}: list inherited from \code{peptides.list}, containing
+relevant attributes used in the earlier call to \code{\link[=extract_peptides]{extract_peptides()}}.
+\item \strong{splits.attrs}: list containing information about the splitting:
+\itemize{
+\item \emph{split_level}: same as input parameter \code{split_level}
+\item \emph{similarity_threshold}: same as input parameter \code{similarity_threshold}
+\item \emph{substitution_matrix}: same as input parameter \code{substitution_matrix}
+\item \emph{split_props}: proportion of data allocated to each split
+\item \emph{split_balance}: proportion of positive observations in each split
+\item \emph{target_props}: same as input parameter \code{split_prop}
+\item \emph{target_balance}: proportion of positive observations in full data
+\item \emph{alpha}: same as input parameter \code{alpha}
+\item \emph{SW.scores}: local alignment scores between each sequence (Smith-Waterman)
+\item \emph{diss.matrix}: dissimilarity matrix (see \strong{Grouping strategy} for details)
+\item \emph{clusters}: \code{hclust} object with clustering structure.
+\item \emph{cluster.alloc}: data frame with cluster allocations
+\item \emph{alloc.summary}: list summarising which clusters were allocated to each split
+}
 }
 
 If the splitting is impossible (e.g., if the number of clusters is smaller
@@ -135,21 +138,22 @@ proportion of \emph{positive} observations within each split and the overall
 proportion in the data. A simple linear aggregation strategy is used to
 define the following optimisation problem. Let:
 \itemize{
-\item nC: number of clusters.
-\item xi: integer variable defining the split to which cluster i is allocated.
+\item nC:  number of clusters.
+\item K:   number of splits.
+\item xi:  integer variable defining the split to which cluster i is allocated.
 \item Ni+: number of \emph{positive} observations in cluster i.
-\item Ni: total number of observations in cluster i.
-\item Nj*: desired proportion of data for split j.
-\item P*: proportion of \emph{positive} observations in the whole data.
+\item Ni:  total number of observations in cluster i.
+\item Gj*: desired proportion of data for split j.
+\item P*:  proportion of \emph{positive} observations in the whole data.
 }
 
 We want to solve the problem:
 
-\verb{minimize sum_j\{ alpha x (Gj - Nj*)^2 + (1-alpha) x (pj - P*)^2 \}}
+\verb{minimize sum_j\{ alpha x (Gj - Gj*)^2 + (1-alpha) x (pj - P*)^2 \}}
 
 With:
 \itemize{
-\item \verb{xi \\in \{1, 2, ..., nC\}}
+\item \verb{xi \\in \{1, ..., K\}}, for all \verb{i = 1, ..., nC}
 \item \code{yij = ifelse(xi == j, 1, 0)}
 \item \verb{Gj = sum_i\{ yij * Ni \} / sum_i\{ Ni \}}
 \item \verb{pj = sum_i\{ yij * Ni+ \} / sum_i\{ yij * Ni \}}
@@ -165,7 +169,7 @@ proportions. An approximation to the Pareto-optimal front can be obtained
 by varying \code{alpha} between these two values.
 
 The search space of this optimisation problem has a cardinality of
-\code{number.of.splits ^ nC}. If the cardinality is under \code{10^6} possible
+\code{K ^ nC}. If the cardinality is under \code{10^6} possible
 allocations then this routine performs enumerative search and is guaranteed
 to return the global optimum. For larger search spaces a
 constructive heuristic followed by Simulated Annealing (see \code{\link[stats:optim]{stats::optim()}}
