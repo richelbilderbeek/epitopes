@@ -286,8 +286,12 @@ make_data_splits <- function(peptides.list,
 
   # Build outlist
   outlist          <- peptides.list
-  outlist$df       <- df
-  outlist$peptides <- peptides
+  outlist$df       <- df %>%
+    dplyr::rename(Info_cluster = c("Cluster"),
+                  Info_split   = c("Split")) %>%
+    dplyr::select(dplyr::everything(), .data$Class)
+    outlist$peptides <- peptides %>% dplyr::rename(Info_cluster = c("Cluster"),
+                                                   Info_split   = c("Split"))
   outlist$proteins <- proteins
   outlist$splits.attrs <- list(
     split_level          = split_level,
@@ -303,6 +307,7 @@ make_data_splits <- function(peptides.list,
     clusters             = clusters,
     cluster.alloc        = X)
 
+  class(outlist) <- c(class(outlist), "splitted.peptide.data")
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {

@@ -82,8 +82,7 @@ relevant attributes used in the earlier call to \code{\link[=extract_peptides]{e
 \item \emph{SW.scores}: local alignment scores between each sequence (Smith-Waterman)
 \item \emph{diss.matrix}: dissimilarity matrix (see \strong{Grouping strategy} for details)
 \item \emph{clusters}: \code{hclust} object with clustering structure.
-\item \emph{cluster.alloc}: data frame with cluster allocations
-\item \emph{alloc.summary}: list summarising which clusters were allocated to each split
+\item \emph{cluster.alloc}: data frame summarising the split allocations.
 }
 }
 
@@ -123,13 +122,14 @@ list) is used to calculate a hierarchical clustering of
 the sequences, and input parameter \code{similarity_threshold} is then used to
 define the resulting similarity clusters. Single-linkage is used, to
 guarantee that any pair of sequences with similarity
-greater than the threshold will always be contained within the same cluster.
+greater than \code{similarity_threshold} will always be contained within the same
+cluster.
 The resulting clusters (returned as element \strong{clusters} of the output list)
 represent the allocation units that are considered by the optimisation
 to split the data.
 }
 
-\section{Optimisation Problem}{
+\section{\strong{Optimisation Problem}}{
 
 This routine attempts to simultaneously minimise two objectives: (i) the
 difference between the actual proportion of data within each split and the

@@ -102,6 +102,7 @@ extract_peptides <- function(df,
                   peptide.attrs = list(min_peptide = min_peptide,
                                        max_epitope = max_epitope,
                                        window_size = window_size))
+  class(outlist) <- c(class(outlist), "peptide.list")
 
   # Check save folder and save files
   if(!is.null(save_folder)) {
