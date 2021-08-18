@@ -307,7 +307,7 @@ make_data_splits <- function(peptides.list,
     clusters             = clusters,
     cluster.alloc        = X)
 
-  class(outlist) <- c(class(outlist), "splitted.peptide.data")
+  class(outlist) <- unique(c(class(outlist), "splitted.peptide.data"))
 
   # Check save folder and create file names
   if(!is.null(save_folder)) {

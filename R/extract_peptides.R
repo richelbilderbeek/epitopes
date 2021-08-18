@@ -82,7 +82,7 @@ extract_peptides <- function(df,
 
 
   # Update df to include local neighbourhood and remove NA regions and those
-  # that do not comply with min_peptide and max_peptide
+  # that do not comply with min_peptide and max_epitope
   message("Extracting windows...")
   df <- df %>%
     dplyr::group_by(.data$Info_protein_id) %>%
@@ -102,7 +102,8 @@ extract_peptides <- function(df,
                   peptide.attrs = list(min_peptide = min_peptide,
                                        max_epitope = max_epitope,
                                        window_size = window_size))
-  class(outlist) <- c(class(outlist), "peptide.list")
+
+  class(outlist) <- unique(c(class(outlist), "peptide.list"))
 
   # Check save folder and save files
   if(!is.null(save_folder)) {

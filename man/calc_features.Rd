@@ -6,22 +6,34 @@
 \usage{
 calc_features(
   peptides.list,
-  peptide.features = list(),
-  protein.features = list(),
-  ncpus = 1
+  local.features = list(),
+  global.features = list(),
+  ncpus = 1,
+  overwrite = FALSE
 )
 }
 \arguments{
 \item{peptides.list}{list object returned by \code{\link[=make_data_splits]{make_data_splits()}}.}
 
-\item{peptide.features, protein.features}{lists of features to be calculated
+\item{local.features}{list of features to be calculated
+at the local neighbourhood (\code{peptides.list$df$Info_window}) level. Notice
+that invalid AA codes (B, J, O, U, X and Y) are removed prior to the
+calculation of local features. See \strong{Feature Lists} for details.}
+
+\item{global.features}{lists of features to be calculated
 at the peptide/protein level. See \strong{Feature Lists} for details.}
 
 \item{ncpus}{positive integer, number of cores to use.}
+
+\item{overwrite}{logical: if a feature group already exists in
+\code{peptides.list$df} (local) or \code{peptides.list$proteins} (global), should it be
+overwritten? If it already exists and \code{overwrite == FALSE} then a message is
+printed and calculation is skipped for that group.}
 }
 \value{
-Updated \code{peptides.list} object, with features calculated for element
-\code{peptides.list$df}.
+Updated \code{peptides.list} object, with local features added as columns
+to \code{peptides.list$df}, and global features added as columns to
+\code{peptides.list$proteins}.
 }
 \description{
 This function is used to calculate several distinct families of features for
@@ -35,7 +47,7 @@ neighbourhood of each AA position (column \emph{Info_window} of the windowed
 data frame).
 \item \emph{global features}, which are calculated using the full sequence
 of the protein (listed in column \emph{Info_protein_id}  of the windowed
-data frame)
+data frame).
 }
 
 All features are calculated based on the implementations available in package
@@ -91,37 +103,48 @@ Multidimensional Scaling
 }
 }
 
-Each of these groups may be used either at the peptide or the protein level -
+\strong{NOTE}: in all feature groups except those ending in "Gap", invalid AA codes
+(B, J, O, U, X, Y) are removed from the strings prior to feature calculation.
+In those ending with "Gap" these codes are replaced by a gap indicator, "-".
+
+Each feature group may be used either at the local or global level -
 which does not mean it \emph{should} be. The \strong{protr} documentation provides
 the following warning: "\emph{Users need to intelligently evaluate the underlying}
 \emph{details of the descriptors provided, instead of using protr with their data}
 \emph{blindly, especially for the descriptor types with more flexibility. It}
 \emph{would be wise for the users to use some negative and positive control}
 \emph{comparisons where relevant to help guide interpretation of the results.}".
-Users should be savvy when choosing which features to use for epitope
+Users should therefore be savvy when choosing which features to use for epitope
 prediction, and the choice should ideally be guided by domain expertise.
+Certain feature groups may not make sense as local features,
+as the (usually very short) local substrings will not allow the features to
+be informative (e.g., tripeptide composition, "TC"); or may require
+specific overriding of standard parameters (e.g., parameter
+\code{lambda} for "PAAC" must be smaller than the length of the shortest local
+string).
+
 \strong{IMPORTANT}: if the splitting level intended to be used for modelling is
 "peptide" (this can be checked in \code{peptides.list$splits.attrs$split_level})
-then protein-level features should be avoided, as they can result in data
-leakage across splits and contaminate performance calculations.
+then protein-level features should be avoided, as their use can result in
+data leakage across splits and contaminate performance calculations.
 }
 \section{\strong{Feature Lists}}{
 
-Input lists \code{peptide.features} and \code{protein.features} are used to define
+Input lists \code{local.features} and \code{global.features} are used to define
 which features are calculated at either level. These input parameters must be
-named list vectors, where each element is itself a list with the name of the
-feature group the user wants to compute, and elements corresponding to the
-desired parameters to be passed down to the feature calculation routines.
+named lists, where each element is itself a list named after the
+feature group the user wants to compute, containing elements corresponding to
+the desired parameters to be passed down to the feature calculation routines.
 For more information on the parameters needed for any feature group, check
 \code{?protr::extractXYZ}, replacing \code{XYZ} by the group abbreviation (see
 \strong{Details} or the documentation of the \strong{protr} package for the list of
 available feature groups).
 
-For instance, suppose the user wants to calculate the
-\emph{Amino Acid Composition}, "AAC" (no parameters required) and the
-\emph{Pseudo Amino Acid Composition}, "PAAC" (up to four optional parameters -
-assume that the user wants to set parameter \code{lambda = 50}), at the peptide
-level. In this case, \code{peptide.features} should be:\preformatted{peptide.features = list(AAC = list(), PAAC = list(lambda = 50))
+For instance, suppose the user wants to calculate the local features
+\emph{Amino Acid Composition}, "AAC" (no parameters required) and
+\emph{Pseudo Amino Acid Composition}, "PAAC" (assume that the user wants to set
+override parameter \code{lambda} with \code{lambda = 5}). In this case,
+\code{local.features} should be:\preformatted{local.features = list(AAC = list(), PAAC = list(lambda = 5))
 }
 }
 
