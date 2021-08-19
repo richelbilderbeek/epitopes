@@ -14,7 +14,7 @@ extractAtoms <- function(x){
   cnts$Code1 <- rownames(cnts)
   cnts <- y %>%
     dplyr::left_join(cnts, by = "Code1") %>%
-    dplyr::mutate(dplyr::across(starts_with("n"), ~.x*.data$V1)) %>%
+    dplyr::mutate(dplyr::across(dplyr::starts_with("n"), ~.x*.data$V1)) %>%
     dplyr::select(-c("Code1", "V1")) %>%
     dplyr::summarise(dplyr::across(dplyr::everything(), sum, na.rm = TRUE))
 

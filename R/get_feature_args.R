@@ -10,7 +10,7 @@ get_feature_args <- function(feat.name){
                    CTriad = list(),
                    SOCN = list(nlag = 3),
                    QSO = list(nlag = 3, w = 0.1),
-                   ScalesGap = list(propmat = t(na.omit(as.matrix(protr::AAindex[, 7:26]))),
+                   ScalesGap = list(propmat = t(stats::na.omit(as.matrix(protr::AAindex[, 7:26]))),
                                     pc      = 5,
                                     lag     = 3,
                                     scale   = TRUE,

@@ -18,7 +18,7 @@ call_protr <- function(SEQs, feat.name, txt.opts, dfnames, ncpus){
   }
 
   message("   ", txt.opts[1], ":", feat.name)
-  myargs <- get_feat_args(feat.name)
+  myargs <- get_feature_args(feat.name)
   y <- mypblapply(SEQs,
                   function(x, fn, myargs){
                     myargs$x <- x

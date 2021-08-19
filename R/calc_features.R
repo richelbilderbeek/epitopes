@@ -84,11 +84,12 @@
 #' **Details**. For more information on the features calculated by **protr**,
 #' check `?protr::extractXYZ`, replacing `XYZ` by the group abbreviation (see
 #' **Details** or the documentation of the **protr** package for the list of
-#' available feature groups). Notice that, for consistency purposes, the
-#' **epitopes** maintain the user parameters of all **protr** features fixed.
-#' If the user wishes to add other features they can calculate those separately
+#' available feature groups). Notice that, for consistency purposes, the user
+#' parameters of all **protr** features are kept fixed in this routine.
+#' If the user wishes to add other features (or the same features with distinct
+#' parameters) they can calculate those separately
 #' and bind them to `peptides.list$df` (for local features) or
-#' `peptides.list$proteins` (for global ones). Feature columns should have
+#' `peptides.list$proteins` (for global ones). All feature columns should have
 #' names starting with "feat_local_" or "feat_global_".
 #'
 #' @param peptides.list list object returned by [make_data_splits()].
