@@ -15,7 +15,7 @@ extractMolWeight <- function(x){
     dplyr::left_join(cnts, by = "Code1") %>%
     dplyr::mutate("AA_MW" = .data$AA_MW * .data$V1) %>%
     dplyr::select(-c("Code1", "V1")) %>%
-    dplyr::summarise(MW = sum(.data$AA_MW, na.rm = TRUE))
+    dplyr::summarise(MolWeight = sum(.data$AA_MW, na.rm = TRUE))
 
   return(cnts)
 }

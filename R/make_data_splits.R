@@ -289,9 +289,13 @@ make_data_splits <- function(peptides.list,
   outlist$df       <- df %>%
     dplyr::rename(Info_cluster = c("Cluster"),
                   Info_split   = c("Split")) %>%
-    dplyr::select(dplyr::everything(), .data$Class)
-    outlist$peptides <- peptides %>% dplyr::rename(Info_cluster = c("Cluster"),
-                                                   Info_split   = c("Split"))
+    dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
+
+  outlist$peptides <- peptides %>%
+    dplyr::rename(Info_cluster = c("Cluster"),
+                  Info_split   = c("Split")) %>%
+    dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
+
   outlist$proteins <- proteins
   outlist$splits.attrs <- list(
     split_level          = split_level,

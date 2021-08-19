@@ -27,7 +27,9 @@ call_protr <- function(SEQs, feat.name, txt.opts, dfnames, ncpus){
                   fn = fn, myargs = myargs,
                   ncpus = ncpus) %>%
     dplyr::bind_rows() %>%
-    dplyr::rename_with(~ paste0("feat_", txt.opts[1], "_", feat.name, "_", .x))
+    dplyr::rename_with(~ ifelse(feat.name == .x,
+                                paste0("feat_", txt.opts[1], "_", .x),
+                                paste0("feat_", txt.opts[1], "_", feat.name, "_", .x)))
 
   return(y)
 }

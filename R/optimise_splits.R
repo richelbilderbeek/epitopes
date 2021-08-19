@@ -132,10 +132,10 @@ optimise_splits <- function(Y, Nstar, alpha, SAopts, ncpus){
     y  <- stats::optim(par = x0, fn = objfun, gr = neighbour, method = "SANN",
                        alpha = alpha, Y = Y, Nstar = Nstar,
                        control = SAopts)
-    message("Done! Final cost = ", signif(y$value, 3))
     assignment <- y$par
     cost       <- y$value
   }
+  message("Done! Final cost = ", signif(cost, 3))
 
   # Cast x as an allocation list
   xl <- lapply(seq_along(Nstar), function(i){seq_along(assignment)[assignment == i]})
