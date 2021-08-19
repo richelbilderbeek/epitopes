@@ -6,29 +6,22 @@
 \usage{
 calc_features(
   peptides.list,
-  local.features = list(),
-  global.features = list(),
-  ncpus = 1,
-  overwrite = FALSE
+  local.features = character(),
+  global.features = character(),
+  ncpus = 1
 )
 }
 \arguments{
 \item{peptides.list}{list object returned by \code{\link[=make_data_splits]{make_data_splits()}}.}
 
 \item{local.features}{list of features to be calculated
-at the local neighbourhood (\code{peptides.list$df$Info_window}) level. Notice
-that invalid AA codes (B, J, O, U, X and Y) are removed prior to the
-calculation of local features. See \strong{Feature Lists} for details.}
+at the local neighbourhood (\code{peptides.list$df$Info_window}) level.}
 
 \item{global.features}{lists of features to be calculated
-at the peptide/protein level. See \strong{Feature Lists} for details.}
+at the global level (\code{peptides.list$proteins$TSeq_sequence}).
+See \strong{Feature Lists} for details.}
 
 \item{ncpus}{positive integer, number of cores to use.}
-
-\item{overwrite}{logical: if a feature group already exists in
-\code{peptides.list$df} (local) or \code{peptides.list$proteins} (global), should it be
-overwritten? If it already exists and \code{overwrite == FALSE} then a message is
-printed and calculation is skipped for that group.}
 }
 \value{
 Updated \code{peptides.list} object, with local features added as columns
@@ -46,25 +39,20 @@ Two major types of features can be calculated:
 neighbourhood of each AA position (column \emph{Info_window} of the windowed
 data frame).
 \item \emph{global features}, which are calculated using the full sequence
-of the protein (listed in column \emph{Info_protein_id}  of the windowed
+of the protein (listed in column \emph{TSeq_sequence}  of the protein
 data frame).
 }
 
-All features are calculated based on the implementations available in package
+The following features are calculated based on the implementations available
+in package
 \href{https://cran.r-project.org/package=protr}{\strong{protr}}. As of August 2021,
-the following groups of features were available (see the
-\href{https://cran.r-project.org/web/packages/protr/vignettes/protr.html#3_package_overview}{package vignette}
-for details):
+the following groups of features are supported by the \strong{epitopes} package
+(see the \href{https://cran.r-project.org/web/packages/protr/vignettes/protr.html#3_package_overview}{protr vignette}
+for details on each of these):
 \itemize{
 \item "AAC" - Amino acid composition
 \item "DC"  - Dipeptide composition
 \item "TC"  - Tripeptide composition
-\item  Autocorrelation:
-\itemize{
-\item "MoreauBroto" - Normalized Moreau-Broto autocorrelation
-\item "Moran" - Moran autocorrelation
-\item "Geary" - Geary autocorrelation
-}
 \item  CTD descriptors:
 \itemize{
 \item "CTDC" - Composition
@@ -74,38 +62,29 @@ for details):
 \item "CTriad" - Conjoint triad descriptors
 \item  Quasi-sequence-order descriptors:
 \itemize{
-\item "SOCN" - Sequence-order-coupling number
-\item "QSO" - Quasi-sequence-order descriptors
-}
-\item  Pseudo-amino acid composition:
-\itemize{
-\item "PAAC" - Pseudo-amino acid composition (PseAAC)
-\item "APAAC" - Amphiphilic pseudo-amino acid composition (APseAAC)
-}
-\item  Profile-based descriptors:
-\itemize{
-\item "PSSM"
-\item "PSSMAcc"
-\item "PSSMFeature"
+\item "SOCN" - Sequence-order-coupling number (with maximum lag \code{nlag = 3})
+\item "QSO" - Quasi-sequence-order descriptors (with maximum lag \code{nlag = 3} and weighting factor \code{w = 0.1})
 }
 \item Proteochemometric Modeling descriptors:
 \itemize{
 \item "ScalesGap" - Scales-based descriptors derived by Principal
-Components Analysis
-\item "ProtFPGap" - Scales-based descriptors derived by amino acid
-properties from AAindex (a.k.a. Protein Fingerprint)
-\item "DescScales" - Scales-based descriptors derived by 20+ classes
-of 2D and 3D molecular descriptors (Topological, WHIM, VHSE, etc.)
-\item "FAScales" - Scales-based descriptors derived by Factor Analysis
-\item "MDSScales" - Scales-based descriptors derived by
-Multidimensional Scaling
-\item "BLOSUM" - BLOSUM and PAM matrix-derived descriptors
+Components Analysis (using all properties in the \code{protr::AAindex} matrix, \code{pc = 5} and \code{lag = 3})
+\item "BLOSUM" - BLOSUM -derived descriptors (with \code{submat = "AABLOSUM62"}, \code{k = 5} and \code{lag = 3})
 }
 }
 
-\strong{NOTE}: in all feature groups except those ending in "Gap", invalid AA codes
+\strong{NOTE}: in all feature groups except "ScalesGap", invalid AA codes
 (B, J, O, U, X, Y) are removed from the strings prior to feature calculation.
-In those ending with "Gap" these codes are replaced by a gap indicator, "-".
+In "ScalesGap" these codes are replaced by a gap indicator, "-".
+
+Besides those, the following features are also available based on native
+implementations:
+\itemize{
+\item "Entropy" - the Shannon entropy of a sequence.
+\item "Atoms" - the number of C, H, N, O, S atoms in the sequence
+\item "MolWeight" - the total molecular weight of the sequence
+\item "AAtypes" - the proportion of AAs of each type (acidic, aliphatic, acidic, etc.)
+}
 
 Each feature group may be used either at the local or global level -
 which does not mean it \emph{should} be. The \strong{protr} documentation provides
@@ -128,24 +107,20 @@ string).
 then protein-level features should be avoided, as their use can result in
 data leakage across splits and contaminate performance calculations.
 }
-\section{\strong{Feature Lists}}{
+\section{\strong{Feature Vectors}}{
 
-Input lists \code{local.features} and \code{global.features} are used to define
+Input vectors \code{local.features} and \code{global.features} are used to define
 which features are calculated at either level. These input parameters must be
-named lists, where each element is itself a list named after the
-feature group the user wants to compute, containing elements corresponding to
-the desired parameters to be passed down to the feature calculation routines.
-For more information on the parameters needed for any feature group, check
-\code{?protr::extractXYZ}, replacing \code{XYZ} by the group abbreviation (see
+character vectors, where each element is one of the names listed in
+\strong{Details}. For more information on the features calculated by \strong{protr},
+check \code{?protr::extractXYZ}, replacing \code{XYZ} by the group abbreviation (see
 \strong{Details} or the documentation of the \strong{protr} package for the list of
-available feature groups).
-
-For instance, suppose the user wants to calculate the local features
-\emph{Amino Acid Composition}, "AAC" (no parameters required) and
-\emph{Pseudo Amino Acid Composition}, "PAAC" (assume that the user wants to set
-override parameter \code{lambda} with \code{lambda = 5}). In this case,
-\code{local.features} should be:\preformatted{local.features = list(AAC = list(), PAAC = list(lambda = 5))
-}
+available feature groups). Notice that, for consistency purposes, the
+\strong{epitopes} maintain the user parameters of all \strong{protr} features fixed.
+If the user wishes to add other features they can calculate those separately
+and bind them to \code{peptides.list$df} (for local features) or
+\code{peptides.list$proteins} (for global ones). Feature columns should have
+names starting with "feat_local_" or "feat_global_".
 }
 
 \author{

@@ -1,23 +1,14 @@
-call_protr <- function(SEQs, feat.list, txt.opts, dfnames, ncpus, overwrite){
+call_protr <- function(SEQs, feat.name, txt.opts, dfnames, ncpus){
 
-  fn <- paste0("extract", names(feat.list))
+  fn <- paste0("extract", feat.name)
 
   # Check if function exists
-  if(!(fn %in% ls('package:protr'))){
-    warning("Function protr::", fn, "() not found. Please check the feature ",
-            "group names in input list '", txt.opts[1], ".features'.\nSkipping...")
+  if(!(fn %in% ls('package:protr') | fn %in% ls('package:epitopes'))){
+    warning("Function ", fn, "() not found.\nSkipping...")
     return(FALSE)
   }
 
-  # Check if feature already exists
-  feat.exists <- any(grepl(paste0("feat_", names(feat.list)), dfnames))
-  if (!overwrite & feat.exists){
-    message("Feature group ", txt.opts[1], ":", names(feat.list),
-            " already present in peptide.list$", txt.opts[2], ".\nSkipping...")
-    return(FALSE)
-  }
-
-  message("Calculating ", txt.opts[1], ":", names(feat.list))
+  if (fn %in% ls('package:protr')) fn <- paste0("protr::", fn)
 
   # Remove or replace invalid AA codes, depending on feature:
   if (grepl("Gap$", fn)) {
@@ -26,15 +17,17 @@ call_protr <- function(SEQs, feat.list, txt.opts, dfnames, ncpus, overwrite){
     SEQs <- sapply(SEQs, function(x){gsub("B|J|O|U|X|Y", "", x)})
   }
 
+  message("   ", txt.opts[1], ":", feat.name)
+  myargs <- get_feat_args(feat.name)
   y <- mypblapply(SEQs,
                   function(x, fn, myargs){
                     myargs$x <- x
-                    do.call(eval(parse(text = paste0("protr::", fn))),
+                    do.call(eval(parse(text = fn)),
                             args = myargs)},
-                  fn = fn, myargs = feat.list[[1]],
+                  fn = fn, myargs = myargs,
                   ncpus = ncpus) %>%
     dplyr::bind_rows() %>%
-    dplyr::rename_with(~ paste0("feat_", txt.opts[1], "_", names(feat.list), "_", .x))
+    dplyr::rename_with(~ paste0("feat_", txt.opts[1], "_", feat.name, "_", .x))
 
   return(y)
 }
