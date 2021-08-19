@@ -14,7 +14,7 @@ extractAAtypes <- function(x){
   f_AAc <- as.data.frame(
     lapply(AAtypes,
            function(pat, x){
-             sum(stringr::str_count(x, pat)) / nchar(x)},
+             sum(strsplit(x, split = "")[[1]] %in% pat) / nchar(x)},
            x = x))
 
   return(f_AAc)

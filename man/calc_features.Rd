@@ -115,11 +115,12 @@ character vectors, where each element is one of the names listed in
 \strong{Details}. For more information on the features calculated by \strong{protr},
 check \code{?protr::extractXYZ}, replacing \code{XYZ} by the group abbreviation (see
 \strong{Details} or the documentation of the \strong{protr} package for the list of
-available feature groups). Notice that, for consistency purposes, the
-\strong{epitopes} maintain the user parameters of all \strong{protr} features fixed.
-If the user wishes to add other features they can calculate those separately
+available feature groups). Notice that, for consistency purposes, the user
+parameters of all \strong{protr} features are kept fixed in this routine.
+If the user wishes to add other features (or the same features with distinct
+parameters) they can calculate those separately
 and bind them to \code{peptides.list$df} (for local features) or
-\code{peptides.list$proteins} (for global ones). Feature columns should have
+\code{peptides.list$proteins} (for global ones). All feature columns should have
 names starting with "feat_local_" or "feat_global_".
 }
 
