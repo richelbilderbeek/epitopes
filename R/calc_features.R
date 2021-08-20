@@ -32,14 +32,18 @@
 #'    \item "CTriad" - Conjoint triad descriptors
 #'    \item  Quasi-sequence-order descriptors:
 #'    \itemize{
-#'        \item "SOCN" - Sequence-order-coupling number (with maximum lag `nlag = 3`)
-#'        \item "QSO" - Quasi-sequence-order descriptors (with maximum lag `nlag = 3` and weighting factor `w = 0.1`)
+#'        \item "SOCN" - Sequence-order-coupling number (with maximum lag
+#'        `nlag = 3`)
+#'        \item "QSO" - Quasi-sequence-order descriptors (with maximum lag
+#'        `nlag = 3` and weighting factor `w = 0.1`)
 #'    }
 #'    \item Proteochemometric Modeling descriptors:
 #'    \itemize{
 #'        \item "ScalesGap" - Scales-based descriptors derived by Principal
-#'        Components Analysis (using all properties in the `protr::AAindex` matrix, `pc = 5` and `lag = 3`)
-#'        \item "BLOSUM" - BLOSUM -derived descriptors (with `submat = "AABLOSUM62"`, `k = 5` and `lag = 3`)
+#'        Components Analysis (using all properties in the `protr::AAindex`
+#'        matrix, `pc = 5` and `lag = 3`)
+#'        \item "BLOSUM" - BLOSUM -derived descriptors (with
+#'        `submat = "AABLOSUM62"`, `k = 5` and `lag = 3`)
 #'    }
 #' }
 #'
@@ -53,7 +57,8 @@
 #'     \item "Entropy" - the Shannon entropy of a sequence.
 #'     \item "Atoms" - the number of C, H, N, O, S atoms in the sequence
 #'     \item "MolWeight" - the total molecular weight of the sequence
-#'     \item "AAtypes" - the proportion of AAs of each type (acidic, aliphatic, acidic, etc.)
+#'     \item "AAtypes" - the proportion of AAs of each type (acidic, aliphatic,
+#'     acidic, etc.)
 #' }
 #'
 #' Each feature group may be used either at the local or global level -
