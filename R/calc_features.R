@@ -79,7 +79,7 @@
 #'
 #' **IMPORTANT**: if the splitting level intended to be used for modelling is
 #' "peptide" (this can be checked in `peptides.list$splits.attrs$split_level`)
-#' then protein-level features should be avoided, as their use can result in
+#' then global features should be avoided, as their use can result in
 #' data leakage across splits and contaminate performance calculations.
 #'
 #' @section **Feature Vectors**:
