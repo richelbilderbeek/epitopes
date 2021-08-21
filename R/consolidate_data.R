@@ -100,7 +100,7 @@ consolidate_data <- function(epitopes, proteins,
   # Build long data frame
 
   # Build long protein data frame
-  message("Building long data frame: proteins\n")
+  message("Building long data frame: proteins")
   df <- mypblapply(split(df, seq(nrow(df))),
                    FUN = function(x){
                      data.frame(Info_organism_id = x$TSeq_taxid,
@@ -112,7 +112,7 @@ consolidate_data <- function(epitopes, proteins,
     dplyr::bind_rows()
 
   # Build long epitope data frame
-  message("Building long data frame: epitopes\n")
+  message("Building long data frame: epitopes")
   epit_summary <- mypblapply(split(epitopes, seq(nrow(epitopes))),
                              FUN = function(x){
                                data.frame(Info_protein_id   = x$protein_id,

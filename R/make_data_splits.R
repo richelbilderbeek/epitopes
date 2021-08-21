@@ -98,6 +98,7 @@
 #' @param split_prop numeric vector of target proportions for each split
 #'        (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
 #'        sum(pk) = 1).
+#' @param split_names optional, vector of names to be given to each split.
 #' @param similarity_threshold similarity threshold for grouping observations.
 #'        See **Grouping strategy** for details.
 #' @param substitution_matrix character string indicating the substitution
@@ -157,6 +158,7 @@ make_data_splits <- function(peptides.list,
                              proteins,
                              split_level = "protein",
                              split_prop  = c(.75, .25),
+                             split_names = NULL,
                              similarity_threshold = .7,
                              substitution_matrix = "BLOSUM62",
                              alpha  = 0.5,
@@ -167,6 +169,10 @@ make_data_splits <- function(peptides.list,
   # ========================================================================== #
   # Sanity checks and initial definitions
   split_level <- tolower(split_level)
+  if (is.null(split_names)) split_names <- sprintf("split_%02d_%02d",
+                                                   seq_along(split_prop),
+                                                   round(100*split_prop))
+
   assertthat::assert_that(is.list(peptides.list),
                           all(c("df", "peptides") %in% names(peptides.list)),
                           is.data.frame(proteins),
@@ -175,6 +181,8 @@ make_data_splits <- function(peptides.list,
                           is.numeric(split_prop), length(split_prop) > 1,
                           all(split_prop > 0), all(split_prop < 1),
                           sum(split_prop) == 1,
+                          is.character(split_names),
+                          length(split_names) == length(split_prop),
                           is.numeric(similarity_threshold),
                           length(similarity_threshold) == 1,
                           similarity_threshold > 0, similarity_threshold < 1,
@@ -186,11 +194,10 @@ make_data_splits <- function(peptides.list,
                           assertthat::is.count(ncpus))
 
   diss_t   <- 1 - similarity_threshold
+
   df       <- peptides.list$df
   peptides <- peptides.list$peptides
   proteins <- proteins %>% dplyr::filter(.data$UID %in% df$Info_protein_id)
-
-  # ========================================================================== #
 
   message("Performing data split at ", split_level, " level")
   if(split_level == "peptide"){
@@ -202,6 +209,9 @@ make_data_splits <- function(peptides.list,
       dplyr::select(IDs  = .data$UID,
                     SEQs = .data$TSeq_sequence)
   }
+
+  # ========================================================================== #
+  # Extract similarity-based clusters
 
   # Run Smith-Waterman local alignment and build similarity score matrix
   message("Calculating similarities (normalized Smith-Waterman scores)")
@@ -254,14 +264,16 @@ make_data_splits <- function(peptides.list,
                      N    = dplyr::n(),
                      P    = .data$nPos / dplyr::n())
 
-  # Define split alllocations
+  # ========================================================================== #
+  # Optimise split alllocations
+
   if(!("maxit" %in% names(SAopts))) {
     SAopts$maxit <- min(1e5, 2000 * round(log10(length(split_prop) ^ nrow(Y))))
   }
   y <- optimise_splits(Y = Y, Nstar = split_prop, alpha = alpha,
                        SAopts = SAopts, ncpus = ncpus)
 
-  Y$Split <- y$x
+  Y$Split <- split_names[y$x]
 
   X <- dplyr::left_join(dplyr::select(X, -c("SEQs")),
                         dplyr::select(Y, c("Cluster", "Split")),
@@ -277,11 +289,8 @@ make_data_splits <- function(peptides.list,
     peptides <- dplyr::left_join(peptides, X, by = "Info_protein_id")
   }
 
-  names(y$solstats$Gj) <- paste0("split_",
-                                 sprintf("%02d_%02d",
-                                         seq_along(split_prop),
-                                         round(100*split_prop)))
-  names(y$solstats$pj) <- names(y$solstats$Gj)
+  names(y$solstats$Gj) <- split_names
+  names(y$solstats$pj) <- split_names
 
 
   # Build outlist

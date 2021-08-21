@@ -9,6 +9,7 @@ make_data_splits(
   proteins,
   split_level = "protein",
   split_prop = c(0.75, 0.25),
+  split_names = NULL,
   similarity_threshold = 0.7,
   substitution_matrix = "BLOSUM62",
   alpha = 0.5,
@@ -36,6 +37,8 @@ See \strong{Grouping strategy} for details.}
 \item{split_prop}{numeric vector of target proportions for each split
 (i.e., a vector (p1, p2, ..., pK) such that 0 < pk < 1 for all k and
 sum(pk) = 1).}
+
+\item{split_names}{optional, vector of names to be given to each split.}
 
 \item{similarity_threshold}{similarity threshold for grouping observations.
 See \strong{Grouping strategy} for details.}

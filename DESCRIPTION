@@ -8,7 +8,7 @@ Author: c(person(given = "Felipe", family = "Campelo",
                     role = c("aut", "cre")),
           person(given = "Jodie", family = "Ashford",
                     email = "ashfojsm@aston.ac.uk",
-                    role = c("aut")),
+                    role = c("ctb")),
           person(given = "Francisco", family = "Lobo",
                     email = "franciscolobo@gmail.com",
                     role = c("ctb")))

@@ -146,7 +146,7 @@ calc_features <- function(peptides.list,
       }
     }
     class(peptides.list) <- unique(c(class(peptides.list), "local.features"))
-    peptides.list$feature.attrs$local.features = local.features
+    peptides.list$feature.attrs$local.features <- local.features
   }
 
   # Calculate global features
@@ -168,8 +168,13 @@ calc_features <- function(peptides.list,
       }
     }
     class(peptides.list) <- unique(c(class(peptides.list), "global.features"))
-    peptides.list$feature.attrs$global.features = global.features
-  }
+    peptides.list$feature.attrs$global.features <- global.features
 
+    if(peptides.list$splits.attrs$split_level == "peptide"){
+      warning("Global features should not be used for classification when\n",
+              "the data is split at the 'peptide' level, since it can result\n",
+              "in data leakage. Proceed with care.")
+    }
+  }
   return(peptides.list)
 }
