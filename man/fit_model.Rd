@@ -23,7 +23,8 @@ numerical predictors and one \strong{Class} attribute).}
 
 \item{assessment.mode}{mode of performance assessment to use. Accepts "CV"
 (for cross-validation using all splits in \code{peptides.list$df}) or "holdout"
-(in which case the holdout split must be informed in \code{holdout.split})}
+(in which case the holdout split must be informed in \code{holdout.split}).
+Defaults to "CV".}
 
 \item{holdout.split}{name of split to be used as a holdout set.Ignored if
 \code{assessment.mode = "CV"}.}
@@ -41,7 +42,12 @@ unless the user knows exactly what they're doing. See \strong{Details}.}
 
 \item{ncpus}{number of cores to use.}
 
-\item{rnd.seed}{seed for random number generator}
+\item{rnd.seed}{seed for random number generator. \strong{Note}: this function
+always returns the state of the random number generator back to its original
+value before returning the results. Running it twice in sequence with
+\code{rnd.seed = NULL} should result in exactly the same results (but it is
+safer to simply set a specific seed, or to reuse the seed that is returned
+in the output list).}
 
 \item{...}{other options to be passed down to \code{\link[ranger:ranger]{ranger::ranger()}}.}
 }

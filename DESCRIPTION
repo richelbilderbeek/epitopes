@@ -19,13 +19,14 @@ Description: Routines for retrieval and preprocessing of epitope data from
 License: GPL-2
 Depends: R (>= 3.6.0)
 Imports: assertthat (>= 0.2.1),
-         XML (>= 3.98),
-         dplyr (>= 0.8.3),
-         rlang (>= 0.4.10),
+         XML (>= 3.99),
+         dplyr (>= 1.0.7),
+         rlang (>= 0.4.11),
          reutils (>= 0.2.3),
          pbapply (>= 1.4.0),
-         Biostrings (>= 2.60.2),
-         protr (>= 1.6.0),
+         Biostrings (>= 2.60),
+         protr (>= 1.6),
+         ranger (>= 0.13.1),
          parallel,
          utils
 Suggests: 
