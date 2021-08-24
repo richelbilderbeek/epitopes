@@ -7,8 +7,8 @@
 fit_model(
   peptides.list,
   assessment.mode = c("CV", "holdout"),
-  holdout.split = NULL,
   threshold = 0.5,
+  holdout.split = NULL,
   sample.rebalancing = TRUE,
   use.global.features = ifelse(peptides.list$splits.attrs$split_level == "protein",
     TRUE, FALSE),
@@ -26,11 +26,11 @@ numerical predictors and one \strong{Class} attribute).}
 (in which case the holdout split must be informed in \code{holdout.split}).
 Defaults to "CV".}
 
-\item{holdout.split}{name of split to be used as a holdout set.Ignored if
-\code{assessment.mode = "CV"}.}
-
 \item{threshold}{probability threshold for attributing a prediction as
 \emph{positive}.}
+
+\item{holdout.split}{name of split to be used as a holdout set.Ignored if
+\code{assessment.mode = "CV"}.}
 
 \item{sample.rebalancing}{logical: should the model try to compensate class
 imbalances by weighted sampling of examples when training the trees in the

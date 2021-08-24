@@ -10,7 +10,9 @@ calc_performance(
   prob = NULL,
   posValue = 1,
   negValue = -1,
-  ret.as.list = FALSE
+  ret.as.list = FALSE,
+  ncpus = 1,
+  roc.points = 200
 )
 }
 \arguments{
@@ -27,6 +29,11 @@ calc_performance(
 \item{ret.as.list}{optional, should the result be returned as a list (if
 TRUE the routine also returns the \code{tpr} and \code{fpr} vectors used to
 calculate AUC)}
+
+\item{ncpus}{number of cores to use.}
+
+\item{roc.points}{maximum number of points to use for the calculation of the
+ROC curve and AUC value.}
 }
 \value{
 list containing several performance indicators

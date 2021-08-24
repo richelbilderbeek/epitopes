@@ -10,8 +10,10 @@
 #' @param negValue value that indicates the "negative" class.
 #' @param ret.as.list optional, should the result be returned as a list (if
 #'        TRUE the routine also returns the `tpr` and `fpr` vectors used to
-#'        calculate AUC)
+#'        calculate AUC, as a data frame "roc")
 #' @param ncpus number of cores to use.
+#' @param roc.points maximum number of points to use for the calculation of the
+#' ROC curve and AUC value.
 #'
 #' @return list containing several performance indicators
 #'
@@ -25,7 +27,8 @@
 calc_performance <- function(truth, pred, prob = NULL,
                              posValue = 1, negValue = -1,
                              ret.as.list = FALSE,
-                             ncpus = 1){
+                             ncpus = 1,
+                             roc.points = 200){
 
   assertthat::assert_that(length(posValue) == 1,
                           length(negValue) == 1,
@@ -35,7 +38,9 @@ calc_performance <- function(truth, pred, prob = NULL,
                           is.null(prob) | all(prob >= 0),
                           is.null(prob) | all(prob <= 1),
                           is.null(prob) | length(prob) == length(pred),
-                          is.logical(ret.as.list))
+                          is.logical(ret.as.list),
+                          assertthat::is.count(roc.points),
+                          roc.points >= 10)
 
   idx   <- which(is.na(truth) | is.na(pred))
   nPos  <- sum(pred == posValue)
@@ -57,7 +62,12 @@ calc_performance <- function(truth, pred, prob = NULL,
   spec    <- TN / ifelse(TN + FP == 0, 1, TN + FP)
 
   if(!is.null(prob)){
-    tr  <- sort(unique(prob), decreasing = TRUE)
+    tr <- sort(unique(prob), decreasing = TRUE)
+    if (length(unique(prob)) > roc.points){
+      ii <- round(seq(from = 1, to = length(tr), length.out = roc.points))
+      tr <- tr[ii]
+    }
+
     roc <- mypblapply(tr,
                       function(tri, prob, truth, posValue, negValue){
                         tpr  <- sum(prob >= tri & truth == posValue) / sum(truth == posValue)
@@ -118,8 +128,7 @@ calc_performance <- function(truth, pred, prob = NULL,
 
   if(ret.as.list){
     out     <- as.list(out)
-    out$tpr <- tpr
-    out$fpr <- fpr
+    out$roc <- roc
   }
 
   return(out)

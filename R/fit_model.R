@@ -60,6 +60,7 @@
 
 fit_model <- function(peptides.list,
                       assessment.mode = c("CV", "holdout"),
+                      threshold = 0.5,
                       holdout.split = NULL,
                       sample.rebalancing = TRUE,
                       use.global.features = ifelse(peptides.list$splits.attrs$split_level == "protein", TRUE, FALSE),

@@ -47,48 +47,49 @@ fit_RF_holdout <- function(df,
   }
 
   message("Fitting Random Forest...")
-  myRF <- ranger::ranger(Class ~ .,
+  myRF <- ranger::ranger(as.factor(Class) ~ .,
                          data =  dplyr::select(df.tr,
                                                dplyr::starts_with("feat_"),
                                                "Class"),
                          classification = TRUE,
                          probability    = TRUE,
+                         class.weights  = nrow(df.tr)/table(df.tr$Class),
                          inbag          = inbag,
                          num.threads    = ncpus,
-                         min.node.size  = 40,
+                         min.node.size  = 100,
                          oob.error      = FALSE,
                          ...)
 
-  message("Optimising threshold...")
-  preds <- stats::predict(myRF,
-                          data = dplyr::select(df.tr,
-                                               dplyr::starts_with("feat_"),
-                                               "Class"))
-
-  # Optimise threshold
-  myf <- function(thres, mypreds, truth, ncpus){
-    pred.class <- smooth_predictions(x = ifelse(mypreds >= thres, 1, -1),
-                                     type = "mode", window_size = 5)
-    myperf <- calc_performance(truth = truth,
-                               pred  = pred.class,
-                               prob  = mypreds,
-                               posValue = 1,
-                               negValue = -1,
-                               ncpus = ncpus)
-    return(myperf$mcc)
-  }
-
-  threshold <- stats::optimise(myf, interval = c(0, 1),
-                               mypreds = preds$predictions[, 2],
-                               truth   = df.tr$Class,
-                               ncpus = ncpus,
-                               maximum = TRUE)$maximum
+  # message("Optimising threshold...")
+  # preds <- stats::predict(myRF,
+  #                         data = dplyr::select(df.tr,
+  #                                              dplyr::starts_with("feat_"),
+  #                                              "Class"))
+  #
+  # # Optimise threshold
+  # myf <- function(thres, mypreds, truth, ncpus){
+  #   pred.class <- smooth_predictions(x = ifelse(mypreds >= thres, 1, -1),
+  #                                    type = "mode", window_size = 5)
+  #   myperf <- calc_performance(truth = truth,
+  #                              pred  = pred.class,
+  #                              prob  = mypreds,
+  #                              posValue = 1,
+  #                              negValue = -1,
+  #                              ncpus = ncpus)
+  #   return(myperf$gmean)
+  # }
+  #
+  # threshold <- stats::optimise(myf, interval = c(0, 1),
+  #                              mypreds = preds$predictions[, 2],
+  #                              truth   = df.tr$Class,
+  #                              ncpus = ncpus,
+  #                              maximum = TRUE)$maximum
 
   message("Estimating performance on split: ", holdout.split)
   preds <- stats::predict(myRF,
                           data = dplyr::select(df.ho,
                                                dplyr::starts_with("feat_"),
-                                               "Class"))
+                                               Class = as.factor(.data$Class)))
 
   pred.class <- ifelse(preds$predictions[, 2] >= threshold, 1, -1) %>%
     smooth_predictions(type = "mode", window_size = 5)
