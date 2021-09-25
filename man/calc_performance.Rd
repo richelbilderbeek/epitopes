@@ -28,7 +28,7 @@ calc_performance(
 
 \item{ret.as.list}{optional, should the result be returned as a list (if
 TRUE the routine also returns the \code{tpr} and \code{fpr} vectors used to
-calculate AUC)}
+calculate AUC, as a data frame "roc")}
 
 \item{ncpus}{number of cores to use.}
 

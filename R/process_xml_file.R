@@ -28,5 +28,7 @@ process_xml_file <- function(filename, type = "B", ...){
     stop("T-cell epitope extraction still under development.")
   } else stop("epitope type not recognised")
 
-  return(do.call(rbind, outlist))
+  df <- do.call(rbind, outlist)
+  if(!is.null(df) > 0) {df$PubmedId <- list_data$Reference$Article$PubmedId}
+  return(df)
 }
