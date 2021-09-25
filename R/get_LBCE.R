@@ -52,7 +52,7 @@ get_LBCE <- function(data_folder,
 
   # ==================================================
   t <- Sys.time()
-  message("Processing ", length(filelist), " files using", ncpus, " cores",
+  message("Processing ", length(filelist), " files using ", ncpus, " cores",
       "\nStarted at ", as.character(t), "\n")
 
   df <- mypblapply(ncpus = ncpus,
