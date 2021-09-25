@@ -29,6 +29,5 @@ process_xml_file <- function(filename, type = "B", ...){
   } else stop("epitope type not recognised")
 
   df <- do.call(rbind, outlist)
-  if(!is.null(df) > 0) {df$PubmedId <- list_data$Reference$Article$PubmedId}
   return(df)
 }
