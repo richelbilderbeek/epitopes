@@ -4,6 +4,7 @@
 ^cran-comments.md$
 ^doc$
 ^Meta$
+^data$
 ^CRAN-RELEASE$
 ^.*\.rds$
 

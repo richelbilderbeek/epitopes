@@ -103,8 +103,6 @@ fit_RF_holdout <- function(df,
   myperf <- calc_performance(truth = ho.preds$Class,
                              pred  = ho.preds$pred.class,
                              prob  = ho.preds$pred.prob,
-                             posValue = 1,
-                             negValue = -1,
                              ret.as.list = TRUE,
                              ncpus = ncpus)
 

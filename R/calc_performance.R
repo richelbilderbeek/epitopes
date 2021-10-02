@@ -68,6 +68,7 @@ calc_performance <- function(truth, pred, prob = NULL,
       tr <- tr[ii]
     }
 
+    message("Calculating ROC curve:")
     roc <- mypblapply(tr,
                       function(tri, prob, truth, posValue, negValue){
                         tpr  <- sum(prob >= tri & truth == posValue) / sum(truth == posValue)
