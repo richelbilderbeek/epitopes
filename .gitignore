@@ -24,7 +24,6 @@
 # Rprof temporary files
 Rprof.out
 Meta
-
 #*.rds
 
 #results/

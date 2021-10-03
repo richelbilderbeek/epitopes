@@ -250,7 +250,6 @@ make_data_splits <- function(peptides.list,
                 diss.matrix     = diss,
                 clusters        = clusters))
   }
-
   # Check how many positive / negative examples per group
   if (split_level == "protein") {
     Y <- df %>% dplyr::left_join(X, by = c("Info_protein_id" = "IDs"))
@@ -296,11 +295,13 @@ make_data_splits <- function(peptides.list,
   # Build outlist
   outlist          <- peptides.list
   outlist$df       <- df %>%
+    dplyr::select(-c("Info_cluster", "Info_split")) %>%
     dplyr::rename(Info_cluster = c("Cluster"),
                   Info_split   = c("Split")) %>%
     dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
 
   outlist$peptides <- peptides %>%
+    dplyr::select(-c("Info_cluster", "Info_split")) %>%
     dplyr::rename(Info_cluster = c("Cluster"),
                   Info_split   = c("Split")) %>%
     dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
@@ -327,6 +328,28 @@ make_data_splits <- function(peptides.list,
     if(!dir.exists(save_folder)) dir.create(save_folder, recursive = TRUE)
     saveRDS(outlist, paste0(normalizePath(save_folder), "/peptides_list.rds"))
   }
+
+  # Print resulting split statistics
+  cl_tbl <- outlist$splits.attrs$cluster.alloc %>%
+    group_by(Split) %>% summarise(Clusters = length(unique(Cluster)))
+
+  message("============================================================")
+  message("Data splitting summary")
+  message("Splitting level: ", split_level)
+  message("Similarity threshold: ",  similarity_threshold)
+  message("alpha: ",  alpha)
+  message("Number of clusters: ", length(unique(X)))
+  message("Target balance: ", signif(y$solstats$Pstar, 4))
+  message("Target split proportions: ", paste(signif(split_prop, 4), collapse = ", "))
+  for (i in seq_along(y$solstats$Gj)){
+    message(names(y$solstats$Gj)[i], ": Split proportion = ",
+            round(y$solstats$Gj[i], 4),
+            " | Split balance: ",
+            round(y$solstats$pj[i], 4),
+            " | Number of clusters: ",
+            cl_tbl$Clusters[i])
+  }
+  message("============================================================")
 
   # return results
   return(outlist)

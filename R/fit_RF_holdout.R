@@ -91,8 +91,7 @@ fit_RF_holdout <- function(df,
                                                dplyr::starts_with("feat_"),
                                                Class = as.factor(.data$Class)))
 
-  pred.class <- ifelse(preds$predictions[, 2] >= threshold, 1, -1) %>%
-    smooth_predictions(type = "mode", window_size = 5)
+  pred.class <- ifelse(preds$predictions[, 2] >= threshold, 1, -1)
 
   ho.preds <- df.ho %>%
     dplyr::select(c("Info_PepID", "Info_protein_id", "Info_pos", "Info_split",
