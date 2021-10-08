@@ -195,8 +195,12 @@ make_data_splits <- function(peptides.list,
 
   diss_t   <- 1 - similarity_threshold
 
-  df       <- peptides.list$df
-  peptides <- peptides.list$peptides
+  df <- peptides.list$df %>%
+    dplyr::select(-starts_with("Info_cluster"),
+                  -starts_with("Info_split"))
+  peptides <- peptides.list$peptides %>%
+    dplyr::select(-starts_with("Info_cluster"),
+                  -starts_with("Info_split"))
   proteins <- proteins %>% dplyr::filter(.data$UID %in% df$Info_protein_id)
 
   message("Performing data split at ", split_level, " level")
@@ -295,13 +299,11 @@ make_data_splits <- function(peptides.list,
   # Build outlist
   outlist          <- peptides.list
   outlist$df       <- df %>%
-    dplyr::select(-c("Info_cluster", "Info_split")) %>%
     dplyr::rename(Info_cluster = c("Cluster"),
                   Info_split   = c("Split")) %>%
     dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
 
   outlist$peptides <- peptides %>%
-    dplyr::select(-c("Info_cluster", "Info_split")) %>%
     dplyr::rename(Info_cluster = c("Cluster"),
                   Info_split   = c("Split")) %>%
     dplyr::select(dplyr::starts_with("Info"), dplyr::everything())
@@ -337,10 +339,10 @@ make_data_splits <- function(peptides.list,
   message("Data splitting summary")
   message("Splitting level: ", split_level)
   message("Similarity threshold: ",  similarity_threshold)
-  message("alpha: ",  alpha)
-  message("Number of clusters: ", length(unique(X)))
+  message("Number of clusters found: ", length(unique(X$Cluster)))
   message("Target balance: ", signif(y$solstats$Pstar, 4))
   message("Target split proportions: ", paste(signif(split_prop, 4), collapse = ", "))
+  message("alpha: ",  alpha)
   for (i in seq_along(y$solstats$Gj)){
     message(names(y$solstats$Gj)[i], ": Split proportion = ",
             round(y$solstats$Gj[i], 4),

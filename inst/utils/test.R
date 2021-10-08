@@ -32,7 +32,7 @@ peptides.list <- epitopes %>%
   make_data_splits(proteins    = proteins,
                    split_prop  = c(.6,.4),                            # <--- desired split ratios
                    similarity_threshold = .75,
-                  split_names = paste0("Fold_", 1:2),                # <--- split names
+                   split_names = paste0("Fold_", 1:2),                # <--- split names
                    ncpus = ncpus) %>%
   calc_features(local.features = c("AAC", "CTDC", "CTDD", "CTDT",     # <--- local features are calculated for the 15-AA windows and added to peptides.list$df
                                    "BLOSUM", "Entropy",
